@@ -40,5 +40,3 @@ The following table describe the main structure of the project:
 - Delay while travelling
 - Connection with multiple transfers and one is delayed
 - Functionality of restriction
-- 
-  
