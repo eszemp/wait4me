@@ -95,10 +95,12 @@ Currently the dependencies between the layers look as follows (*a -> b* means *b
 1. `domain` forms the core and does not import from any of the other layer since the business logic comes first and does not depend on our `infrastructure`, `application` or `configuration`. We want to be able to change our `infrastructure` and `application` without affecting the business logic.
 2. Currently, `application` depends on `infrastructure`. This might / should be turned around. The `application` should dictate the interfaces that the `infrastructure` has to meet, not the other way around. We want to be able to change the `infrastructure` without affecting the `application`.
 
-## Environment Variable
+## Test cases
 
-The following environment variables may be used to configure `pagu_data_analysis`:
-
-| Environment Variable | Purpose | Default Value | Allowed Values |
-|----------------------|-|-|-|
-| LOG_LEVEL            | Sets the default log level [here](src/pagu_data_analysis/common/logging_configuration.py). | "INFO" | See [Python Standard Library API-Reference](https://docs.python.org/3/library/logging.html#logging-levels) |
+- Multiple delayed transfers
+- Allready delayed when routing
+- Delay while travelling
+- Connection with multiple transfers and one is delayed
+- Functionality of restriction
+- 
+  
