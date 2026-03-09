@@ -2,6 +2,20 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
 
+## Local SetUp
+
+First install Angular.js (requires installation of Node.js)
+
+```bash
+npm install -g @angular/cli
+```
+
+Ensure you are using the version of Node.js specified in .nvmrc. (Change versions with nvm use xx.xx.xx). Navigate to folder containing package.json, etc, run clean install:
+
+```bash
+npm ci
+```
+
 ## Development server
 
 To start a local development server, run:
