@@ -1,6 +1,6 @@
 # Wait4Me
 
-This repository contains code and the website for Wait4Me. Under [Wait4Me](www.needs-to-be-added.ch) you find the prototype online.
+This repository contains code and the website for Wait4Me. Under [Wait4Me](https://wait4me.ethz.ch) you find the prototype online.
 
 
 ## Setup
