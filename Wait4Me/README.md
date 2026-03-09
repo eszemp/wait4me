@@ -71,3 +71,24 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## proposed structure og Gemini
+
+src/app/
+├── core/              # Singleton services (API, Auth)
+│   ├── services/
+│   │   └── journey-planner.service.ts  # Handles OpenJourney API
+│   └── models/
+│       └── journey.model.ts             # Interfaces for API data
+├── features/          # Feature-based components
+│   ├── search/        # Logic for the "Start Screen"
+│   │   ├── search.component.ts
+│   │   └── search.component.html
+│   └── routing/       # Logic for the "Routing" list
+│       ├── routing.component.ts
+│       └── routing.component.html
+├── shared/            # Reusable UI elements
+│   └── components/
+│       ├── journey-card/  # The individual route cards
+│       └── input-field/
+└── app.routes.ts      # Routing configuration

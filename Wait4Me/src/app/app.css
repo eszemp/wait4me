@@ -1,0 +1,145 @@
+:host {
+  --mint: #d1ffed;
+  --fir-green: #395148;
+  --grey: #3b3b3b;
+  --light-grey: #dbdbdb;
+  display: block;
+}
+
+.app-shell {
+  color: var(--fir-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 110px;
+}
+
+.top-bar {
+  padding-top: calc(20px + env(safe-area-inset-top));
+  width: 100%;
+  background: var(--mint);
+  text-align: center;
+  font-weight: Bold;
+  font-size: 20px;
+  padding: 20px;
+  padding-bottom: 30px;
+}
+
+.route-card {
+  width: min(calc(100vw - 20px), 680px);
+  margin-top: -20px;
+  background: #ffffff;
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  font-size: 14px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 28px 54px 34px;
+}
+
+.field-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.line-input {
+  width: 100%;
+  display: block;
+  border: 0;
+  border-bottom: 1px solid var(--fir-green);
+  background: transparent;
+  color: var(--grey);
+  font-size: 14px;
+  padding-bottom: 10px;
+  outline: none;
+}
+
+.line-input::placeholder {
+  color: #565656;
+}
+
+.suggestions-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 4px;
+  border: 1px solid var(--fir-green);
+  border-radius: 10px;
+  background: #ffffff;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--grey);
+  text-align: left;
+  font-size: 14px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background: #f0f4f2;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pill-input {
+  min-width: 150px;
+  border: 1px solid var(--fir-green);
+  border-radius: 10px;
+  text-align: center;
+  background: transparent;
+  font-size: 14px;
+  color: #1f1f1f;
+  padding: 10px 18px;
+  line-height: 1;
+  outline: none;
+}
+
+.info-section {
+  width: min(calc(100vw - 100px), 680px);
+  margin-top: 100px;
+}
+
+.info-icon {
+  width: 35px;
+  height: 35px;
+  display: block;
+  margin: 0 auto 42px;
+  color: var(--fir-green);
+}
+
+.info-text {
+  font-size: 14px;
+  color: var(--grey);
+}
+
+.impressum-link {
+  color: var(--fir-green);
+}
+
+.w4m-button {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(10px, env(safe-area-inset-bottom));
+  height: 70px;
+  width: min(calc(100vw - 20px), 680px);
+  z-index: 1000;
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  background: var(--light-grey);
+  color: var(--fir-green);
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+
+}
