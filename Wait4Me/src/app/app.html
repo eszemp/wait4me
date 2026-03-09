@@ -1,64 +1,7 @@
 <main class="app-shell">
 	<header class="top-bar">Wait4Me</header>
 
-	<form class="route-card" [formGroup]="tripForm" novalidate>
-		<div class="field-group">
-			<input
-				id="from"
-				type="text"
-				class="line-input"
-				placeholder="From"
-				autocomplete="off"
-				formControlName="from"
-				(input)="onFromQueryChange(tripForm.controls.from.value)"
-				(focus)="onFromQueryChange(tripForm.controls.from.value)"
-				(blur)="closeFromSuggestions()"
-			/>
-
-			@if (showFromSuggestions && filteredFromDestinations.length > 0) {
-				<ul class="suggestions-list">
-					@for (destination of filteredFromDestinations; track destination) {
-						<li>
-							<button type="button" class="suggestion-item" (mousedown)="selectFromDestination(destination)">
-								{{ destination }}
-							</button>
-						</li>
-					}
-				</ul>
-			}
-		</div>
-
-		<div class="field-group">
-			<input
-				id="to"
-				type="text"
-				class="line-input"
-				placeholder="To"
-				autocomplete="off"
-				formControlName="to"
-				(input)="onToQueryChange(tripForm.controls.to.value)"
-				(focus)="onToQueryChange(tripForm.controls.to.value)"
-				(blur)="closeToSuggestions()"
-			/>
-
-			@if (showToSuggestions && filteredToDestinations.length > 0) {
-				<ul class="suggestions-list">
-					@for (destination of filteredToDestinations; track destination) {
-						<li>
-							<button type="button" class="suggestion-item" (mousedown)="selectToDestination(destination)">
-								{{ destination }}
-							</button>
-						</li>
-					}
-				</ul>
-			}
-		</div>
-
-		<div class="meta-row">
-			<input id="date" type="date" class="pill-input" formControlName="date" />
-			<input id="time" type="time" class="pill-input" formControlName="time" />
-		</div>
-	</form>
+	<app-route-form [tripForm]="tripForm" [destinations]="destinations" />
 
 	<section class="info-section">
 		<img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />

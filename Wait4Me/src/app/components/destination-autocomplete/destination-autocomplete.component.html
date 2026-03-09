@@ -1,0 +1,25 @@
+<div class="field-group">
+  <input
+    [id]="inputId()"
+    type="text"
+    class="line-input"
+    [placeholder]="placeholder()"
+    autocomplete="off"
+    [formControl]="control()"
+    (input)="onQueryChange(control().value)"
+    (focus)="onQueryChange(control().value)"
+    (blur)="closeSuggestions()"
+  />
+
+  @if (showSuggestions && filteredDestinations.length > 0) {
+    <ul class="suggestions-list">
+      @for (destination of filteredDestinations; track destination) {
+        <li>
+          <button type="button" class="suggestion-item" (mousedown)="selectDestination(destination)">
+            {{ destination }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

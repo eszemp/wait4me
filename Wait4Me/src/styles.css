@@ -10,3 +10,10 @@ html,
 body {
   font-family: 'Inter', sans-serif;
 }
+
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}

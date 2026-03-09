@@ -42,23 +42,10 @@ describe('App', () => {
     expect(app.tripForm.controls.time.value).toMatch(/^\d{2}:\d{2}$/);
   });
 
-  it('should filter from destinations by query', () => {
+  it('should keep destination list available for child form components', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
 
-    app.onFromQueryChange('zuri');
-
-    expect(app.showFromSuggestions).toBe(true);
-    expect(app.filteredFromDestinations).toContain('Zurich HB');
-  });
-
-  it('should set destination when selecting from suggestion', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-
-    app.selectToDestination('Bern');
-
-    expect(app.tripForm.controls.to.value).toBe('Bern');
-    expect(app.showToSuggestions).toBe(false);
+    expect(app.destinations).toContain('Bern');
   });
 });

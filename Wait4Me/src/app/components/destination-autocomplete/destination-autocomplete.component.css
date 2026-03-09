@@ -1,0 +1,52 @@
+.field-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.line-input {
+  width: 100%;
+  display: block;
+  border: 0;
+  border-bottom: 1px solid var(--fir-green);
+  background: transparent;
+  color: var(--grey);
+  font-size: 16px;
+  padding-bottom: 10px;
+  outline: none;
+}
+
+.line-input::placeholder {
+  color: #565656;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--fir-green);
+  border-radius: 10px;
+  background: #ffffff;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--grey);
+  text-align: left;
+  font-size: 16px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background: #f0f4f2;
+}
