@@ -9,7 +9,7 @@ import { RouteFormComponent } from '../route-form/route-form.component';
   selector: 'app-passenger-interface',
   imports: [CommonModule, ReactiveFormsModule, RouteFormComponent],
   templateUrl: './passenger-interface.html',
-  styleUrl: './passenger-interface.css',
+  styleUrls: ['../../app.css','./passenger-interface.css'],
 })
 export class PassengerInterface {
   readonly destinations: string[] = [
