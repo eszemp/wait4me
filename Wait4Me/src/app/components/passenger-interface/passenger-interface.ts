@@ -3,27 +3,14 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouteFormComponent } from '../route-form/route-form.component';
 
-
-
 @Component({
   selector: 'app-passenger-interface',
   imports: [CommonModule, ReactiveFormsModule, RouteFormComponent],
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css','./passenger-interface.css'],
 })
+
 export class PassengerInterface {
-  readonly destinations: string[] = [
-    'Zurich HB',
-    'Zurich Oerlikon',
-    'Basel SBB',
-    'Bern',
-    'Luzern',
-    'Winterthur',
-    'St. Gallen',
-    'Lausanne',
-    'Geneve',
-    'Zug'
-  ];
 
   readonly tripForm = new FormGroup({
     from: new FormControl('', { nonNullable: true }),
