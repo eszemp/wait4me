@@ -41,6 +41,7 @@ textarea {
   text-align: center;
   font-weight: Bold;
   font-size: 20px;
+  text-decoration: none;
   color: var(--fir-green);
   padding: 20px;
   padding-bottom: 30px;
