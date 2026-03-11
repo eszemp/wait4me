@@ -1,6 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { OjpService } from '../../services/ojp';
+import { OJPLocation } from '../../services/ojp-location';
+import { OJPTrip } from '../../services/ojp-trip';
 
 @Component({
   selector: 'app-destination-autocomplete',
@@ -14,10 +15,13 @@ export class DestinationAutocompleteComponent {
   placeholder = input.required<string>();
   control = input.required<FormControl<string>>();
 
+  // inject the trip service to update signals
+  private tripService = inject(OJPTrip);
+
   destinations: { StopPlaceName: string; StopPlaceRef: string }[] = [];
   showSuggestions = false;
 
-  constructor(private ojpService: OjpService) {}
+  constructor(private ojpService: OJPLocation) {}
 
   searchForLocation(loc_name: string) : void {
     this.ojpService.getLocationInformation(loc_name).subscribe({
@@ -51,10 +55,12 @@ export class DestinationAutocompleteComponent {
     if (this.placeholder() == "From") {
       sessionStorage.setItem('origin_name', destination.StopPlaceName);
       sessionStorage.setItem('origin_id', destination.StopPlaceRef);
+      this.tripService.originId.set(destination.StopPlaceRef);
     }
     if (this.placeholder() == "To") {
       sessionStorage.setItem('destination_name', destination.StopPlaceName);
       sessionStorage.setItem('destination_id', destination.StopPlaceRef);
+      this.tripService.destinationId.set(destination.StopPlaceRef);
     }
   }
 

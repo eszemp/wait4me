@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { OJPBase } from './ojp-base';
 
-import { OjpService } from './ojp';
-
-describe('Ojp', () => {
-  let service: OjpService;
+describe('OJPBase', () => {
+  let service: OJPBase;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(OjpService);
+    service = TestBed.inject(OJPBase);
   });
 
   it('should be created', () => {
