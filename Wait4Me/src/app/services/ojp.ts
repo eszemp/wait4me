@@ -56,7 +56,13 @@ export class OjpService {
     return this.http.post(this.apiUrl, xmlBody, { 
       headers: this.getHeaders(), 
       responseType: 'text' // because it returns XML not JSON
-    }).pipe(map(response => parser.parse(response)));
+    }).pipe(
+      map(xmlString => {
+        const fullObj = parser.parse(xmlString);
+        // Dig into the object here and return only what you need
+        return fullObj?.OJP?.OJPResponse?.['siri:ServiceDelivery']?.OJPLocationInformationDelivery.PlaceResult;
+      })
+    );
   }
 }
 

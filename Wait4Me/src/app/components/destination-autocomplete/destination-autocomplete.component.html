@@ -11,12 +11,12 @@
     (blur)="closeSuggestions()"
   />
 
-  @if (showSuggestions && filteredDestinations.length > 0) {
+  @if (showSuggestions && destinations.length > 0) {
     <ul class="suggestions-list">
-      @for (destination of filteredDestinations; track destination) {
+      @for (destination of destinations; track destination) {
         <li>
           <button type="button" class="suggestion-item" (mousedown)="selectDestination(destination)">
-            {{ destination }}
+            {{ destination.StopPlaceName }}
           </button>
         </li>
       }
