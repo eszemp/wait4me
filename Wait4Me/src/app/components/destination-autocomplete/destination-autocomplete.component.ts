@@ -22,13 +22,12 @@ export class DestinationAutocompleteComponent {
   searchForLocation(loc_name: string) : void {
     this.ojpService.getLocationInformation(loc_name).subscribe({
       next: (response) => {
-        // Transformiere die Destination-Liste
         const list = response || [];
         this.destinations = list.map((dest: any) => ({
           StopPlaceName: dest.Place?.StopPlace?.StopPlaceName?.Text ?? '',
           StopPlaceRef: dest.Place?.StopPlace?.StopPlaceRef ?? ''
         }));
-        console.log(this.destinations)
+        // console.log(this.destinations)
       },
       error: (err) => {
         console.error('API Error:', err);
@@ -49,6 +48,14 @@ export class DestinationAutocompleteComponent {
   selectDestination(destination: { StopPlaceName: string; StopPlaceRef: string }): void {
     this.control().setValue(destination.StopPlaceName);
     this.showSuggestions = false;
+    if (this.placeholder() == "From") {
+      sessionStorage.setItem('origin_name', destination.StopPlaceName);
+      sessionStorage.setItem('origin_id', destination.StopPlaceRef);
+    }
+    if (this.placeholder() == "To") {
+      sessionStorage.setItem('destination_name', destination.StopPlaceName);
+      sessionStorage.setItem('destination_id', destination.StopPlaceRef);
+    }
   }
 
   closeSuggestions(): void {
