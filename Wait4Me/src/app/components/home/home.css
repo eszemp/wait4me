@@ -28,6 +28,25 @@ a {
   text-decoration: none;
 }
 
+.info-section {
+  width: min(calc(100vw - 100px), 680px);
+  margin: 0 auto;
+  padding: 10px;
+  font-weight: normal;
+}
+
+.info-title {
+  color: var(--fir-green);
+  font-size: 20px;
+  font-weight: bold;
+  padding-top: 10px;
+}
+
+.info-text {
+  font-size: 16px;
+  color: var(--grey);
+}
+
 nav {
   display: flex;
   flex-direction: column;
