@@ -1,6 +1,12 @@
-<form class="route-card" novalidate>
-  Test
-</form>
+<div class="status-row">
+  <section class="input-section" id="driver-id">
+    Line and course number
+  </section>
+
+  <section class="input-section" id="time">
+    {{ currentTime() | date: 'HH:mm:ss' }}
+  </section>
+</div>
 
 
 <section class="info-section">
