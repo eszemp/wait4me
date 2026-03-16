@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouteFormComponent } from '../route-form/route-form.component';
-
-
+import { OJPTrip } from '../../services/ojp-trip';
 
 @Component({
   selector: 'app-passenger-interface',
@@ -11,19 +10,10 @@ import { RouteFormComponent } from '../route-form/route-form.component';
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css','./passenger-interface.css'],
 })
+
 export class PassengerInterface {
-  readonly destinations: string[] = [
-    'Zurich HB',
-    'Zurich Oerlikon',
-    'Basel SBB',
-    'Bern',
-    'Luzern',
-    'Winterthur',
-    'St. Gallen',
-    'Lausanne',
-    'Geneve',
-    'Zug'
-  ];
+
+  public tripService = inject(OJPTrip);
 
   readonly tripForm = new FormGroup({
     from: new FormControl('', { nonNullable: true }),

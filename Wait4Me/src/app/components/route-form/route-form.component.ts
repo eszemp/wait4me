@@ -17,5 +17,4 @@ type TripForm = FormGroup<{
 })
 export class RouteFormComponent {
   tripForm = input.required<TripForm>();
-  destinations = input.required<string[]>();
 }

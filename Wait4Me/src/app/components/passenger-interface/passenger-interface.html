@@ -1,14 +1,23 @@
-<app-route-form [tripForm]="tripForm" [destinations]="destinations" />
+<app-route-form [tripForm]="tripForm" />
 
-<section class="info-section">
-    <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
-
-    <p class="info-text">
-        To use Wait4Me, search for your route and select your connection. If there is a delay and
-        you might not be able to make the transfer, you can send a request for the driver of the
+@for (trip of tripService.tripResults() ?? []; track trip.Id) {
+    <section class="routing-results">
+      <p>Trip Result: Start from Place a at {{trip.StartTime}}, 
+        arrive in Place b at {{trip.EndTime}} 
+        with total duration {{trip.Duration}} and {{trip.Transfers}} transfer(s)</p>
+    </section>
+    
+} 
+@empty {
+    <section class="info-section">
+      <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
+      <p class="info-text">
+        To use Wait4Me, search for your route and select your connection. If there is a delay and 
+        you might not be able to make the transfer, you can send a request for the driver of the 
         second vehicle to Wait4You by clicking the button below.
-    </p>
+      </p>
+    </section>
+}
 
-</section>
 
 <button type="button" class="w4m-button">Wait4Me</button>

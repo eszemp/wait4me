@@ -77,7 +77,7 @@ export class OJPTrip extends OJPBase{
 
   getTripInformation(origin_id: string, destination_id: string) {
     const xmlBody = this.buildTripRequest(origin_id, destination_id);
-    const parser = new XMLParser();
+    const parser = new XMLParser({removeNSPrefix: true});
   
     return this.http.post(this.apiUrl, xmlBody, { 
       headers: this.getHeaders(), 
@@ -85,9 +85,9 @@ export class OJPTrip extends OJPBase{
     }).pipe(
       map(xmlString => {
         const fullObj = parser.parse(xmlString);
-        
-        // Dig into the object here and return only what you need
-        return fullObj?.OJP?.OJPResponse?.['siri:ServiceDelivery']?.OJPTripDelivery.TripResult;
+        const rawTripResults = fullObj?.OJP?.OJPResponse?.ServiceDelivery?.OJPTripDelivery?.TripResult;
+        const tripArray = Array.isArray(rawTripResults) ? rawTripResults : [rawTripResults];
+        return tripArray.map(item => item.Trip);
       })
     );
   }
