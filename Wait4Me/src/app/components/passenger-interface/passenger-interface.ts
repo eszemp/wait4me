@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouteFormComponent } from '../route-form/route-form.component';
+import { OJPTrip } from '../../services/ojp-trip';
 
 @Component({
   selector: 'app-passenger-interface',
@@ -11,6 +12,8 @@ import { RouteFormComponent } from '../route-form/route-form.component';
 })
 
 export class PassengerInterface {
+
+  public tripService = inject(OJPTrip);
 
   readonly tripForm = new FormGroup({
     from: new FormControl('', { nonNullable: true }),
