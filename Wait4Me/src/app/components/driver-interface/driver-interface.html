@@ -1,6 +1,46 @@
 <div class="status-row">
   <section class="input-section" id="driver-id">
-    Line and course number
+    <p class="position-title">Actual Position: {{ actualPosition() }}</p>
+
+    <div class="position-search-wrap">
+      <input
+        class="position-search"
+        type="text"
+        placeholder="Search station"
+        [ngModel]="stationQuery()"
+        (ngModelChange)="onStationQueryChange($event)"
+        (blur)="closeSuggestions()"
+      />
+      <button
+        type="button"
+        class="refresh-button position-button"
+        (click)="fetchCurrentPositionStop()"
+      >
+        Use My Position
+      </button>
+    </div>
+
+    @if (isResolvingPosition()) {
+      <p class="position-message">Resolving nearest stop from your location...</p>
+    } @else if (positionError()) {
+      <p class="position-message error">{{ positionError() }}</p>
+    }
+
+    @if (stationSuggestions().length > 0) {
+      <ul class="station-suggestions">
+        @for (station of stationSuggestions(); track station.stopPlaceRef) {
+          <li>
+            <button
+              type="button"
+              class="station-suggestion-item"
+              (mousedown)="selectSuggestedStation(station)"
+            >
+              {{ station.stopPlaceName }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
   </section>
 
   <section class="input-section" id="time">
@@ -8,10 +48,41 @@
   </section>
 </div>
 
+<section class="input-section departures-section">
+  <div class="departures-header">
+    <h2>Departing Lines</h2>
+    <button type="button" class="refresh-button" (click)="refreshDepartures()">Refresh</button>
+  </div>
+
+  @if (isLoadingDepartures()) {
+    <p class="departures-message">Loading departures...</p>
+  } @else if (loadError()) {
+    <p class="departures-message error">{{ loadError() }}</p>
+  } @else if (departureLines().length === 0) {
+    <p class="departures-message">No departures found for this station.</p>
+  } @else {
+    <ul class="departures-list">
+      @for (departure of departureLines(); track departure.line + departure.departureIso + departure.direction) {
+        <li class="departure-row">
+          <span class="line">{{ departure.line }}</span>
+          <span class="direction">{{ departure.direction || 'n/a' }}</span>
+          <span class="time">{{ departure.departureIso | date: 'HH:mm' }}</span>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
 
 <section class="info-section">
-    <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
+  <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
 
-    <p class="info-text">
-        Enter the Line number and Course number. After that the route will be displayed. If a Wait4Me request is received, it will be indicated and the response can be selected.
+  <p class="info-text">
+    Enter the Line number and Course number. After that the route will be displayed. If a Wait4Me request is received, it will be indicated and the response can be selected.
+  </p>
 </section>
+
+
+<!-- @route{
+  
+} -->
