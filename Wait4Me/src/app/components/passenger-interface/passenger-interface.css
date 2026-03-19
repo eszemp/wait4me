@@ -35,3 +35,93 @@
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
 
 }
+
+.content {
+  margin-top: 29px;
+}
+
+
+.trip-card {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 15px;
+  background: white;
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  padding: 20px 25px;
+  margin-bottom: 9px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  font-family: sans-serif;
+}
+
+/* Timeline Graphic */
+.trip-timeline {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.timeline-line {
+  position: relative;
+  width: 1px;
+  background: var(--fir-green);
+  margin: 5px 0;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border: 1.5px solid var(--fir-green);
+  border-radius: 50%;
+  position: absolute;
+}
+
+.dot.top { top: -5px; }
+.dot.bottom { bottom: -5px; }
+
+.middle-dots-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1; /* Takes up the space between top and bottom */
+  transform: translate(0%, calc(0% - ((var(--total) - 1) * 2px))); 
+} 
+
+.dot.middle {  
+  transform: translateY(calc(var(--i) * 4px));
+}
+
+
+/* Text Styling */
+.time-column, .location-column {
+  display: flex;
+  color: black;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 60px; /* Adjust based on desired card height */
+}
+
+.time-start, .time-end, .location-start, .location-end {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.meta-column {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.platform { font-size: 1rem; color: #333; }
+.duration { font-size: 1.1rem; color: #333; }
