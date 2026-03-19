@@ -10,8 +10,11 @@ import { OJPBase } from './ojp-base';
 export class OJPTrip extends OJPBase{
 
   originId = signal<string | null>(null);
+  originName = signal<string | null>(null);
   destinationId = signal<string | null>(null);
+  destinationName = signal<string | null>(null);
   tripResults = signal<any[]>([]);
+
 
   constructor(protected http: HttpClient) {
     super();
@@ -25,6 +28,8 @@ export class OJPTrip extends OJPBase{
         this.getTripInformation(from, to).subscribe(results => {
           this.tripResults.set(results);
         });
+        this.originName.set(sessionStorage.getItem("origin_name"));
+        this.destinationName.set(sessionStorage.getItem("destination_name"));
       }
     });
   }
