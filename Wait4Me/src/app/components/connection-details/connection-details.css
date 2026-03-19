@@ -1,4 +1,4 @@
-.trip-card {
+.trip-overview {
   width: min(calc(100vw - 20px), 680px);
   margin-top: -20px;
   background: #ffffff;
@@ -7,4 +7,23 @@
   font-size: 16px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 28px 54px 34px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  font-family: sans-serif;
 }
+
+.leg {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 15px;
+  background: white;
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  padding: 20px 25px;
+  margin-bottom: 9px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  font-family: sans-serif;
+}
+
