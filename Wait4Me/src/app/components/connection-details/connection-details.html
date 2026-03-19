@@ -1,0 +1,31 @@
+<section class="trip-card">
+    <div class="trip-timeline">
+      <div class="timeline-line" [class.has-transfers]="trip.Transfers > 0">
+        <span class="dot top"></span>
+        <div class="middle-dots-container" [style.--total]="trip.Transfers">
+          @for (dot of [].constructor(trip.Transfers); track $index) {
+            <span class="dot middle" [style.--i]="$index"></span>
+          }
+        </div>
+        <span class="dot bottom"></span>
+      </div>
+      <div class="time-column">
+        <span class="time-start">{{ trip.StartTime | date: 'HH:mm' }}</span>
+        <span class="time-end">{{ trip.EndTime | date: 'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="location-column">
+      <span class="location-start">{{ tripService.originName() }}</span>
+      <span class="location-end">{{ tripService.destinationName() }}</span>
+    </div>
+
+    <div class="meta-column">
+      <span class="platform"> {{ 10 }}</span>
+      <span class="duration">{{ trip.Duration | duration }}</span>
+    </div>
+</section>
+
+<section class="content">
+   <p>More details</p> 
+</section>
