@@ -27,3 +27,19 @@
   font-family: sans-serif;
 }
 
+.leg.transfer-leg {
+  height: 60px;
+}
+
+.arrow-right-icon {
+  transform: scaleX(-1) translateY(-20px);
+  height: 35px;
+  width: 35px;
+}
+
+.walking-icon {
+  height: 30px;
+  width: 30px;
+  transform: translateY(-5px);
+}
+

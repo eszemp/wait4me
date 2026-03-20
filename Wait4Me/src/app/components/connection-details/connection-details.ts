@@ -19,4 +19,9 @@ export class ConnectionDetails {
     const navigation = this.router.currentNavigation();
     this.trip = navigation?.extras.state?.['selectedTrip'];
   }
+
+  popup_walking_route(transferLeg: any): void {
+    console.log("see detailed walking route for transfer");
+    return;
+  }
 }

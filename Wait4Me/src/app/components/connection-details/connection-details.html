@@ -54,16 +54,18 @@
         }
 
         @else if (leg.TransferLeg) {
-        <div class="leg transfer-leg">
+        <div class="leg transfer-leg" (click)="popup_walking_route(leg.TransferLeg)">
             <div class="time-column">
-                <div class="icon-circle">🚶</div>
+                <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
             </div>
             
             <div class="location-column">
-            {{ leg.TransferLeg.TransferType }} ({{ leg.Duration | duration }})
+            {{ leg.Duration | duration }} Walking Route
             </div>
             
-            <div class="info-col"></div>
+            <div class="info-col">
+              <img class="arrow-right-icon" src="/return-back-button-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </div>
         </div>
         }
         @else {
