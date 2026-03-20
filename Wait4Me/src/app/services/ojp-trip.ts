@@ -34,6 +34,14 @@ export class OJPTrip extends OJPBase{
     });
   }
 
+  reset() {
+    this.originId.set(null);
+    this.originName.set(null);
+    this.destinationId.set(null);
+    this.destinationName.set(null);
+    this.tripResults.set([]);
+  }
+
   private buildTripRequest(origin_id: string, destination_id: string): string {
     const curTime = new Date().toISOString();
     const departure_time = curTime; //TODO: implement departure time properly

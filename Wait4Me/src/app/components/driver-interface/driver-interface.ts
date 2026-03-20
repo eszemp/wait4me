@@ -29,10 +29,11 @@ export class DriverInterface {
 
   constructor(private router: Router) {
 
-    const navigation = this.router.currentNavigation();
-    const state = navigation?.extras.state as { clearStorage: boolean };
-    if (state?.clearStorage) {
+    // clear saved values if component is newly loaded
+    const state = history.state;
+    if (state && state.clearStorage === true) {
       sessionStorage.clear();
+      history.replaceState({}, '')
     }
 
     const timer = window.setInterval(() => {

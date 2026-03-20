@@ -19,11 +19,22 @@ export class PassengerInterface {
   private router = inject(Router);
 
   constructor() {
-    const navigation = this.router.currentNavigation();
-    const state = navigation?.extras.state as { clearStorage: boolean };
-    if (state?.clearStorage) {
+    // clear saved values if component is newly loaded
+    const state = history.state;
+    if (state && state.clearStorage === true) {
       sessionStorage.clear();
+      this.tripService.reset();
+      history.replaceState({}, '')
     }
+
+    // fill out form fields with saved values (if they exist)
+    if (sessionStorage.getItem("origin_name") && sessionStorage.getItem("destination_name")){
+      this.tripForm.patchValue({
+        from: sessionStorage.getItem("origin_name") ?? '',
+        to: sessionStorage.getItem("destination_name") ?? ''
+      });
+    }
+
   }
 
   readonly tripForm = new FormGroup({
