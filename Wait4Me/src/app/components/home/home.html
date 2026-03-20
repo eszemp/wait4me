@@ -1,7 +1,7 @@
 <section class="home">
   <nav>
-    <a class="routing-button" routerLink="/passenger">Passenger Interface</a>
-    <a class="routing-button" routerLink="/driver">Driver Interface</a>
+    <a class="routing-button" routerLink="/passenger" [state]="{ clearStorage: true }">Passenger Interface</a>
+    <a class="routing-button" routerLink="/driver" [state]="{ clearStorage: true }">Driver Interface</a>
     <a class="routing-button" routerLink="/monitoring">Monitoring View</a>
   </nav>
   <div class="info-section">

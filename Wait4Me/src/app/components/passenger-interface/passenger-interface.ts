@@ -18,6 +18,14 @@ export class PassengerInterface {
   public tripService = inject(OJPTrip);
   private router = inject(Router);
 
+  constructor() {
+    const navigation = this.router.currentNavigation();
+    const state = navigation?.extras.state as { clearStorage: boolean };
+    if (state?.clearStorage) {
+      sessionStorage.clear();
+    }
+  }
+
   readonly tripForm = new FormGroup({
     from: new FormControl('', { nonNullable: true }),
     to: new FormControl('', { nonNullable: true }),

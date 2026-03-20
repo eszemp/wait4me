@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { DepartureLine, OJPStopEvent, StopLookupResult } from '../../services/ojp-stop-event';
@@ -26,7 +27,14 @@ export class DriverInterface {
 
   private readonly selectedStopRef = signal<string | null>(null);
 
-  constructor() {
+  constructor(private router: Router) {
+
+    const navigation = this.router.currentNavigation();
+    const state = navigation?.extras.state as { clearStorage: boolean };
+    if (state?.clearStorage) {
+      sessionStorage.clear();
+    }
+
     const timer = window.setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
