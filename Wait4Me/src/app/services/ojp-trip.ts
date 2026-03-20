@@ -82,17 +82,23 @@ export class OJPTrip extends OJPBase{
 
   getTripInformation(origin_id: string, destination_id: string) {
     const xmlBody = this.buildTripRequest(origin_id, destination_id);
-    const parser = new XMLParser({removeNSPrefix: true});
-  
-    return this.http.post(this.apiUrl, xmlBody, { 
-      headers: this.getHeaders(), 
+
+    const parser = new XMLParser({
+      removeNSPrefix: true,
+      isArray: (tagName, jpath, isObject, isArray) => {
+        const arrayTags = ['OJP.OJPResponse.ServiceDelivery.OJPTripDelivery.TripResult','Trip.Leg'];
+        return arrayTags.some(path => jpath.endsWith(path));
+      }
+    });
+
+    return this.http.post(this.apiUrl, xmlBody, {
+      headers: this.getHeaders(),
       responseType: 'text'
     }).pipe(
       map(xmlString => {
         const fullObj = parser.parse(xmlString);
-        const rawTripResults = fullObj?.OJP?.OJPResponse?.ServiceDelivery?.OJPTripDelivery?.TripResult;
-        const tripArray = Array.isArray(rawTripResults) ? rawTripResults : [rawTripResults];
-        return tripArray.map(item => item.Trip);
+        const tripResults = fullObj?.OJP?.OJPResponse?.ServiceDelivery?.OJPTripDelivery?.TripResult || [];
+        return tripResults.map((item: any) => item.Trip);
       })
     );
   }
