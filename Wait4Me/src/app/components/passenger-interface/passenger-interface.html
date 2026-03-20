@@ -25,7 +25,7 @@
     </div>
 
     <div class="meta-column">
-      <span class="platform"> {{ 10 }}</span>
+      <span class="platform"> {{ trip.Leg[0]?.TimedLeg?.LegBoard.EstimatedQuay?.Text }}</span>
       <span class="duration">{{ trip.Duration | duration }}</span>
     </div>
   </section>
