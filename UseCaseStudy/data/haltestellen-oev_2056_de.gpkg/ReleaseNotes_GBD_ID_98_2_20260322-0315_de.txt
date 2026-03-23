@@ -1,0 +1,43 @@
+﻿Datensatz: Haltestellen des öffentlichen Verkehrs, GeoIV-ID 98.2
+
+Nutzungsbestimmungen: Nutzung frei unter Angabe der Datenquelle: öV-Haltestellen Bundesamt für Verkehr BAV (O-BY)
+
+Kontakt: Hinweise auf mögliche Fehler in den Daten können mitgeteilt werden an: gis@bav.admin.ch
+
+Weitere Informationen: Modellbeschreibung, Metadaten und weitere Links:https://www.bav.admin.ch/bav/de/home/allgemeine-themen/fachthemen/geoinformation/geobasisdaten/haltestellen-des-oeffentlichen-verkehrs.html
+
+Datenquelle: DiDok-3
+
+Stand: 22.03.2026
+
+Anzahl Betriebspunkte: 28919
+-       Haltestelle: 26465
+-       Haltestelle und Bedienpunkt: 826
+-       Bedienpunkt: 246
+-       Anschlusspunkt: 73
+-       Ausweiche: 57
+-       Blockstelle: 35
+-       Dienststation: 86
+-       Eigentumsgrenze: 12
+-       Fehlerprofil/Kilometer-Sprung: 19
+-       Gleisende: 63
+-       Haltestelle ausser Betrieb: 60
+-       Landesgrenze: 26
+-       Spurtrennung: 12
+-       Spurwechsel: 103
+-       Verzweigung, Abzweigung, Spaltweiche: 414
+-       Wendeschleife: 57
+-       Zugeordneter Betriebspunkt: 365
+
+Anzahl Haltekanten: 55234
+
+Geänderte Objekte gegenüber der Vorversion vom 15.03.2026:
+
+Haltekanten:
+-       Hinzugefügt: 17
+-       Geändert: 115
+-       Gelöscht: 0
+Betriebspunkte:
+-       Hinzugefügt: 1
+-       Geändert: 28
+-       Gelöscht: 0

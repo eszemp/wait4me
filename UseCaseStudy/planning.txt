@@ -1,0 +1,20 @@
+
+--- Code Structure ---
+
+01_preprocess_tarif_area -> get one polygon with borders of tarifverbund from tarifverbund shp
+02_preprocess_stop_places -> extract stop places in tarif area and keep only necessary attributes
+03_calculate_time_series -> per stop: calculate buffer between all arrivals and the next departure (use OJP API) over a typical weekday
+04_aggregate_to_final_buffer_score -> per stop: extract one final metric per stop and save items
+05_network_analysis -> calculate some network level stats
+06_network_visualization -> create network level map and visualization of all stop places and buffer metrics
+
+
+--- Data ---
+
+All Stop Places: (incl StopPlaceRef, Name and Coordinates)
+https://www.bav.admin.ch/de/haltestellen-des-oeffentlichen-verkehrs-geoiv-id-982, 
+https://www.geocat.ch/geonetwork/srv/ger/catalog.search#/metadata/841d42ff-8177-4e07-a96b-e8e5455ae048
+used: https://data.geo.admin.ch/browser/index.html#/collections/ch.bav.haltestellen-oev/items/haltestellen-oev 
+
+Borders of Tarifverbundregionen:
+https://opendata.swiss/de/dataset/tarifverbundkarte
