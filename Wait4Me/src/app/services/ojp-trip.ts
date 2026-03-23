@@ -13,6 +13,8 @@ export class OJPTrip extends OJPBase{
   originName = signal<string | null>(null);
   destinationId = signal<string | null>(null);
   destinationName = signal<string | null>(null);
+  departureDay = signal<string | null>(null);
+  departureTimeOfDay = signal<string | null>(null);
   tripResults = signal<any[]>([]);
 
 
@@ -25,7 +27,7 @@ export class OJPTrip extends OJPBase{
       const to = this.destinationId();
 
       if (from && to) {
-        this.getTripInformation(from, to).subscribe(results => {
+        this.getTripInformation(from, to, this.departureDay() || "", this.departureTimeOfDay() || "").subscribe(results => {
           this.tripResults.set(results);
         });
         this.originName.set(sessionStorage.getItem("origin_name"));
@@ -42,11 +44,10 @@ export class OJPTrip extends OJPBase{
     this.tripResults.set([]);
   }
 
-  private buildTripRequest(origin_id: string, destination_id: string): string {
+  private buildTripRequest(origin_id: string, destination_id: string, departure_time: string): string {
     const curTime = new Date().toISOString();
-    const departure_time = curTime; //TODO: implement departure time properly
+    console.log(departure_time);
     const noResults = 8;
-    const messageID = 'cd'; // TODO: handle message ids properly
 
     return `<?xml version="1.0" encoding="UTF-8"?>
       <OJP xmlns="http://www.vdv.de/ojp" version="2.0">
@@ -88,8 +89,34 @@ export class OJPTrip extends OJPBase{
       //TODO: change IncludeLegProjection to true, when can handle large data
   }
 
-  getTripInformation(origin_id: string, destination_id: string) {
-    const xmlBody = this.buildTripRequest(origin_id, destination_id);
+  getTripInformation(origin_id: string, destination_id: string, day: string, time_of_day: string) {
+    // departure_time requires format:  "2026-03-23T07:49:30.519Z"
+    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
+    // time of day has format           "08:59" (HH:MM from time input)
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let date = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    if (day !== "") {
+      const dayParts = day.split('-');
+      year = parseInt(dayParts[0], 10);
+      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
+      date = parseInt(dayParts[2], 10);
+    }
+
+    if (time_of_day !== "") {
+      const timeParts = time_of_day.split(':');
+      hours = parseInt(timeParts[0], 10);
+      minutes = parseInt(timeParts[1], 10);
+    }
+
+    const departureDate = new Date(year, month, date, hours, minutes);
+    const departure_time = departureDate.toISOString();
+
+    const xmlBody = this.buildTripRequest(origin_id, destination_id, departure_time);
 
     const parser = new XMLParser({
       removeNSPrefix: true,

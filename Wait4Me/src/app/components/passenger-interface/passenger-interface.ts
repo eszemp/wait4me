@@ -35,6 +35,15 @@ export class PassengerInterface {
       });
     }
 
+    // Connect form date and time to trip service signals
+    this.tripForm.valueChanges.subscribe(value => {
+      this.tripService.departureDay.set(value.date || null);
+      this.tripService.departureTimeOfDay.set(value.time || null);
+    });
+
+    // Set initial values
+    this.tripService.departureDay.set(this.tripForm.value.date || null);
+    this.tripService.departureTimeOfDay.set(this.tripForm.value.time || null);
   }
 
   readonly tripForm = new FormGroup({
