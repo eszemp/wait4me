@@ -1,24 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 
 import { DepartureLine, OJPStopEvent, StopLookupResult } from '../../services/ojp-stop-event';
+import { DriverDeparturesComponent } from './driver-departures/driver-departures';
+import { DriverStatusComponent } from './driver-status/driver-status';
 
 @Component({
   selector: 'app-driver-interface',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, DriverStatusComponent, DriverDeparturesComponent],
   templateUrl: './driver-interface.html',
   styleUrl: './driver-interface.css',
 })
 export class DriverInterface {
+  private static readonly OWN_POSITION_PLACEHOLDER = 'Own Position';
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly stopEventService = inject(OJPStopEvent);
 
   readonly currentTime = signal(new Date());
-  readonly actualPosition = signal('Locating current position...');
+  readonly actualPosition = signal(DriverInterface.OWN_POSITION_PLACEHOLDER);
+  readonly selectedOriginName = signal('');
   readonly departureLines = signal<DepartureLine[]>([]);
   readonly stationSuggestions = signal<StopLookupResult[]>([]);
+  readonly showSuggestions = signal(false);
   readonly stationQuery = signal('');
   readonly isLoadingDepartures = signal(false);
   readonly isResolvingPosition = signal(false);
@@ -27,7 +31,7 @@ export class DriverInterface {
 
   private readonly selectedStopRef = signal<string | null>(null);
 
-  constructor(private router: Router) {
+  constructor() {
 
     // clear saved values if component is newly loaded
     const state = history.state;
@@ -49,12 +53,10 @@ export class DriverInterface {
 
     if (persistedRef) {
       this.selectedStopRef.set(persistedRef);
-      this.actualPosition.set(persistedName || 'Selected station');
+      this.selectedOriginName.set(persistedName || 'Selected station');
       this.stationQuery.set(persistedName);
       this.refreshDepartures();
     }
-
-    this.fetchCurrentPositionStop();
   }
 
   refreshDepartures(): void {
@@ -87,6 +89,10 @@ export class DriverInterface {
   onStationQueryChange(query: string): void {
     this.stationQuery.set(query);
     this.positionError.set(null);
+    if (query.trim().length > 0) {
+      this.actualPosition.set(DriverInterface.OWN_POSITION_PLACEHOLDER);
+    }
+    this.showSuggestions.set(query.trim().length >= 2);
 
     if (query.trim().length < 2) {
       this.stationSuggestions.set([]);
@@ -96,19 +102,33 @@ export class DriverInterface {
     this.stopEventService.searchStopsByName(query.trim()).subscribe({
       next: (stops) => {
         this.stationSuggestions.set(stops);
+        this.showSuggestions.set(stops.length > 0);
       },
       error: (error: unknown) => {
         const message = error instanceof Error ? error.message : 'Unknown API error';
         this.positionError.set(`Could not search stations: ${message}`);
         this.stationSuggestions.set([]);
+        this.showSuggestions.set(false);
       },
     });
   }
 
+  onStationInputFocus(): void {
+    this.showSuggestions.set(this.stationQuery().trim().length >= 2 && this.stationSuggestions().length > 0);
+  }
+
   selectSuggestedStation(stop: StopLookupResult): void {
-    this.persistSelectedStop(stop);
+    this.persistSearchStop(stop);
     this.stationSuggestions.set([]);
+    this.showSuggestions.set(false);
     this.refreshDepartures();
+  }
+
+  onOwnPositionClick(): void {
+    this.stationQuery.set('');
+    this.stationSuggestions.set([]);
+    this.showSuggestions.set(false);
+    this.fetchCurrentPositionStop();
   }
 
   fetchCurrentPositionStop(): void {
@@ -132,7 +152,7 @@ export class DriverInterface {
                 return;
               }
 
-              this.persistSelectedStop(nearestStop);
+              this.persistOwnPositionStop(nearestStop);
               this.refreshDepartures();
               this.isResolvingPosition.set(false);
             },
@@ -156,14 +176,27 @@ export class DriverInterface {
 
   closeSuggestions(): void {
     setTimeout(() => {
-      this.stationSuggestions.set([]);
+      this.showSuggestions.set(false);
     }, 120);
   }
 
-  private persistSelectedStop(stop: StopLookupResult): void {
+  private persistSearchStop(stop: StopLookupResult): void {
     this.selectedStopRef.set(stop.stopPlaceRef);
-    this.actualPosition.set(stop.stopPlaceName);
+    this.selectedOriginName.set(stop.stopPlaceName);
+    this.actualPosition.set(DriverInterface.OWN_POSITION_PLACEHOLDER);
     this.stationQuery.set(stop.stopPlaceName);
+    this.loadError.set(null);
+    this.positionError.set(null);
+
+    sessionStorage.setItem('origin_name', stop.stopPlaceName);
+    sessionStorage.setItem('origin_id', stop.stopPlaceRef);
+  }
+
+  private persistOwnPositionStop(stop: StopLookupResult): void {
+    this.selectedStopRef.set(stop.stopPlaceRef);
+    this.selectedOriginName.set(stop.stopPlaceName);
+    this.actualPosition.set(stop.stopPlaceName);
+    this.stationQuery.set('');
     this.loadError.set(null);
 
     sessionStorage.setItem('origin_name', stop.stopPlaceName);

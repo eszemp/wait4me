@@ -8,6 +8,8 @@ export type DepartureLine = {
   line: string;
   direction: string;
   departureIso: string;
+  arrivalIso: string | null;
+  departurePlatformOrStop: string | null;
 };
 
 export type StopLookupResult = {
@@ -57,21 +59,36 @@ export class OJPStopEvent extends OJPBase {
         const rows = rawResults
           .map((result) => {
             const service = result.stopEvent?.service;
-            const line =
+            const callAtStop = result.stopEvent?.thisCall?.callAtStop;
+            const firstOnwardCall = result.stopEvent?.onwardCall?.[0]?.callAtStop;
+            const line = this.asString(
               service?.publicCode ??
-              this.readTextValue(service?.publishedServiceName) ??
-              service?.lineRef ??
-              '';
-            const direction = this.readTextValue(service?.destinationText) ?? '';
-            const departure =
-              result.stopEvent?.thisCall?.callAtStop?.serviceDeparture?.estimatedTime ??
-              result.stopEvent?.thisCall?.callAtStop?.serviceDeparture?.timetabledTime ??
-              '';
+                this.readTextValue(service?.publishedServiceName) ??
+                service?.lineRef,
+            );
+            const direction = this.asString(this.readTextValue(service?.destinationText));
+            const departure = this.asString(
+              callAtStop?.serviceDeparture?.estimatedTime ??
+                callAtStop?.serviceDeparture?.timetabledTime,
+            );
+            const arrival = this.asString(
+              callAtStop?.serviceArrival?.estimatedTime ??
+                callAtStop?.serviceArrival?.timetabledTime ??
+                firstOnwardCall?.serviceArrival?.estimatedTime ??
+                firstOnwardCall?.serviceArrival?.timetabledTime,
+            );
+            const departurePlatformOrStop = this.asNullableString(
+              this.readTextValue(callAtStop?.estimatedQuay) ??
+                this.readTextValue(callAtStop?.plannedQuay) ??
+                this.readTextValue(callAtStop?.stopPointName),
+            );
 
             return {
               line,
               direction,
               departureIso: departure,
+              arrivalIso: this.asNullableString(arrival),
+              departurePlatformOrStop,
             };
           })
           .filter((row) => row.line.trim().length > 0 && row.departureIso.trim().length > 0)
@@ -83,7 +100,9 @@ export class OJPStopEvent extends OJPBase {
               return (
                 candidate.line === row.line &&
                 candidate.direction === row.direction &&
-                candidate.departureIso === row.departureIso
+                candidate.departureIso === row.departureIso &&
+                candidate.arrivalIso === row.arrivalIso &&
+                candidate.departurePlatformOrStop === row.departurePlatformOrStop
               );
             }) === index
           );
@@ -195,6 +214,27 @@ export class OJPStopEvent extends OJPBase {
     }
 
     return null;
+  }
+
+  private asString(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean') {
+      return String(value);
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    return '';
+  }
+
+  private asNullableString(value: unknown): string | null {
+    const normalized = this.asString(value).trim();
+    return normalized.length > 0 ? normalized : null;
   }
 
   private distanceMeters(
