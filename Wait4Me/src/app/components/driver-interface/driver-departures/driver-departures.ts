@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { DepartureLine } from '../../../services/ojp-stop-event';
 
@@ -15,4 +15,9 @@ export class DriverDeparturesComponent {
   readonly isLoadingDepartures = input.required<boolean>();
   readonly hasSelectedOrigin = input<boolean>(false);
   readonly loadError = input<string | null>(null);
+  readonly departureSelected = output<DepartureLine>();
+
+  onDepartureClick(departure: DepartureLine): void {
+    this.departureSelected.emit(departure);
+  }
 }

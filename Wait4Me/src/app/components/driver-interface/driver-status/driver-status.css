@@ -19,11 +19,34 @@
 }
 
 #driver-id {
-  display: block;
+  display: flex;
+  align-items: center;
   text-align: left;
   font-size: 16px;
   color: #565656;
   position: relative;
+}
+
+.search-body {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+}
+
+.search-fields {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.search-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
 }
 
 .position-field {
@@ -74,6 +97,19 @@
 
 .line-input::placeholder {
   color: #565656;
+}
+
+.selector-input {
+  min-width: 100px;
+  border: 1px solid var(--fir-green);
+  border-radius: 10px;
+  text-align: center;
+  background: transparent;
+  font-size: 16px;
+  color: #000000;
+  padding: 5px 5px;
+  line-height: 1;
+  outline: none;
 }
 
 .suggestions-list {

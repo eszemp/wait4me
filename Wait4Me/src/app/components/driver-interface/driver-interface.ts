@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { DepartureLine, OJPStopEvent, StopLookupResult } from '../../services/ojp-stop-event';
 import { DriverDeparturesComponent } from './driver-departures/driver-departures';
@@ -15,6 +16,7 @@ export class DriverInterface {
   private static readonly OWN_POSITION_PLACEHOLDER = 'Own Position';
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private readonly stopEventService = inject(OJPStopEvent);
 
   readonly currentTime = signal(new Date());
@@ -28,6 +30,8 @@ export class DriverInterface {
   readonly isResolvingPosition = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly positionError = signal<string | null>(null);
+  readonly selectedDate = signal(this.formatDate(new Date()));
+  readonly selectedTime = signal(this.formatTime(new Date()));
 
   private readonly selectedStopRef = signal<string | null>(null);
 
@@ -72,7 +76,7 @@ export class DriverInterface {
     this.isLoadingDepartures.set(true);
     this.loadError.set(null);
 
-    this.stopEventService.getDepartingLines(stationId).subscribe({
+    this.stopEventService.getDepartingLines(stationId, this.selectedDepartureDate()).subscribe({
       next: (lines) => {
         this.departureLines.set(lines);
         this.isLoadingDepartures.set(false);
@@ -131,6 +135,29 @@ export class DriverInterface {
     this.fetchCurrentPositionStop();
   }
 
+  onSelectedDateChange(date: string): void {
+    this.selectedDate.set(date);
+    if (this.selectedStopRef()) {
+      this.refreshDepartures();
+    }
+  }
+
+  onSelectedTimeChange(time: string): void {
+    this.selectedTime.set(time);
+    if (this.selectedStopRef()) {
+      this.refreshDepartures();
+    }
+  }
+
+  openConnectionDetails(departure: DepartureLine): void {
+    this.router.navigate(['/driver/connection-details'], {
+      state: {
+        selectedDeparture: departure,
+        originName: this.selectedOriginName() || this.actualPosition(),
+      },
+    });
+  }
+
   fetchCurrentPositionStop(): void {
     if (!navigator.geolocation) {
       this.positionError.set('Geolocation is not supported by this browser.');
@@ -178,6 +205,42 @@ export class DriverInterface {
     setTimeout(() => {
       this.showSuggestions.set(false);
     }, 120);
+  }
+
+  private selectedDepartureDate(): Date {
+    const datePart = this.selectedDate();
+    const timePart = this.selectedTime();
+
+    if (!datePart && !timePart) {
+      return new Date();
+    }
+
+    const [year, month, day] = (datePart || this.formatDate(new Date()))
+      .split('-')
+      .map((value) => Number.parseInt(value, 10));
+    const [hours, minutes] = (timePart || this.formatTime(new Date()))
+      .split(':')
+      .map((value) => Number.parseInt(value, 10));
+
+    if (
+      Number.isNaN(year) ||
+      Number.isNaN(month) ||
+      Number.isNaN(day) ||
+      Number.isNaN(hours) ||
+      Number.isNaN(minutes)
+    ) {
+      return new Date();
+    }
+
+    return new Date(year, month - 1, day, hours, minutes, 0, 0);
+  }
+
+  private formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  private formatTime(date: Date): string {
+    return date.toTimeString().slice(0, 5);
   }
 
   private persistSearchStop(stop: StopLookupResult): void {

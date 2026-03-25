@@ -6,10 +6,18 @@ import { OJPBase } from './ojp-base';
 
 export type DepartureLine = {
   line: string;
+  course: string | null;
   direction: string;
   departureIso: string;
   arrivalIso: string | null;
   departurePlatformOrStop: string | null;
+  stops: DepartureStop[];
+};
+
+export type DepartureStop = {
+  id: string;
+  name: string;
+  timeIso: string | null;
 };
 
 export type StopLookupResult = {
@@ -39,8 +47,12 @@ export class OJPStopEvent extends OJPBase {
     'en',
   );
 
-  getDepartingLines(stopPlaceRef: string, maxResults = 10): Observable<DepartureLine[]> {
-    const request = StopEventRequest.initWithPlaceRefAndDate(stopPlaceRef, new Date());
+  getDepartingLines(
+    stopPlaceRef: string,
+    departureDate: Date = new Date(),
+    maxResults = 10,
+  ): Observable<DepartureLine[]> {
+    const request = StopEventRequest.initWithPlaceRefAndDate(stopPlaceRef, departureDate);
 
     request.payload.params = {
       ...(request.payload.params ?? {}),
@@ -60,22 +72,27 @@ export class OJPStopEvent extends OJPBase {
           .map((result) => {
             const service = result.stopEvent?.service;
             const callAtStop = result.stopEvent?.thisCall?.callAtStop;
-            const firstOnwardCall = result.stopEvent?.onwardCall?.[0]?.callAtStop;
+            const onwardCalls = result.stopEvent?.onwardCall ?? [];
+            const firstOnwardCall = onwardCalls[0]?.callAtStop;
+            const lastOnwardCall = onwardCalls[onwardCalls.length - 1]?.callAtStop;
             const line = this.asString(
               service?.publicCode ??
                 this.readTextValue(service?.publishedServiceName) ??
                 service?.lineRef,
             );
+            const course = this.extractCourseNumber(this.asString(service?.journeyRef));
             const direction = this.asString(this.readTextValue(service?.destinationText));
             const departure = this.asString(
               callAtStop?.serviceDeparture?.estimatedTime ??
                 callAtStop?.serviceDeparture?.timetabledTime,
             );
             const arrival = this.asString(
-              callAtStop?.serviceArrival?.estimatedTime ??
-                callAtStop?.serviceArrival?.timetabledTime ??
+              lastOnwardCall?.serviceArrival?.estimatedTime ??
+                lastOnwardCall?.serviceArrival?.timetabledTime ??
                 firstOnwardCall?.serviceArrival?.estimatedTime ??
-                firstOnwardCall?.serviceArrival?.timetabledTime,
+                firstOnwardCall?.serviceArrival?.timetabledTime ??
+                callAtStop?.serviceArrival?.estimatedTime ??
+                callAtStop?.serviceArrival?.timetabledTime,
             );
             const departurePlatformOrStop = this.asNullableString(
               this.readTextValue(callAtStop?.estimatedQuay) ??
@@ -83,12 +100,54 @@ export class OJPStopEvent extends OJPBase {
                 this.readTextValue(callAtStop?.stopPointName),
             );
 
+            const currentStopName = this.asString(this.readTextValue(callAtStop?.stopPointName));
+            const currentStopTime = this.asNullableString(
+              callAtStop?.serviceDeparture?.estimatedTime ??
+                callAtStop?.serviceDeparture?.timetabledTime ??
+                callAtStop?.serviceArrival?.estimatedTime ??
+                callAtStop?.serviceArrival?.timetabledTime,
+            );
+
+            const onwardStops: DepartureStop[] = onwardCalls
+              .map((onwardCall, index) => {
+                const onwardStop = onwardCall.callAtStop;
+                const stopName = this.asString(this.readTextValue(onwardStop?.stopPointName));
+                const stopTime = this.asNullableString(
+                  onwardStop?.serviceArrival?.estimatedTime ??
+                    onwardStop?.serviceArrival?.timetabledTime ??
+                    onwardStop?.serviceDeparture?.estimatedTime ??
+                    onwardStop?.serviceDeparture?.timetabledTime,
+                );
+
+                if (!stopName) {
+                  return null;
+                }
+
+                return {
+                  id: `onward-${index}`,
+                  name: stopName,
+                  timeIso: stopTime,
+                } satisfies DepartureStop;
+              })
+              .filter((stop): stop is DepartureStop => stop !== null);
+
+            const stops: DepartureStop[] = [
+              {
+                id: 'origin',
+                name: currentStopName || this.asString(this.readTextValue(service?.originText)) || 'Current stop',
+                timeIso: currentStopTime,
+              },
+              ...onwardStops,
+            ];
+
             return {
               line,
+              course,
               direction,
               departureIso: departure,
               arrivalIso: this.asNullableString(arrival),
               departurePlatformOrStop,
+              stops,
             };
           })
           .filter((row) => row.line.trim().length > 0 && row.departureIso.trim().length > 0)
@@ -99,6 +158,7 @@ export class OJPStopEvent extends OJPBase {
             allRows.findIndex((candidate) => {
               return (
                 candidate.line === row.line &&
+                candidate.course === row.course &&
                 candidate.direction === row.direction &&
                 candidate.departureIso === row.departureIso &&
                 candidate.arrivalIso === row.arrivalIso &&
@@ -235,6 +295,21 @@ export class OJPStopEvent extends OJPBase {
   private asNullableString(value: unknown): string | null {
     const normalized = this.asString(value).trim();
     return normalized.length > 0 ? normalized : null;
+  }
+
+  private extractCourseNumber(journeyRef: string): string | null {
+    const normalizedRef = journeyRef.trim();
+    if (!normalizedRef) {
+      return null;
+    }
+
+    const trailingMatch = normalizedRef.match(/(\d{3,}(?:-\d+)?)$/);
+    if (trailingMatch) {
+      return trailingMatch[1];
+    }
+
+    const lastToken = normalizedRef.split(':').pop()?.trim() ?? '';
+    return lastToken.length > 0 ? lastToken : null;
   }
 
   private distanceMeters(

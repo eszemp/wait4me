@@ -1,43 +1,63 @@
 <div class="status-row">
   <section class="input-section" id="driver-id">
-    <div class="field-group position-field">
-      <button
-        type="button"
-        class="line-input own-position own-position-button"
-        (click)="onOwnPositionClick()"
-      >
-        {{ actualPosition() }}
-      </button>
+    <div class="search-body">
+      <div class="search-fields">
+        <div class="field-group position-field">
+          <button
+            type="button"
+            class="line-input own-position own-position-button"
+            (click)="onOwnPositionClick()"
+          >
+            {{ actualPosition() }}
+          </button>
+        </div>
+
+        <div class="field-group">
+          <input
+            class="line-input search-start-input"
+            type="text"
+            placeholder="Search Start Station"
+            [ngModel]="stationQuery()"
+            (ngModelChange)="onStationQueryChange($event)"
+            (focus)="onInputFocus()"
+            (blur)="onInputBlur()"
+          />
+
+          @if (showSuggestions() && stationSuggestions().length > 0) {
+          <ul class="suggestions-list">
+            @for (station of stationSuggestions(); track station.stopPlaceRef) {
+              <li>
+                <button
+                  type="button"
+                  class="suggestion-item"
+                  (mousedown)="selectStation(station)"
+                >
+                  {{ station.stopPlaceName }}
+                </button>
+              </li>
+            }
+          </ul>
+          }
+        </div>
+      </div>
+
+      <div class="search-selectors">
+        <input
+          class="selector-input"
+          type="date"
+          [ngModel]="selectedDate()"
+          (ngModelChange)="onDateChange($event)"
+          aria-label="Select date"
+        />
+        <input
+          class="selector-input"
+          type="time"
+          [ngModel]="selectedTime()"
+          (ngModelChange)="onTimeChange($event)"
+          aria-label="Select time"
+        />
+      </div>
     </div>
-
-    <div class="field-group">
-      <input
-        class="line-input search-start-input"
-        type="text"
-        placeholder="Search Start Station"
-        [ngModel]="stationQuery()"
-        (ngModelChange)="onStationQueryChange($event)"
-        (focus)="onInputFocus()"
-        (blur)="onInputBlur()"
-      />
-
-      @if (showSuggestions() && stationSuggestions().length > 0) {
-      <ul class="suggestions-list">
-        @for (station of stationSuggestions(); track station.stopPlaceRef) {
-          <li>
-            <button
-              type="button"
-              class="suggestion-item"
-              (mousedown)="selectStation(station)"
-            >
-              {{ station.stopPlaceName }}
-            </button>
-          </li>
-        }
-      </ul>
-      }
-    </div>
-
   </section>
 
   <section class="input-section" id="time">

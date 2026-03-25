@@ -18,12 +18,16 @@ export class DriverStatusComponent {
   readonly stationSuggestions = input.required<StopLookupResult[]>();
   readonly isResolvingPosition = input.required<boolean>();
   readonly positionError = input<string | null>(null);
+  readonly selectedDate = input.required<string>();
+  readonly selectedTime = input.required<string>();
 
   readonly stationQueryChange = output<string>();
   readonly stationInputFocus = output<void>();
   readonly stationInputBlur = output<void>();
   readonly stationSelected = output<StopLookupResult>();
   readonly ownPositionClicked = output<void>();
+  readonly selectedDateChange = output<string>();
+  readonly selectedTimeChange = output<string>();
 
   onStationQueryChange(query: string): void {
     this.stationQueryChange.emit(query);
@@ -43,5 +47,13 @@ export class DriverStatusComponent {
 
   onOwnPositionClick(): void {
     this.ownPositionClicked.emit();
+  }
+
+  onDateChange(value: string): void {
+    this.selectedDateChange.emit(value);
+  }
+
+  onTimeChange(value: string): void {
+    this.selectedTimeChange.emit(value);
   }
 }

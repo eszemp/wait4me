@@ -6,7 +6,7 @@
   } @else {
     <ul class="departures-pill-list">
       @for (departure of departureLines(); track departure.line + departure.departureIso + departure.direction + (departure.arrivalIso ?? '') + (departure.departurePlatformOrStop ?? '')) {
-        <li class="departure-pill">
+        <li class="departure-pill" (click)="onDepartureClick(departure)">
           <div class="trip-timeline">
             <div class="timeline-line">
               <span class="dot top"></span>

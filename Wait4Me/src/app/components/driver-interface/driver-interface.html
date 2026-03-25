@@ -6,11 +6,15 @@
   [stationSuggestions]="stationSuggestions()"
   [isResolvingPosition]="isResolvingPosition()"
   [positionError]="positionError()"
+  [selectedDate]="selectedDate()"
+  [selectedTime]="selectedTime()"
   (stationQueryChange)="onStationQueryChange($event)"
   (stationInputFocus)="onStationInputFocus()"
   (stationInputBlur)="closeSuggestions()"
   (stationSelected)="selectSuggestedStation($event)"
   (ownPositionClicked)="onOwnPositionClick()"
+  (selectedDateChange)="onSelectedDateChange($event)"
+  (selectedTimeChange)="onSelectedTimeChange($event)"
 />
 
 <app-driver-departures
@@ -19,6 +23,7 @@
   [isLoadingDepartures]="isLoadingDepartures()"
   [hasSelectedOrigin]="selectedOriginName().trim().length > 0"
   [loadError]="loadError()"
+  (departureSelected)="openConnectionDetails($event)"
 />
 
 @if (departureLines().length === 0) {
