@@ -18,3 +18,12 @@ used: https://data.geo.admin.ch/browser/index.html#/collections/ch.bav.haltestel
 
 Borders of Tarifverbundregionen:
 https://opendata.swiss/de/dataset/tarifverbundkarte
+
+
+same data?
+https://data.sbb.ch/explore/dataset/haltestelle-haltekante/information/
+https://data.sbb.ch/explore/dataset/tarifverbundkarte/map/?location=9,47.35743,8.38943&basemap=00c4d6
+
+
+MAYBE INCLUDE REAL ARRIVAL/DEPARTURE DELAY DATA FROM PREVIOUS DAY:
+https://data.sbb.ch/explore/dataset/ist-daten-sbb/information/?dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiQ09VTlQiLCJ5QXhpcyI6Imxpbmllbl9pZCIsInNjaWVudGlmaWNEaXNwbGF5Ijp0cnVlLCJjb2xvciI6InJhbmdlLUFjY2VudCJ9XSwieEF4aXMiOiJ2ZXJrZWhyc21pdHRlbF90ZXh0IiwibWF4cG9pbnRzIjoyMCwidGltZXNjYWxlIjoiIiwic29ydCI6IiIsInNlcmllc0JyZWFrZG93biI6ImFua3VuZnRzdmVyc3BhdHVuZyIsInN0YWNrZWQiOiJwZXJjZW50IiwiY29uZmlnIjp7ImRhdGFzZXQiOiJpc3QtZGF0ZW4tc2JiIiwib3B0aW9ucyI6e319fV0sInRpbWVzY2FsZSI6IiIsImRpc3BsYXlMZWdlbmQiOnRydWUsImFsaWduTW9udGgiOnRydWV9
