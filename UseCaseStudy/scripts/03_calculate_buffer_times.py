@@ -40,8 +40,10 @@ def process_all_stops(stops):
 def get_required_transfer_time(StopPlaceRef):
     """
     # TODO: implement correctly
+    # standard is two minutes https://www.sbb.ch/en/help-and-contact/products-services/timetable.html#anchor3.
+    # what request to get interchange time of a station?
     """
-    required_transfer_time = timedelta(minutes=3)
+    required_transfer_time = timedelta(minutes=2)
     return required_transfer_time
 
 def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
