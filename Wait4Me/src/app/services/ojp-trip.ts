@@ -1,13 +1,58 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { XMLParser } from 'fast-xml-parser';
+import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SDK, TripRequest } from 'ojp-sdk';
+import type {
+  InternationalTextSchema,
+  LegSchema,
+  TimedLegSchema,
+  TransferLegSchema,
+  TripResultSchema,
+} from 'ojp-shared-types';
 import { OJPBase } from './ojp-base';
+
+export type PassengerTimedLeg = {
+  kind: 'timed';
+  id: string;
+  duration: string;
+  boardTime: string;
+  alightTime: string;
+  boardStopName: string;
+  destinationText: string;
+  alightStopName: string;
+  boardPlatform: string | null;
+};
+
+export type PassengerTransferLeg = {
+  kind: 'transfer';
+  id: string;
+  duration: string;
+};
+
+export type PassengerLeg = PassengerTimedLeg | PassengerTransferLeg;
+
+export type PassengerTrip = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  duration: string;
+  transfers: number;
+  departurePlatform: string | null;
+  legs: PassengerLeg[];
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class OJPTrip extends OJPBase{
+  private readonly sdk = SDK.create(
+    this.requestorRef,
+    {
+      url: this.apiUrl,
+      authToken: this.apiKey,
+    },
+    'en',
+  );
 
   originId = signal<string | null>(null);
   originName = signal<string | null>(null);
@@ -15,10 +60,10 @@ export class OJPTrip extends OJPBase{
   destinationName = signal<string | null>(null);
   departureDay = signal<string | null>(null);
   departureTimeOfDay = signal<string | null>(null);
-  tripResults = signal<any[]>([]);
+  tripResults = signal<PassengerTrip[]>([]);
 
 
-  constructor(protected http: HttpClient) {
+  constructor() {
     super();
 
     // trigger search automatically
@@ -42,51 +87,6 @@ export class OJPTrip extends OJPBase{
     this.destinationId.set(null);
     this.destinationName.set(null);
     this.tripResults.set([]);
-  }
-
-  private buildTripRequest(origin_id: string, destination_id: string, departure_time: string): string {
-    const curTime = new Date().toISOString();
-    console.log(departure_time);
-    const noResults = 8;
-
-    return `<?xml version="1.0" encoding="UTF-8"?>
-      <OJP xmlns="http://www.vdv.de/ojp" version="2.0">
-        <OJPRequest>
-          <siri:ServiceRequest xmlns:siri="http://www.siri.org.uk/siri">
-            <siri:ServiceRequestContext>
-              <siri:Language>en</siri:Language>
-            </siri:ServiceRequestContext>
-            <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-            <siri:RequestorRef>${this.requestorRef}</siri:RequestorRef>
-            <OJPTripRequest>
-              <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-              <Origin>
-                <PlaceRef>
-                  <StopPlaceRef>${origin_id}</StopPlaceRef>
-                  <Name><Text>n/a</Text></Name>
-                </PlaceRef>
-                <DepArrTime>${departure_time}</DepArrTime>
-              </Origin>
-              <Destination>
-                <PlaceRef>
-                  <StopPlaceRef>${destination_id}</StopPlaceRef>
-                  <Name><Text>n/a</Text></Name>
-                </PlaceRef>
-              </Destination>
-              <Params>
-                <NumberOfResults>${noResults}</NumberOfResults>
-                <UseRealtimeData>explanatory</UseRealtimeData>
-                <IncludeAllRestrictedLines>true</IncludeAllRestrictedLines>
-                <IncludeTrackSections>true</IncludeTrackSections>
-                <IncludeLegProjection>false</IncludeLegProjection>
-                <IncludeIntermediateStops>true</IncludeIntermediateStops>
-              </Params>
-            </OJPTripRequest>
-          </siri:ServiceRequest>
-        </OJPRequest>
-      </OJP>`
-    
-      //TODO: change IncludeLegProjection to true, when can handle large data
   }
 
   getTripInformation(origin_id: string, destination_id: string, day: string, time_of_day: string) {
@@ -114,28 +114,127 @@ export class OJPTrip extends OJPBase{
     }
 
     const departureDate = new Date(year, month, date, hours, minutes);
-    const departure_time = departureDate.toISOString();
+    const request = TripRequest.initWithPlaceRefsOrCoords(origin_id, destination_id);
 
-    const xmlBody = this.buildTripRequest(origin_id, destination_id, departure_time);
+    request.setDepartureDatetime(departureDate);
+    request.setNumberOfResults(8);
+    request.disableLinkProkection();
 
-    const parser = new XMLParser({
-      removeNSPrefix: true,
-      isArray: (tagName, jpath, isObject, isArray) => {
-        const arrayTags = ['OJP.OJPResponse.ServiceDelivery.OJPTripDelivery.TripResult','Trip.Leg'];
-        return arrayTags.some(path => jpath.endsWith(path));
-      }
-    });
+    return from(request.fetchResponse(this.sdk)).pipe(
+      map((response) => {
+        if (!response.ok) {
+          throw response.error;
+        }
 
-    return this.http.post(this.apiUrl, xmlBody, {
-      headers: this.getHeaders(),
-      responseType: 'text'
-    }).pipe(
-      map(xmlString => {
-        const fullObj = parser.parse(xmlString);
-        const tripResults = fullObj?.OJP?.OJPResponse?.ServiceDelivery?.OJPTripDelivery?.TripResult || [];
-        return tripResults.map((item: any) => item.Trip);
-      })
+        return (response.value.tripResult ?? [])
+          .map((result) => this.toPassengerTrip(result))
+          .filter((trip): trip is PassengerTrip => trip !== null);
+      }),
     );
+  }
+
+  private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
+    const trip = result.trip;
+    if (!trip) {
+      return null;
+    }
+
+    const legs = (trip.leg ?? [])
+      .map((leg, index) => this.toPassengerLeg(leg, index))
+      .filter((leg): leg is PassengerLeg => leg !== null);
+
+    const departurePlatform = legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed')?.boardPlatform ?? null;
+
+    return {
+      id: this.asString(trip.id) || this.asString(result.id),
+      startTime: this.asString(trip.startTime),
+      endTime: this.asString(trip.endTime),
+      duration: this.asString(trip.duration),
+      transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
+      departurePlatform,
+      legs,
+    };
+  }
+
+  private toPassengerLeg(leg: LegSchema, index: number): PassengerLeg | null {
+    if (leg.timedLeg) {
+      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, leg.duration, index);
+    }
+
+    if (leg.transferLeg) {
+      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, leg.duration, index);
+    }
+
+    return null;
+  }
+
+  private toPassengerTimedLeg(
+    timedLeg: TimedLegSchema,
+    legId: string | undefined,
+    legDuration: string | undefined,
+    index: number,
+  ): PassengerTimedLeg {
+    const board = timedLeg.legBoard;
+    const alight = timedLeg.legAlight;
+
+    return {
+      kind: 'timed',
+      id: this.asString(legId) || `timed-${index}`,
+      duration: this.asString(legDuration),
+      boardTime: this.asString(
+        board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime,
+      ),
+      alightTime: this.asString(
+        alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime,
+      ),
+      boardStopName: this.readTextValue(board?.stopPointName) ?? '',
+      destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
+      alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
+      boardPlatform: this.readTextValue(board?.estimatedQuay) ?? this.readTextValue(board?.plannedQuay),
+    };
+  }
+
+  private toPassengerTransferLeg(
+    transferLeg: TransferLegSchema,
+    legId: string | undefined,
+    legDuration: string | undefined,
+    index: number,
+  ): PassengerTransferLeg {
+    return {
+      kind: 'transfer',
+      id: this.asString(legId) || `transfer-${index}`,
+      duration: this.asString(legDuration),
+    };
+  }
+
+  private readTextValue(value: InternationalTextSchema | undefined): string | null {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      if (typeof value.text === 'string') {
+        return value.text;
+      }
+    }
+
+    return null;
+  }
+
+  private asString(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean') {
+      return String(value);
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    return '';
   }
 
 }

@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouteFormComponent } from '../route-form/route-form.component';
-import { OJPTrip } from '../../services/ojp-trip';
+import { OJPTrip, PassengerTrip } from '../../services/ojp-trip';
 import { DurationPipe } from '../../shared/pipes/duration.pipes';
 
 @Component({
@@ -64,7 +64,7 @@ export class PassengerInterface {
     return `${hours}:${minutes}`;
   }
 
-  selectConnection(trip: any): void {
+  selectConnection(trip: PassengerTrip): void {
     console.log("clicked on a connection");
     this.router.navigate(['/passenger/connection-details'], { 
       state: { selectedTrip: trip } 

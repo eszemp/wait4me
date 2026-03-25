@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DurationPipe } from '../../shared/pipes/duration.pipes';
-import { OJPTrip } from '../../services/ojp-trip';
+import { OJPTrip, PassengerTransferLeg, PassengerTrip } from '../../services/ojp-trip';
 
 @Component({
   selector: 'app-connection-details',
@@ -11,16 +11,16 @@ import { OJPTrip } from '../../services/ojp-trip';
   styleUrls: ['../../app.css','../passenger-interface/passenger-interface.css', './connection-details.css'],
 })
 export class ConnectionDetails {
-  trip: any;
+  trip: PassengerTrip | null = null;
 
   public tripService = inject(OJPTrip);
 
   constructor(private router: Router) {
     const navigation = this.router.currentNavigation();
-    this.trip = navigation?.extras.state?.['selectedTrip'];
+    this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
   }
 
-  popup_walking_route(transferLeg: any): void {
+  popup_walking_route(transferLeg: PassengerTransferLeg): void {
     console.log("see detailed walking route for transfer");
     return;
   }

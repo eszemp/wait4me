@@ -1,21 +1,21 @@
 <app-route-form [tripForm]="tripForm" />
 
 <section class="content">
-@for (trip of tripService.tripResults() ?? []; track trip.Id) {
+@for (trip of tripService.tripResults(); track trip.id) {
     <section class="trip-card" (click)="selectConnection(trip)">
     <div class="trip-timeline">
-      <div class="timeline-line" [class.has-transfers]="trip.Transfers > 0">
+      <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
         <span class="dot top"></span>
-        <div class="middle-dots-container" [style.--total]="trip.Transfers">
-          @for (dot of [].constructor(trip.Transfers); track $index) {
+        <div class="middle-dots-container" [style.--total]="trip.transfers">
+          @for (dot of [].constructor(trip.transfers); track $index) {
             <span class="dot middle" [style.--i]="$index"></span>
           }
         </div>
         <span class="dot bottom"></span>
       </div>
       <div class="time-column">
-        <span class="time-start">{{ trip.StartTime | date: 'HH:mm' }}</span>
-        <span class="time-end">{{ trip.EndTime | date: 'HH:mm' }}</span>
+        <span class="time-start">{{ trip.startTime | date: 'HH:mm' }}</span>
+        <span class="time-end">{{ trip.endTime | date: 'HH:mm' }}</span>
       </div>
     </div>
 
@@ -25,8 +25,8 @@
     </div>
 
     <div class="meta-column">
-      <span class="platform"> {{ trip.Leg[0]?.TimedLeg?.LegBoard.EstimatedQuay?.Text }}</span>
-      <span class="duration">{{ trip.Duration | duration }}</span>
+      <span class="platform"> {{ trip.departurePlatform }}</span>
+      <span class="duration">{{ trip.duration | duration }}</span>
     </div>
   </section>
 } 

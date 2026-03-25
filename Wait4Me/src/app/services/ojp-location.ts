@@ -1,61 +1,74 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { XMLParser } from 'fast-xml-parser';
+import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { LocationInformationRequest, SDK } from 'ojp-sdk';
 import { OJPBase } from './ojp-base';
+
+export type LocationSuggestion = {
+  stopPlaceName: string;
+  stopPlaceRef: string;
+};
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class OJPLocation extends OJPBase {
+    private readonly sdk = SDK.create(
+      this.requestorRef,
+      {
+        url: this.apiUrl,
+        authToken: this.apiKey,
+      },
+      'en',
+    );
 
-    constructor(private http: HttpClient) {
-      super()
+    constructor() {
+      super();
     }
-  
-    private buildLocationRequest(loc_name: string): string {
-      const curTime = new Date().toISOString();
-      const noResults = 8;
-      const messageID = 'ab'; //TODO: handle messageIDs properly
-  
-      return `<?xml version="1.0" encoding="UTF-8"?>
-      <OJP xmlns="http://www.vdv.de/ojp" xmlns:siri="http://www.siri.org.uk/siri" version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <OJPRequest>
-              <siri:ServiceRequest>
-                  <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-                  <siri:RequestorRef>${this.requestorRef}</siri:RequestorRef>
-                  <siri:ServiceRequestContext><siri:Language>en</siri:Language></siri:ServiceRequestContext>
-                  <OJPLocationInformationRequest>
-                      <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-                      <siri:MessageIdentifier>${messageID}</siri:MessageIdentifier>
-                      <InitialInput>
-                          <Name>${loc_name}</Name>
-                      </InitialInput>
-                      <Restrictions>
-                          <Type>stop</Type>
-                          <NumberOfResults>${noResults}</NumberOfResults>
-                      </Restrictions>
-                  </OJPLocationInformationRequest>
-              </siri:ServiceRequest>
-          </OJPRequest>
-      </OJP>`
-    }
-  
-    getLocationInformation(loc_name: string) {
-      const xmlBody = this.buildLocationRequest(loc_name);
-  
-      const parser = new XMLParser();
-    
-      return this.http.post(this.apiUrl, xmlBody, { 
-        headers: this.getHeaders(), 
-        responseType: 'text' // because it returns XML not JSON
-      }).pipe(
-        map(xmlString => {
-          const fullObj = parser.parse(xmlString);
-          return fullObj?.OJP?.OJPResponse?.['siri:ServiceDelivery']?.OJPLocationInformationDelivery.PlaceResult;
-        })
+
+    getLocationInformation(loc_name: string, maxResults = 8) {
+      const request = LocationInformationRequest.initWithLocationName(loc_name, ['stop'], maxResults);
+
+      return from(request.fetchResponse(this.sdk)).pipe(
+        map((response) => {
+          if (!response.ok) {
+            throw response.error;
+          }
+
+          return (response.value.placeResult ?? [])
+            .map((placeResult) => {
+              const stop = placeResult.place?.stopPlace;
+
+              return {
+                stopPlaceName: this.readTextValue(stop?.stopPlaceName) ?? '',
+                stopPlaceRef: stop?.stopPlaceRef ?? '',
+              } satisfies LocationSuggestion;
+            })
+            .filter((item) => item.stopPlaceName.length > 0 && item.stopPlaceRef.length > 0)
+            .slice(0, maxResults);
+        }),
       );
+    }
+
+    private readTextValue(value: unknown): string | null {
+      if (typeof value === 'string') {
+        return value;
+      }
+
+      if (typeof value === 'object' && value !== null && 'text' in value) {
+        const textValue = (value as { text?: unknown }).text;
+
+        if (typeof textValue === 'string') {
+          return textValue;
+        }
+
+        if (typeof textValue === 'number') {
+          return String(textValue);
+        }
+      }
+
+      return null;
     }
 
 }

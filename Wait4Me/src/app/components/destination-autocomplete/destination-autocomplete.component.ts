@@ -1,6 +1,6 @@
 import { Component, input, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { OJPLocation } from '../../services/ojp-location';
+import { LocationSuggestion, OJPLocation } from '../../services/ojp-location';
 import { OJPTrip } from '../../services/ojp-trip';
 
 @Component({
@@ -18,7 +18,7 @@ export class DestinationAutocompleteComponent {
   // inject the trip service to update signals
   private tripService = inject(OJPTrip);
 
-  destinations: { StopPlaceName: string; StopPlaceRef: string }[] = [];
+  destinations: LocationSuggestion[] = [];
   showSuggestions = false;
 
   constructor(private ojpService: OJPLocation) {}
@@ -26,12 +26,7 @@ export class DestinationAutocompleteComponent {
   searchForLocation(loc_name: string) : void {
     this.ojpService.getLocationInformation(loc_name).subscribe({
       next: (response) => {
-        const list = response || [];
-        this.destinations = list.map((dest: any) => ({
-          StopPlaceName: dest.Place?.StopPlace?.StopPlaceName?.Text ?? '',
-          StopPlaceRef: dest.Place?.StopPlace?.StopPlaceRef ?? ''
-        }));
-        // console.log(this.destinations)
+        this.destinations = response || [];
       },
       error: (err) => {
         console.error('API Error:', err);
@@ -49,18 +44,18 @@ export class DestinationAutocompleteComponent {
     this.showSuggestions = true;
   }
 
-  selectDestination(destination: { StopPlaceName: string; StopPlaceRef: string }): void {
-    this.control().setValue(destination.StopPlaceName);
+  selectDestination(destination: LocationSuggestion): void {
+    this.control().setValue(destination.stopPlaceName);
     this.showSuggestions = false;
     if (this.placeholder() == "From") {
-      sessionStorage.setItem('origin_name', destination.StopPlaceName);
-      sessionStorage.setItem('origin_id', destination.StopPlaceRef);
-      this.tripService.originId.set(destination.StopPlaceRef);
+      sessionStorage.setItem('origin_name', destination.stopPlaceName);
+      sessionStorage.setItem('origin_id', destination.stopPlaceRef);
+      this.tripService.originId.set(destination.stopPlaceRef);
     }
     if (this.placeholder() == "To") {
-      sessionStorage.setItem('destination_name', destination.StopPlaceName);
-      sessionStorage.setItem('destination_id', destination.StopPlaceRef);
-      this.tripService.destinationId.set(destination.StopPlaceRef);
+      sessionStorage.setItem('destination_name', destination.stopPlaceName);
+      sessionStorage.setItem('destination_id', destination.stopPlaceRef);
+      this.tripService.destinationId.set(destination.stopPlaceRef);
     }
   }
 
