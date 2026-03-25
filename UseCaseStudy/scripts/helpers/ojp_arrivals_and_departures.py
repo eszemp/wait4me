@@ -64,8 +64,16 @@ class OJPStopDepArrRequest:
         payload = self._build_xml_payload(stop_ref, request_type, time, number_of_results)
         
         response = requests.post(self.endpoint, data=payload, headers=self.headers)
+
+        if response.status_code == 429:
+            print(f"\nAPI Error: {response.status_code} - {response.text}\nWaiting for 30 seconds")
+            time.sleep(30)
+            response = requests.post(self.endpoint, data=payload, headers=self.headers)
+
+            if response.status_code != 200:
+                raise Exception(f"API Error: {response.status_code} - {response.text}")
         
-        if response.status_code != 200:
+        elif response.status_code != 200:
             raise Exception(f"API Error: {response.status_code} - {response.text}")
             
         return self._parse_response(response.text, request_type)
@@ -122,11 +130,11 @@ class OJPStopDepArrRequest:
 # --- Example Usage ---
 if __name__ == "__main__":
     
-    # Example: Bern Hauptbahnhof (8507000)
+    # Example: Bern Hauptbahnhof (8507000), 8577442
     ojp = OJPStopDepArrRequest()
     
     try:
-        departures = ojp.fetch_departures_or_arrivals("8505084", time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
+        departures = ojp.fetch_departures_or_arrivals("8577442", time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
         print(f"{'Line':<10} | {'Destination':<25} | {'Departure'}")
         print("-" * 55)
         for dep in departures:
@@ -135,7 +143,7 @@ if __name__ == "__main__":
         print(f"Error: {e}")
 
     try:
-        arrivals = ojp.fetch_departures_or_arrivals("8505084", request_type="arrival",  time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
+        arrivals = ojp.fetch_departures_or_arrivals("8577442", request_type="arrival",  time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
         print(arrivals)
     except Exception as e:
         print(f"Error: {e}")

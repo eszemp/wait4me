@@ -24,8 +24,8 @@ def process_all_stops(stops):
 
     print("Processing entries...")
     for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
-        if index>20:
-            break
+        #if index>50:
+        #    break
         result = get_buffer_timeseries(row, OJPDepArr)
 
         if result:
@@ -95,6 +95,7 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
 
     if all_arrivals.empty or all_departures.empty:
         print(f"\n{row['Name']} ({row['Nummer']}) has no services")
+        time.sleep(1.3)
         return {'buffer_timeseries':'NO SERVICE'}
 
     combined = pd.merge(all_arrivals, all_departures, how='cross', suffixes=('_arr', '_dep'))
@@ -107,6 +108,7 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
 
     if len(valid_options)==0:
         print(f"\n{row['Name']} ({row['Nummer']}) has no transfers")
+        time.sleep(1.3)
         return {'buffer_timeseries':'NO TRANSFERS'}
 
     # find the 'First' departure for each arrival, sort by departure time first, then group by the unique arrival (time + line)
