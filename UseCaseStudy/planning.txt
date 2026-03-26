@@ -27,3 +27,22 @@ https://data.sbb.ch/explore/dataset/tarifverbundkarte/map/?location=9,47.35743,8
 
 MAYBE INCLUDE REAL ARRIVAL/DEPARTURE DELAY DATA FROM PREVIOUS DAY:
 https://data.sbb.ch/explore/dataset/ist-daten-sbb/information/?dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiQ09VTlQiLCJ5QXhpcyI6Imxpbmllbl9pZCIsInNjaWVudGlmaWNEaXNwbGF5Ijp0cnVlLCJjb2xvciI6InJhbmdlLUFjY2VudCJ9XSwieEF4aXMiOiJ2ZXJrZWhyc21pdHRlbF90ZXh0IiwibWF4cG9pbnRzIjoyMCwidGltZXNjYWxlIjoiIiwic29ydCI6IiIsInNlcmllc0JyZWFrZG93biI6ImFua3VuZnRzdmVyc3BhdHVuZyIsInN0YWNrZWQiOiJwZXJjZW50IiwiY29uZmlnIjp7ImRhdGFzZXQiOiJpc3QtZGF0ZW4tc2JiIiwib3B0aW9ucyI6e319fV0sInRpbWVzY2FsZSI6IiIsImRpc3BsYXlMZWdlbmQiOnRydWUsImFsaWduTW9udGgiOnRydWV9
+
+
+
+--- Concept ---
+
+For each station: 
+-	calculate buffer times* for all arrivals over the course of a typical weekday
+-	count occurrences of each buffer time (e.g. 20 x 0 min, 11 x 1 min, etc. ) 
+-	compute a weighted average
+-> daily average of the minimal buffer time when transferring at this station
+
+Network-wide analysis: 
+-	compute percentage of stations where transfer windows can accommodate a specific delay of an incoming service
+-	show the spatial patterns of station buffer times (-> application areas of Wait4Me)
+
+Visualization: 
+-	map of network with all stops, color coding of stops to reflect this average buffer time
+-	could be included in an about-the-project section of the web-application 
+-	static or with a filter where you can input a possible delay and see which stations would (not) be able to accommodate this delay
