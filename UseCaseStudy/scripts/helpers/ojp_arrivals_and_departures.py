@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
@@ -21,14 +22,14 @@ class OJPStopDepArrRequest:
         }
     
 
-    def _build_xml_payload(self, stop_ref, request_type, time, number_of_results):
+    def _build_xml_payload(self, stop_ref, request_type, timestamp, number_of_results):
         """Builds the OJP 2.0 StopEventRequest XML."""
         curTime = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        if time is None:
+        if timestamp is None:
             # Format: 2024-03-25T12:00:00Z
             time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         else: 
-            time = time.strftime('%Y-%m-%dT%H:%M:%SZ') 
+            timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') 
 
         assert request_type in ["both", "departure", "arrival"]
 
@@ -44,7 +45,7 @@ class OJPStopDepArrRequest:
                                             <PlaceRef>
                                                 <siri:StopPointRef>{stop_ref}</siri:StopPointRef>
                                             </PlaceRef>
-                                            <DepArrTime>{time}</DepArrTime>
+                                            <DepArrTime>{timestamp}</DepArrTime>
                                         </Location>
                                         <Params>
                                             <NumberOfResults>{number_of_results}</NumberOfResults>
@@ -59,9 +60,9 @@ class OJPStopDepArrRequest:
 
         return xml_template
 
-    def fetch_departures_or_arrivals(self, stop_ref, request_type="departure", time=None, number_of_results=50):
+    def fetch_departures_or_arrivals(self, stop_ref, request_type="departure", timestamp=None, number_of_results=50):
         """Sends the request and returns the parsed results."""
-        payload = self._build_xml_payload(stop_ref, request_type, time, number_of_results)
+        payload = self._build_xml_payload(stop_ref, request_type, timestamp, number_of_results)
         
         response = requests.post(self.endpoint, data=payload, headers=self.headers)
 
@@ -112,17 +113,17 @@ class OJPStopDepArrRequest:
             # Time info (ThisCall)
             # Look specifically for TimetableTime or EstimatedTime
             this_call = stop_event.find('.//ojp:ThisCall/ojp:CallAtStop', self.ns)
-            time = "N/A"
+            timestamp = "N/A"
             if this_call is not None:
                 if request_type=="departure":
-                    time = get_text(this_call, './/ojp:ServiceDeparture/ojp:TimetabledTime')
+                    timestamp = get_text(this_call, './/ojp:ServiceDeparture/ojp:TimetabledTime')
                 elif request_type=="arrival":
-                    time = get_text(this_call, './/ojp:ServiceArrival/ojp:TimetabledTime')
+                    timestamp = get_text(this_call, './/ojp:ServiceArrival/ojp:TimetabledTime')
             
             results.append({
                 "line": line,
                 "destination": destination,
-                "time": datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
+                "time": datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
             })
             
         return results
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     ojp = OJPStopDepArrRequest()
     
     try:
-        departures = ojp.fetch_departures_or_arrivals("8577442", time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
+        departures = ojp.fetch_departures_or_arrivals("8577442", timestamp=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
         print(f"{'Line':<10} | {'Destination':<25} | {'Departure'}")
         print("-" * 55)
         for dep in departures:
@@ -143,7 +144,7 @@ if __name__ == "__main__":
         print(f"Error: {e}")
 
     try:
-        arrivals = ojp.fetch_departures_or_arrivals("8577442", request_type="arrival",  time=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
+        arrivals = ojp.fetch_departures_or_arrivals("8577442", request_type="arrival",  timestamp=datetime(year=2026, month=4, day=15, hour=21, minute=0, second=0))
         print(arrivals)
     except Exception as e:
         print(f"Error: {e}")

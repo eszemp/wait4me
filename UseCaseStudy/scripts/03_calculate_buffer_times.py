@@ -56,7 +56,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
     results = []
 
     while current_time < end_time:
-        new_batch= OJPDepArr.fetch_departures_or_arrivals(stop_ref=StopPlaceRef, request_type=RequestType, time=current_time)
+        new_batch= OJPDepArr.fetch_departures_or_arrivals(stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time)
 
         if not new_batch:
             # print("No more results returned from API.")
