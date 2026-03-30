@@ -1,17 +1,42 @@
-<div class="status-row">
-  <section class="input-section" id="driver-id">
-    Line and course number
-  </section>
+<app-driver-status
+  [currentTime]="currentTime()"
+  [actualPosition]="actualPosition()"
+  [stationQuery]="stationQuery()"
+  [showSuggestions]="showSuggestions()"
+  [stationSuggestions]="stationSuggestions()"
+  [isResolvingPosition]="isResolvingPosition()"
+  [positionError]="positionError()"
+  [selectedDate]="selectedDate()"
+  [selectedTime]="selectedTime()"
+  (stationQueryChange)="onStationQueryChange($event)"
+  (stationInputFocus)="onStationInputFocus()"
+  (stationInputBlur)="closeSuggestions()"
+  (stationSelected)="selectSuggestedStation($event)"
+  (ownPositionClicked)="onOwnPositionClick()"
+  (selectedDateChange)="onSelectedDateChange($event)"
+  (selectedTimeChange)="onSelectedTimeChange($event)"
+/>
 
-  <section class="input-section" id="time">
-    {{ currentTime() | date: 'HH:mm:ss' }}
-  </section>
-</div>
+<app-driver-departures
+  [actualPosition]="selectedOriginName() || actualPosition()"
+  [departureLines]="departureLines()"
+  [isLoadingDepartures]="isLoadingDepartures()"
+  [hasSelectedOrigin]="selectedOriginName().trim().length > 0"
+  [loadError]="loadError()"
+  (departureSelected)="openConnectionDetails($event)"
+/>
 
-
-<section class="info-section">
+@if (departureLines().length === 0) {
+  <section class="info-section">
     <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
 
     <p class="info-text">
-        Enter the Line number and Course number. After that the route will be displayed. If a Wait4Me request is received, it will be indicated and the response can be selected.
-</section>
+      Enter the Line number and Course number. After that the route will be displayed. If a Wait4Me request is received, it will be indicated and the response can be selected.
+    </p>
+  </section>
+}
+
+
+<!-- @route{
+  
+} -->

@@ -1,34 +1,12 @@
-.status-row {
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
-  width: calc(100vw - 20px);
-  margin-top: -20px;
-}
-
-.input-section {
-  flex: 1 1 0;
-  background: #ffffff;
-  border: 2px solid var(--fir-green);
-  border-radius: 20px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 28px 54px 34px;
-}
-
-#driver-id {
+:host {
   display: block;
-  text-align: left;
-  font-size: 16px;
-  color: #565656;
+  width: 100%;
 }
 
-#time {
-  flex: 0 0 250px;
-  display: flex;
-  font-size: 40px;
-  font-weight: semi-bold;
-  color: #000000;
-  padding: 28px 20px 34px 45px;
+app-driver-status,
+app-driver-departures {
+  display: block;
+  width: 100%;
 }
 
 .info-section {

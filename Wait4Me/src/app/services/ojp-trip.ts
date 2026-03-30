@@ -1,19 +1,69 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { XMLParser } from 'fast-xml-parser';
+import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SDK, TripRequest } from 'ojp-sdk';
+import type {
+  InternationalTextSchema,
+  LegSchema,
+  TimedLegSchema,
+  TransferLegSchema,
+  TripResultSchema,
+} from 'ojp-shared-types';
 import { OJPBase } from './ojp-base';
+
+export type PassengerTimedLeg = {
+  kind: 'timed';
+  id: string;
+  duration: string;
+  boardTime: string;
+  alightTime: string;
+  boardStopName: string;
+  destinationText: string;
+  alightStopName: string;
+  boardPlatform: string | null;
+};
+
+export type PassengerTransferLeg = {
+  kind: 'transfer';
+  id: string;
+  duration: string;
+};
+
+export type PassengerLeg = PassengerTimedLeg | PassengerTransferLeg;
+
+export type PassengerTrip = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  duration: string;
+  transfers: number;
+  departurePlatform: string | null;
+  legs: PassengerLeg[];
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class OJPTrip extends OJPBase{
+  private readonly sdk = SDK.create(
+    this.requestorRef,
+    {
+      url: this.apiUrl,
+      authToken: this.apiKey,
+    },
+    'en',
+  );
 
   originId = signal<string | null>(null);
+  originName = signal<string | null>(null);
   destinationId = signal<string | null>(null);
-  tripResults = signal<any[]>([]);
+  destinationName = signal<string | null>(null);
+  departureDay = signal<string | null>(null);
+  departureTimeOfDay = signal<string | null>(null);
+  tripResults = signal<PassengerTrip[]>([]);
 
-  constructor(protected http: HttpClient) {
+
+  constructor() {
     super();
 
     // trigger search automatically
@@ -22,74 +72,169 @@ export class OJPTrip extends OJPBase{
       const to = this.destinationId();
 
       if (from && to) {
-        this.getTripInformation(from, to).subscribe(results => {
+        this.getTripInformation(from, to, this.departureDay() || "", this.departureTimeOfDay() || "").subscribe(results => {
           this.tripResults.set(results);
         });
+        this.originName.set(sessionStorage.getItem("origin_name"));
+        this.destinationName.set(sessionStorage.getItem("destination_name"));
       }
     });
   }
 
-  private buildTripRequest(origin_id: string, destination_id: string): string {
-    const curTime = new Date().toISOString();
-    const departure_time = curTime; //TODO: implement departure time properly
-    const noResults = 8;
-    const messageID = 'cd'; // TODO: handle message ids properly
-
-    return `<?xml version="1.0" encoding="UTF-8"?>
-      <OJP xmlns="http://www.vdv.de/ojp" version="2.0">
-        <OJPRequest>
-          <siri:ServiceRequest xmlns:siri="http://www.siri.org.uk/siri">
-            <siri:ServiceRequestContext>
-              <siri:Language>en</siri:Language>
-            </siri:ServiceRequestContext>
-            <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-            <siri:RequestorRef>${this.requestorRef}</siri:RequestorRef>
-            <OJPTripRequest>
-              <siri:RequestTimestamp>${curTime}</siri:RequestTimestamp>
-              <Origin>
-                <PlaceRef>
-                  <StopPlaceRef>${origin_id}</StopPlaceRef>
-                  <Name><Text>n/a</Text></Name>
-                </PlaceRef>
-                <DepArrTime>${departure_time}</DepArrTime>
-              </Origin>
-              <Destination>
-                <PlaceRef>
-                  <StopPlaceRef>${destination_id}</StopPlaceRef>
-                  <Name><Text>n/a</Text></Name>
-                </PlaceRef>
-              </Destination>
-              <Params>
-                <NumberOfResults>${noResults}</NumberOfResults>
-                <UseRealtimeData>explanatory</UseRealtimeData>
-                <IncludeAllRestrictedLines>true</IncludeAllRestrictedLines>
-                <IncludeTrackSections>true</IncludeTrackSections>
-                <IncludeLegProjection>false</IncludeLegProjection>
-                <IncludeIntermediateStops>true</IncludeIntermediateStops>
-              </Params>
-            </OJPTripRequest>
-          </siri:ServiceRequest>
-        </OJPRequest>
-      </OJP>`
-    
-      //TODO: change IncludeLegProjection to true, when can handle large data
+  reset() {
+    this.originId.set(null);
+    this.originName.set(null);
+    this.destinationId.set(null);
+    this.destinationName.set(null);
+    this.tripResults.set([]);
   }
 
-  getTripInformation(origin_id: string, destination_id: string) {
-    const xmlBody = this.buildTripRequest(origin_id, destination_id);
-    const parser = new XMLParser({removeNSPrefix: true});
-  
-    return this.http.post(this.apiUrl, xmlBody, { 
-      headers: this.getHeaders(), 
-      responseType: 'text'
-    }).pipe(
-      map(xmlString => {
-        const fullObj = parser.parse(xmlString);
-        const rawTripResults = fullObj?.OJP?.OJPResponse?.ServiceDelivery?.OJPTripDelivery?.TripResult;
-        const tripArray = Array.isArray(rawTripResults) ? rawTripResults : [rawTripResults];
-        return tripArray.map(item => item.Trip);
-      })
+  getTripInformation(origin_id: string, destination_id: string, day: string, time_of_day: string) {
+    // departure_time requires format:  "2026-03-23T07:49:30.519Z"
+    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
+    // time of day has format           "08:59" (HH:MM from time input)
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let date = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    if (day !== "") {
+      const dayParts = day.split('-');
+      year = parseInt(dayParts[0], 10);
+      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
+      date = parseInt(dayParts[2], 10);
+    }
+
+    if (time_of_day !== "") {
+      const timeParts = time_of_day.split(':');
+      hours = parseInt(timeParts[0], 10);
+      minutes = parseInt(timeParts[1], 10);
+    }
+
+    const departureDate = new Date(year, month, date, hours, minutes);
+    const request = TripRequest.initWithPlaceRefsOrCoords(origin_id, destination_id);
+
+    request.setDepartureDatetime(departureDate);
+    request.setNumberOfResults(8);
+    request.disableLinkProkection();
+
+    return from(request.fetchResponse(this.sdk)).pipe(
+      map((response) => {
+        if (!response.ok) {
+          throw response.error;
+        }
+
+        return (response.value.tripResult ?? [])
+          .map((result) => this.toPassengerTrip(result))
+          .filter((trip): trip is PassengerTrip => trip !== null);
+      }),
     );
+  }
+
+  private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
+    const trip = result.trip;
+    if (!trip) {
+      return null;
+    }
+
+    const legs = (trip.leg ?? [])
+      .map((leg, index) => this.toPassengerLeg(leg, index))
+      .filter((leg): leg is PassengerLeg => leg !== null);
+
+    const departurePlatform = legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed')?.boardPlatform ?? null;
+
+    return {
+      id: this.asString(trip.id) || this.asString(result.id),
+      startTime: this.asString(trip.startTime),
+      endTime: this.asString(trip.endTime),
+      duration: this.asString(trip.duration),
+      transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
+      departurePlatform,
+      legs,
+    };
+  }
+
+  private toPassengerLeg(leg: LegSchema, index: number): PassengerLeg | null {
+    if (leg.timedLeg) {
+      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, leg.duration, index);
+    }
+
+    if (leg.transferLeg) {
+      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, leg.duration, index);
+    }
+
+    return null;
+  }
+
+  private toPassengerTimedLeg(
+    timedLeg: TimedLegSchema,
+    legId: string | undefined,
+    legDuration: string | undefined,
+    index: number,
+  ): PassengerTimedLeg {
+    const board = timedLeg.legBoard;
+    const alight = timedLeg.legAlight;
+
+    return {
+      kind: 'timed',
+      id: this.asString(legId) || `timed-${index}`,
+      duration: this.asString(legDuration),
+      boardTime: this.asString(
+        board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime,
+      ),
+      alightTime: this.asString(
+        alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime,
+      ),
+      boardStopName: this.readTextValue(board?.stopPointName) ?? '',
+      destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
+      alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
+      boardPlatform: this.readTextValue(board?.estimatedQuay) ?? this.readTextValue(board?.plannedQuay),
+    };
+  }
+
+  private toPassengerTransferLeg(
+    transferLeg: TransferLegSchema,
+    legId: string | undefined,
+    legDuration: string | undefined,
+    index: number,
+  ): PassengerTransferLeg {
+    return {
+      kind: 'transfer',
+      id: this.asString(legId) || `transfer-${index}`,
+      duration: this.asString(legDuration),
+    };
+  }
+
+  private readTextValue(value: InternationalTextSchema | undefined): string | null {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      if (typeof value.text === 'string') {
+        return value.text;
+      }
+    }
+
+    return null;
+  }
+
+  private asString(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'bigint' || typeof value === 'boolean') {
+      return String(value);
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    return '';
   }
 
 }

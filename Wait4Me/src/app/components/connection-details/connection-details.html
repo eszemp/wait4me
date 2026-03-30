@@ -1,0 +1,79 @@
+@if (trip) {
+<section class="trip-overview">
+    <div class="trip-timeline">
+      <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
+        <span class="dot top"></span>
+        <div class="middle-dots-container" [style.--total]="trip.transfers">
+          @for (dot of [].constructor(trip.transfers); track $index) {
+            <span class="dot middle" [style.--i]="$index"></span>
+          }
+        </div>
+        <span class="dot bottom"></span>
+      </div>
+      <div class="time-column">
+        <span class="time-start">{{ trip.startTime | date: 'HH:mm' }}</span>
+        <span class="time-end">{{ trip.endTime | date: 'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="location-column">
+      <span class="location-start">{{ tripService.originName() }}</span>
+      <span class="location-end">{{ tripService.destinationName() }}</span>
+    </div>
+
+    <div class="meta-column">
+    <span class="platform"> {{ trip.departurePlatform }}</span>
+    <span class="duration">{{ trip.duration | duration }}</span>
+    </div>
+</section>
+
+<section class="content">
+  @for (leg of trip.legs; track leg.id; let last = $last) {
+    @if (leg.kind === 'timed') {
+            <div class="leg timed-leg">
+                <div class="trip-timeline"> 
+                    <div class="timeline-line">
+                        <span class="dot top"></span>
+                        <span class="dot bottom"></span>
+                    </div>
+                    <div class="time-column">
+            <span class="time-start">{{ leg.boardTime | date: 'HH:mm' }}</span>
+            <span class="time-end">{{ leg.alightTime | date: 'HH:mm' }}</span>
+                    </div>
+                </div>
+
+                <div class="location-column">
+        <span class="location-start">{{ leg.boardStopName }}  Dir. {{ leg.destinationText }}</span>
+        <span class="location-end">{{ leg.alightStopName }}</span>
+                </div>
+
+                <div class="meta-column">
+        <span class="platform"> {{ leg.boardPlatform }}</span>
+        <span class="duration">{{ leg.duration | duration }}</span>
+                </div>
+        </div>
+        }
+
+    @else if (leg.kind === 'transfer') {
+    <div class="leg transfer-leg" (click)="popup_walking_route(leg)">
+            <div class="time-column">
+                <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
+            </div>
+            
+            <div class="location-column">
+      {{ leg.duration | duration }} Walking Route
+            </div>
+            
+            <div class="info-col">
+              <img class="arrow-right-icon" src="/return-back-button-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </div>
+        </div>
+        }
+        @else {
+            <p>Error</p>
+        }
+    }
+</section>
+
+<button type="button" class="w4m-button">Wait4Me</button>
+}

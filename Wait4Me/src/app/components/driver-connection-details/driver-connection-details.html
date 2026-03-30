@@ -1,0 +1,44 @@
+<section class="driver-connection-details-page">
+  <button type="button" class="back-button" (click)="backToDriver()" aria-label="Back to driver departures">
+    <img src="/return-back-button-svgrepo-com.svg" alt="" aria-hidden="true" />
+  </button>
+
+  <section class="status-row">
+    <article class="input-section trip-summary">
+      <div class="line-course">
+        <span class="line">{{ lineLabel }}</span>
+        <span class="course">{{ courseLabel }}</span>
+      </div>
+      <div class="destination">{{ destinationLabel }}</div>
+    </article>
+
+    <article class="input-section" id="time">
+      <div class="clock-frame">
+        <span class="clock-text">{{ currentTime() | date: 'HH:mm:ss' }}</span>
+      </div>
+    </article>
+  </section>
+
+  @if (departure) {
+    <section class="stops-card">
+      @for (stop of visibleStops; track stop.id; let isLast = $last; let isFirst = $first) {
+        <div class="stop-row" [class.last]="isLast" [class.first]="isFirst">
+          <div class="timeline-column">
+            <span class="dot"></span>
+            @if (!isLast) {
+              <span class="line-solid"></span>
+            } @else {
+              <span class="line-dashed"></span>
+            }
+          </div>
+
+          <span class="time">{{ stop.timeIso ? (stop.timeIso | date: 'HH:mm') : '--:--' }}</span>
+          <span class="label">{{ stop.label }}</span>
+          <span class="request">No request</span>
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="empty-state">No connection selected.</section>
+  }
+</section>

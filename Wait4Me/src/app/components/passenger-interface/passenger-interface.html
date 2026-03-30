@@ -1,12 +1,34 @@
 <app-route-form [tripForm]="tripForm" />
 
-@for (trip of tripService.tripResults() ?? []; track trip.Id) {
-    <section class="routing-results">
-      <p>Trip Result: Start from Place a at {{trip.StartTime}}, 
-        arrive in Place b at {{trip.EndTime}} 
-        with total duration {{trip.Duration}} and {{trip.Transfers}} transfer(s)</p>
-    </section>
-    
+<section class="content">
+@for (trip of tripService.tripResults(); track trip.id) {
+    <section class="trip-card" (click)="selectConnection(trip)">
+    <div class="trip-timeline">
+      <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
+        <span class="dot top"></span>
+        <div class="middle-dots-container" [style.--total]="trip.transfers">
+          @for (dot of [].constructor(trip.transfers); track $index) {
+            <span class="dot middle" [style.--i]="$index"></span>
+          }
+        </div>
+        <span class="dot bottom"></span>
+      </div>
+      <div class="time-column">
+        <span class="time-start">{{ trip.startTime | date: 'HH:mm' }}</span>
+        <span class="time-end">{{ trip.endTime | date: 'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="location-column">
+      <span class="location-start">{{ tripService.originName() }}</span>
+      <span class="location-end">{{ tripService.destinationName() }}</span>
+    </div>
+
+    <div class="meta-column">
+      <span class="platform"> {{ trip.departurePlatform }}</span>
+      <span class="duration">{{ trip.duration | duration }}</span>
+    </div>
+  </section>
 } 
 @empty {
     <section class="info-section">
@@ -18,6 +40,7 @@
       </p>
     </section>
 }
+</section>
 
 
 <button type="button" class="w4m-button">Wait4Me</button>
