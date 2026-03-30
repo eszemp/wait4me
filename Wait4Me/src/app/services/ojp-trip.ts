@@ -9,37 +9,8 @@ import type {
   TransferLegSchema,
   TripResultSchema,
 } from 'ojp-shared-types';
+import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTrip';
 import { OJPBase } from './ojp-base';
-
-export type PassengerTimedLeg = {
-  kind: 'timed';
-  id: string;
-  duration: string;
-  boardTime: string;
-  alightTime: string;
-  boardStopName: string;
-  destinationText: string;
-  alightStopName: string;
-  boardPlatform: string | null;
-};
-
-export type PassengerTransferLeg = {
-  kind: 'transfer';
-  id: string;
-  duration: string;
-};
-
-export type PassengerLeg = PassengerTimedLeg | PassengerTransferLeg;
-
-export type PassengerTrip = {
-  id: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
-  transfers: number;
-  departurePlatform: string | null;
-  legs: PassengerLeg[];
-};
 
 @Injectable({
   providedIn: 'root',
@@ -176,22 +147,44 @@ export class OJPTrip extends OJPBase{
   ): PassengerTimedLeg {
     const board = timedLeg.legBoard;
     const alight = timedLeg.legAlight;
+    const boardDelay = this.calculateDelay(board?.serviceDeparture?.timetabledTime, board?.serviceDeparture?.estimatedTime);
+    const alightDelay = this.calculateDelay(alight?.serviceArrival?.timetabledTime, alight?.serviceArrival?.estimatedTime);
 
     return {
       kind: 'timed',
       id: this.asString(legId) || `timed-${index}`,
       duration: this.asString(legDuration),
-      boardTime: this.asString(
-        board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime,
+      boardTimeTimetable: this.asString(
+        board?.serviceDeparture?.timetabledTime,
       ),
-      alightTime: this.asString(
-        alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime,
+      boardTimeEstimated: this.asString(
+        board?.serviceDeparture?.estimatedTime,
       ),
+      boardDelay: boardDelay,
+      alightTimeTimetable: this.asString(
+        alight?.serviceArrival?.timetabledTime,
+      ),
+      alightTimeEstimated: this.asString(
+        alight?.serviceArrival?.estimatedTime,
+      ),
+      alightDelay: alightDelay,
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
       boardPlatform: this.readTextValue(board?.estimatedQuay) ?? this.readTextValue(board?.plannedQuay),
     };
+  }
+
+  private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): number {
+    // times have format: 2026-03-30T10:11:18Z
+    const scheduled = new Date(this.asString(timetabledTime)).getTime();
+    const estimated = new Date(this.asString(estimatedTime)).getTime();
+
+    const diffInMs = estimated - scheduled; // in ms
+    const delayInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+    return delayInMinutes;
+  
   }
 
   private toPassengerTransferLeg(
