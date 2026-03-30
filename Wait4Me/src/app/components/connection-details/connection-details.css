@@ -15,7 +15,7 @@
 
 .leg {
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 15px;
   background: white;
