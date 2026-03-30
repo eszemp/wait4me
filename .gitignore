@@ -1,1 +1,3 @@
 .vscode
+UseCaseStudy/scripts/helpers/__pycache__/*.pyc
+Wait4Me/src/environments/environments.ts
