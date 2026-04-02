@@ -1,18 +1,21 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { DurationPipe } from '../../shared/pipes/duration.pipes';
 import { OJPTrip } from '../../services/ojp-trip';
 import { PassengerTransferLeg, PassengerTrip } from '../../shared/types/PassengerTrip'
+import { Duration } from '../../shared/models/duration';
 
 @Component({
   selector: 'app-connection-details',
-  imports: [CommonModule, DurationPipe],
+  imports: [CommonModule],
   templateUrl: './connection-details.html',
   styleUrls: ['../../app.css','../passenger-interface/passenger-interface.css', './connection-details.css'],
 })
 export class ConnectionDetails {
+
   trip: PassengerTrip | null = null;
+
+  public durationZero = Duration.initFromTotalMinutes(0);
 
   public tripService = inject(OJPTrip);
 

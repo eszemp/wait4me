@@ -11,6 +11,7 @@ import type {
 } from 'ojp-shared-types';
 import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTrip';
 import { OJPBase } from './ojp-base';
+import { Duration } from '../shared/models/duration';
 
 @Injectable({
   providedIn: 'root',
@@ -105,6 +106,7 @@ export class OJPTrip extends OJPBase{
   }
 
   private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
+
     const trip = result.trip;
     if (!trip) {
       return null;
@@ -116,11 +118,32 @@ export class OJPTrip extends OJPBase{
 
     const departurePlatform = legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed')?.boardPlatform ?? null;
 
+    let initialWalkTime = Duration.initFromTotalMinutes(0);
+    let finalWalkTime = Duration.initFromTotalMinutes(0);
+
+    if (legs.at(0)?.kind=='transfer') {
+      initialWalkTime = legs.at(0)?.duration || Duration.initFromTotalMinutes(0);
+    }
+
+    if (legs.at(-1)?.kind=='transfer') {
+      finalWalkTime = legs.at(-1)?.duration || Duration.initFromTotalMinutes(0);
+    }
+
+    // filter out transfers
+    const timedLegs = legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+
+    const firstTimedLeg = timedLegs[0];
+    const lastTimedLeg = timedLegs[timedLegs.length - 1];
+
     return {
       id: this.asString(trip.id) || this.asString(result.id),
-      startTime: this.asString(trip.startTime),
-      endTime: this.asString(trip.endTime),
-      duration: this.asString(trip.duration),
+      startTime: new Date(this.asString(trip.startTime)),
+      scheduledStart: initialWalkTime.subtractFromDate(firstTimedLeg?.boardTimeTimetable),
+      startDelay: firstTimedLeg.boardDelay,
+      endTime: new Date(this.asString(trip.endTime)),
+      scheduledEnd: finalWalkTime.addToDate(lastTimedLeg?.alightTimeTimetable),
+      endDelay: lastTimedLeg.alightDelay,
+      duration: Duration.initWithDurationSchema(trip.duration),
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
       departurePlatform,
       legs,
@@ -128,12 +151,13 @@ export class OJPTrip extends OJPBase{
   }
 
   private toPassengerLeg(leg: LegSchema, index: number): PassengerLeg | null {
+    const legDuration = Duration.initWithDurationSchema(leg.duration);
     if (leg.timedLeg) {
-      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, leg.duration, index);
+      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, legDuration, index);
     }
 
     if (leg.transferLeg) {
-      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, leg.duration, index);
+      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, legDuration, index);
     }
 
     return null;
@@ -141,8 +165,8 @@ export class OJPTrip extends OJPBase{
 
   private toPassengerTimedLeg(
     timedLeg: TimedLegSchema,
-    legId: string | undefined,
-    legDuration: string | undefined,
+    legId: string,
+    legDuration: Duration,
     index: number,
   ): PassengerTimedLeg {
     const board = timedLeg.legBoard;
@@ -153,20 +177,12 @@ export class OJPTrip extends OJPBase{
     return {
       kind: 'timed',
       id: this.asString(legId) || `timed-${index}`,
-      duration: this.asString(legDuration),
-      boardTimeTimetable: this.asString(
-        board?.serviceDeparture?.timetabledTime,
-      ),
-      boardTimeEstimated: this.asString(
-        board?.serviceDeparture?.estimatedTime,
-      ),
+      duration: legDuration,
+      boardTimeTimetable: new Date(this.asString(board?.serviceDeparture?.timetabledTime)),
+      boardTimeEstimated: new Date(this.asString(board?.serviceDeparture?.estimatedTime)),
       boardDelay: boardDelay,
-      alightTimeTimetable: this.asString(
-        alight?.serviceArrival?.timetabledTime,
-      ),
-      alightTimeEstimated: this.asString(
-        alight?.serviceArrival?.estimatedTime,
-      ),
+      alightTimeTimetable: new Date(this.asString(alight?.serviceArrival?.timetabledTime)),
+      alightTimeEstimated: new Date(this.asString(alight?.serviceArrival?.estimatedTime)),
       alightDelay: alightDelay,
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
@@ -175,7 +191,7 @@ export class OJPTrip extends OJPBase{
     };
   }
 
-  private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): number {
+  private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): Duration {
     // times have format: 2026-03-30T10:11:18Z
     const scheduled = new Date(this.asString(timetabledTime)).getTime();
     const estimated = new Date(this.asString(estimatedTime)).getTime();
@@ -183,20 +199,20 @@ export class OJPTrip extends OJPBase{
     const diffInMs = estimated - scheduled; // in ms
     const delayInMinutes = Math.floor(diffInMs / (1000 * 60));
 
-    return delayInMinutes;
+    return Duration.initFromTotalMinutes(delayInMinutes);
   
   }
 
   private toPassengerTransferLeg(
     transferLeg: TransferLegSchema,
-    legId: string | undefined,
-    legDuration: string | undefined,
+    legId: string,
+    legDuration: Duration,
     index: number,
   ): PassengerTransferLeg {
     return {
       kind: 'transfer',
       id: this.asString(legId) || `transfer-${index}`,
-      duration: this.asString(legDuration),
+      duration: legDuration,
     };
   }
 

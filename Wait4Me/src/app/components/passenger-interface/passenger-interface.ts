@@ -5,11 +5,11 @@ import { Router } from '@angular/router';
 import { RouteFormComponent } from '../route-form/route-form.component';
 import { OJPTrip} from '../../services/ojp-trip';
 import { PassengerTrip } from '../../shared/types/PassengerTrip';
-import { DurationPipe } from '../../shared/pipes/duration.pipes';
+import { Duration } from '../../shared/models/duration';
 
 @Component({
   selector: 'app-passenger-interface',
-  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent, DurationPipe],
+  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent],
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css','./passenger-interface.css'],
 })
@@ -18,6 +18,7 @@ export class PassengerInterface {
 
   public tripService = inject(OJPTrip);
   private router = inject(Router);
+  public durationZero = Duration.initFromTotalMinutes(0);
 
   constructor() {
     // clear saved values if component is newly loaded

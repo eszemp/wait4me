@@ -23,7 +23,7 @@
 
     <div class="meta-column">
       <span class="platform"> {{ trip.departurePlatform }}</span>
-      <span class="duration">{{ trip.duration | duration }}</span>
+      <span class="duration">{{ trip.duration.format() }}</span>
     </div>
 </section>
 
@@ -39,14 +39,14 @@
               <div class="time-column">
                   <span class="time-start"> 
                     {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
-                    <span *ngIf="leg.boardDelay > 0" class="time-delay">
-                      +{{ leg.boardDelay }}
+                    <span *ngIf="leg.boardDelay > durationZero" class="time-delay">
+                      +{{ leg.boardDelay.format() }}
                     </span>
                   </span>
                   <span class="time-end"> 
                     {{ leg.alightTimeTimetable | date: 'HH:mm' }}
-                    <span *ngIf="leg.alightDelay > 0" class="time-delay">
-                      +{{ leg.alightDelay }}
+                    <span *ngIf="leg.alightDelay > durationZero" class="time-delay">
+                      +{{ leg.alightDelay.format() }}
                     </span>
                   </span>
               </div>
@@ -59,7 +59,7 @@
 
           <div class="meta-column">
               <span class="platform"> {{ leg.boardPlatform }}</span>
-              <span class="duration">{{ leg.duration | duration }}</span>
+              <span class="duration">{{ leg.duration.format() }}</span>
           </div>
       </div>
     }
@@ -71,7 +71,7 @@
           </div>
           
           <div class="location-column">
-              {{ leg.duration | duration }} Walking Route
+              {{ leg.duration.format() }} Walking Route
           </div>
           
           <div class="info-col">

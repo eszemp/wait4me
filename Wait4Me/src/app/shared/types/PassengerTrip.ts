@@ -1,13 +1,15 @@
+import { Duration } from '../models/duration';
+
 export type PassengerTimedLeg = {
   kind: 'timed';
   id: string;
-  duration: string;
-  boardTimeTimetable: string;
-  boardTimeEstimated: string;
-  boardDelay: number;
-  alightTimeTimetable: string;
-  alightTimeEstimated: string;
-  alightDelay: number;
+  duration: Duration;
+  boardTimeTimetable: Date;
+  boardTimeEstimated: Date;
+  boardDelay: Duration;
+  alightTimeTimetable: Date;
+  alightTimeEstimated: Date;
+  alightDelay: Duration;
   boardStopName: string;
   destinationText: string;
   alightStopName: string;
@@ -17,16 +19,20 @@ export type PassengerTimedLeg = {
 export type PassengerTransferLeg = {
   kind: 'transfer';
   id: string;
-  duration: string;
+  duration: Duration;
 };
 
 export type PassengerLeg = PassengerTimedLeg | PassengerTransferLeg;
 
 export type PassengerTrip = {
   id: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
+  startTime: Date;
+  scheduledStart: Date;
+  startDelay: Duration;
+  endTime: Date;
+  scheduledEnd: Date;
+  endDelay: Duration;
+  duration: Duration;
   transfers: number;
   departurePlatform: string | null;
   legs: PassengerLeg[];

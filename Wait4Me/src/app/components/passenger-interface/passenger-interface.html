@@ -14,8 +14,18 @@
         <span class="dot bottom"></span>
       </div>
       <div class="time-column">
-        <span class="time-start">{{ trip.startTime | date: 'HH:mm' }}</span>
-        <span class="time-end">{{ trip.endTime | date: 'HH:mm' }}</span>
+        <span class="time-start"> 
+          {{ trip.scheduledStart| date: 'HH:mm' }} 
+          <span *ngIf="trip.startDelay > durationZero" class="time-delay">
+            + {{ trip.startDelay }}
+          </span>
+        </span>
+        <span class="time-end"> 
+          {{ trip.scheduledEnd | date: 'HH:mm' }}
+          <span *ngIf="trip.endDelay > durationZero" class="time-delay">
+            + {{ trip.endDelay }}
+          </span>
+        </span>
       </div>
     </div>
 
@@ -26,7 +36,7 @@
 
     <div class="meta-column">
       <span class="platform"> {{ trip.departurePlatform }}</span>
-      <span class="duration">{{ trip.duration | duration }}</span>
+      <span class="duration">{{ trip.duration.format() }}</span>
     </div>
   </section>
 } 
