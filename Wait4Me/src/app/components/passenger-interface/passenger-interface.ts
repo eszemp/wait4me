@@ -18,7 +18,6 @@ export class PassengerInterface {
 
   public tripService = inject(OJPTrip);
   private router = inject(Router);
-  public durationZero = Duration.initFromTotalMinutes(0);
 
   constructor() {
     // clear saved values if component is newly loaded

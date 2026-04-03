@@ -15,8 +15,6 @@ export class ConnectionDetails {
 
   trip: PassengerTrip | null = null;
 
-  public durationZero = Duration.initFromTotalMinutes(0);
-
   public tripService = inject(OJPTrip);
 
   constructor(private router: Router) {

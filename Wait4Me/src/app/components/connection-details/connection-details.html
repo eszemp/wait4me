@@ -11,8 +11,18 @@
         <span class="dot bottom"></span>
       </div>
       <div class="time-column">
-        <span class="time-start">{{ trip.startTime | date: 'HH:mm' }}</span>
-        <span class="time-end">{{ trip.endTime | date: 'HH:mm' }}</span>
+        <span class="time-start"> 
+          {{ trip.scheduledStart| date: 'HH:mm' }}
+          <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
+            + {{ trip.startDelay.format() }}
+          </span>
+        </span>
+        <span class="time-end"> 
+          {{ trip.scheduledEnd | date: 'HH:mm' }}
+          <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
+            + {{ trip.endDelay.format() }}
+          </span>
+        </span>
       </div>
     </div>
 
@@ -39,13 +49,13 @@
               <div class="time-column">
                   <span class="time-start"> 
                     {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
-                    <span *ngIf="leg.boardDelay > durationZero" class="time-delay">
+                    <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
                       +{{ leg.boardDelay.format() }}
                     </span>
                   </span>
                   <span class="time-end"> 
                     {{ leg.alightTimeTimetable | date: 'HH:mm' }}
-                    <span *ngIf="leg.alightDelay > durationZero" class="time-delay">
+                    <span *ngIf="leg.alightDelay.isBiggerThanZero()" class="time-delay">
                       +{{ leg.alightDelay.format() }}
                     </span>
                   </span>

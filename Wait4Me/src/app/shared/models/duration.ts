@@ -84,4 +84,8 @@ export class Duration {
     newDate.setMinutes(newDate.getMinutes() - this.totalMinutes);
     return newDate;
   }
+
+  public isBiggerThanZero(): Boolean {
+    return (this.totalMinutes > 0);
+  }
 }
