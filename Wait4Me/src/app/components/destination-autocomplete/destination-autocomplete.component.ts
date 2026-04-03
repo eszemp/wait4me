@@ -51,11 +51,13 @@ export class DestinationAutocompleteComponent {
       sessionStorage.setItem('origin_name', destination.stopPlaceName);
       sessionStorage.setItem('origin_id', destination.stopPlaceRef);
       this.tripService.originId.set(destination.stopPlaceRef);
+      this.tripService.originName.set(destination.stopPlaceName);
     }
     if (this.placeholder() == "To") {
       sessionStorage.setItem('destination_name', destination.stopPlaceName);
       sessionStorage.setItem('destination_id', destination.stopPlaceRef);
       this.tripService.destinationId.set(destination.stopPlaceRef);
+      this.tripService.destinationName.set(destination.stopPlaceName);
     }
   }
 

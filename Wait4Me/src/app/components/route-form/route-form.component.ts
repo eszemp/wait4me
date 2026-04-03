@@ -1,6 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DestinationAutocompleteComponent } from '../destination-autocomplete/destination-autocomplete.component';
+import { OJPTrip } from '../../services/ojp-trip';
 
 type TripForm = FormGroup<{
   from: FormControl<string>;
@@ -17,4 +18,21 @@ type TripForm = FormGroup<{
 })
 export class RouteFormComponent {
   tripForm = input.required<TripForm>();
+
+  // inject the trip service to update signals
+  private tripService = inject(OJPTrip);
+
+  public onDateTimeChanged() : void {
+    const { date, time } = this.tripForm().value;
+
+    if (date) {
+      this.tripService.departureDay.set(date);
+      sessionStorage.setItem('departure_day', date);
+    }
+    if (time) {
+      this.tripService.departureTimeOfDay.set(time);
+      sessionStorage.setItem('departure_time_of_day', time);
+    }
+  }
+  
 }

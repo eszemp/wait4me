@@ -45,6 +45,14 @@ export class PassengerInterface {
     // Set initial values
     this.tripService.departureDay.set(this.tripForm.value.date || null);
     this.tripService.departureTimeOfDay.set(this.tripForm.value.time || null);
+
+    // fill out form fields with saved values (if they exist)
+    if (sessionStorage.getItem("departure_day") && sessionStorage.getItem("departure_time_of_day")){
+      this.tripForm.patchValue({
+        date: sessionStorage.getItem("departure_day") ?? '',
+        time: sessionStorage.getItem("departure_time_of_day") ?? ''
+      });
+    }
   }
 
   readonly tripForm = new FormGroup({
