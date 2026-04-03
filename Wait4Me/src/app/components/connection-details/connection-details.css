@@ -8,9 +8,10 @@
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 28px 54px 34px;
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   font-family: sans-serif;
+  gap: 15px;
 }
 
 .leg {
@@ -40,6 +41,6 @@
 .walking-icon {
   height: 30px;
   width: 30px;
-  transform: translateY(-5px);
+  transform: translateY(-20px);
 }
 

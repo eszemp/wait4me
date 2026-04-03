@@ -60,6 +60,10 @@ export class Duration {
   }
 
   public format(): string {
+    return String(this.totalMinutes);
+  }
+
+  public formatWithMinH(): string {
     const durationParts: string[] = [];
   
     if (this.hours > 0) {

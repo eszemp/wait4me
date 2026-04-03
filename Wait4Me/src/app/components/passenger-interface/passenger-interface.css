@@ -43,7 +43,7 @@
 
 .trip-card {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 20px 1fr auto;
   align-items: center;
   gap: 15px;
   background: white;
@@ -60,6 +60,7 @@
   display: flex;
   gap: 20px;
   align-items: stretch;
+  height: 60px;
 }
 
 .timeline-line {
@@ -103,24 +104,26 @@
 
 
 /* Text Styling */
-.time-column, .location-column {
+.time-and-location-column {
   display: flex;
   color: black;
   flex-direction: column;
   justify-content: space-between;
   height: 60px;
   flex-shrink: 0;
+  gap: 15px;
 }
 
-.time-column {
-  margin-right: 5px;
-}
 
 .time-start, .time-end, .location-start, .location-end {
   font-size: 1.1rem;
   font-weight: 500;
   white-space: nowrap; 
-  /*min-width: max-content;*/
+}
+
+.time-start, .time-end {
+  margin-right: 20px;
+  display: inline-block;
 }
 
 .time-delay {

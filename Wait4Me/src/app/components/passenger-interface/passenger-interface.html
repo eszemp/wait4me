@@ -13,25 +13,27 @@
         </div>
         <span class="dot bottom"></span>
       </div>
-      <div class="time-column">
+    </div>
+
+    <div class="time-and-location-column">
+      <div>
         <span class="time-start"> 
           {{ trip.scheduledStart| date: 'HH:mm' }}
           <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
             + {{ trip.startDelay.format() }}
           </span>
         </span>
+        <span class="location-start">{{ tripService.originName() }}</span>
+      </div>
+      <div>
         <span class="time-end"> 
           {{ trip.scheduledEnd | date: 'HH:mm' }}
           <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
             + {{ trip.endDelay.format() }}
           </span>
         </span>
+        <span class="location-end">{{ tripService.destinationName() }}</span>
       </div>
-    </div>
-
-    <div class="location-column">
-      <span class="location-start">{{ tripService.originName() }}</span>
-      <span class="location-end">{{ tripService.destinationName() }}</span>
     </div>
 
     <div class="meta-column">

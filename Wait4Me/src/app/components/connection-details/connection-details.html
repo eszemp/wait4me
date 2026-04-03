@@ -10,25 +10,27 @@
         </div>
         <span class="dot bottom"></span>
       </div>
-      <div class="time-column">
-        <span class="time-start"> 
-          {{ trip.scheduledStart| date: 'HH:mm' }}
-          <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
-            + {{ trip.startDelay.format() }}
-          </span>
-        </span>
-        <span class="time-end"> 
-          {{ trip.scheduledEnd | date: 'HH:mm' }}
-          <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
-            + {{ trip.endDelay.format() }}
-          </span>
-        </span>
-      </div>
     </div>
 
-    <div class="location-column">
-      <span class="location-start">{{ tripService.originName() }}</span>
-      <span class="location-end">{{ tripService.destinationName() }}</span>
+    <div class="time-and-location-column">
+      <div>
+          <span class="time-start"> 
+            {{ trip.scheduledStart| date: 'HH:mm' }}
+            <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
+              + {{ trip.startDelay.format() }}
+            </span>
+          </span>
+          <span class="location-start">{{ tripService.originName() }}</span>
+      </div>
+      <div>
+          <span class="time-end"> 
+            {{ trip.scheduledEnd | date: 'HH:mm' }}
+            <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
+              + {{ trip.endDelay.format() }}
+            </span>
+          </span>
+          <span class="location-end">{{ tripService.destinationName() }}</span>
+      </div>
     </div>
 
     <div class="meta-column">
@@ -46,25 +48,27 @@
                   <span class="dot top"></span>
                   <span class="dot bottom"></span>
               </div>
-              <div class="time-column">
-                  <span class="time-start"> 
-                    {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
-                    <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
-                      +{{ leg.boardDelay.format() }}
-                    </span>
+          </div>
+
+          <div class="time-and-location-column">
+              <div>
+                <span class="time-start"> 
+                  {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
+                  <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
+                    +{{ leg.boardDelay.format() }}
                   </span>
-                  <span class="time-end"> 
+                </span>
+                <span class="location-start">{{ leg.boardStopName }}  Dir. {{ leg.destinationText }}</span>
+              </div>
+              <div>
+                <span class="time-end"> 
                     {{ leg.alightTimeTimetable | date: 'HH:mm' }}
                     <span *ngIf="leg.alightDelay.isBiggerThanZero()" class="time-delay">
                       +{{ leg.alightDelay.format() }}
                     </span>
-                  </span>
-              </div>
-          </div>
-
-          <div class="location-column">
-              <span class="location-start">{{ leg.boardStopName }}  Dir. {{ leg.destinationText }}</span>
-              <span class="location-end">{{ leg.alightStopName }}</span>
+                </span>
+                <span class="location-end">{{ leg.alightStopName }}</span>
+              </div>        
           </div>
 
           <div class="meta-column">
@@ -80,8 +84,8 @@
               <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
           </div>
           
-          <div class="location-column">
-              {{ leg.duration.format() }} Walking Route
+          <div class="time-and-location-column">
+              {{ leg.duration.formatWithMinH() }} Walking Route
           </div>
           
           <div class="info-col">
