@@ -44,3 +44,19 @@
   transform: translateY(-20px);
 }
 
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  z-index: 10;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.back-button img {
+  width: 36px;
+  height: 36px;
+}
+

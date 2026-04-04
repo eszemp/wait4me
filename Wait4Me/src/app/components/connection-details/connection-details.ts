@@ -26,4 +26,8 @@ export class ConnectionDetails {
     console.log("see detailed walking route for transfer");
     return;
   }
+
+  backToPassenger(): void {
+    this.router.navigate(['/passenger']);
+  }
 }
