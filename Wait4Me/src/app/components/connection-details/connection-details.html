@@ -35,7 +35,7 @@
 
     <div class="meta-column">
       <span class="platform"> {{ trip.departurePlatform }}</span>
-      <span class="duration">{{ trip.duration.format() }}</span>
+      <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
     </div>
 </section>
 
@@ -73,7 +73,7 @@
 
           <div class="meta-column">
               <span class="platform"> {{ leg.boardPlatform }}</span>
-              <span class="duration">{{ leg.duration.format() }}</span>
+              <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
           </div>
       </div>
     }

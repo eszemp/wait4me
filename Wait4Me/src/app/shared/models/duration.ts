@@ -67,10 +67,10 @@ export class Duration {
     const durationParts: string[] = [];
   
     if (this.hours > 0) {
-      durationParts.push(this.hours + 'h ');
+      durationParts.push(this.hours + ' h ');
     }
 
-    durationParts.push(this.minutes + 'min');
+    durationParts.push(this.minutes + ' min');
 
     const durationS = durationParts.join('');
 
