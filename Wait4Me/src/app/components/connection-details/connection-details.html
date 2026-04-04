@@ -40,6 +40,7 @@
     <div class="meta-column">
       <span class="platform"> {{ trip.departurePlatform }}</span>
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
+      <span class="date">{{ trip.startTime | date: 'dd.MM.yyyy' }}</span>
     </div>
 </section>
 
@@ -89,7 +90,7 @@
           </div>
           
           <div class="time-and-location-column">
-              {{ leg.duration.formatWithMinH() }} Walking Route
+              {{ leg.duration.formatWithMinH() }} Walk
           </div>
           
           <div class="info-col">

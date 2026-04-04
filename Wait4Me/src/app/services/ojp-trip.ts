@@ -99,8 +99,6 @@ export class OJPTrip extends OJPBase{
       .map((leg, index) => this.toPassengerLeg(leg, index))
       .filter((leg): leg is PassengerLeg => leg !== null);
 
-    const departurePlatform = legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed')?.boardPlatform ?? null;
-
     let initialWalkTime = Duration.initFromTotalMinutes(0);
     let finalWalkTime = Duration.initFromTotalMinutes(0);
 
@@ -128,7 +126,7 @@ export class OJPTrip extends OJPBase{
       endDelay: lastTimedLeg.alightDelay,
       duration: Duration.initWithDurationSchema(trip.duration),
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
-      departurePlatform,
+      departurePlatform: firstTimedLeg.boardPlatform,
       legs,
     };
   }
@@ -170,7 +168,7 @@ export class OJPTrip extends OJPBase{
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
-      boardPlatform: this.readTextValue(board?.estimatedQuay) ?? this.readTextValue(board?.plannedQuay),
+      boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
     };
   }
 
@@ -199,7 +197,25 @@ export class OJPTrip extends OJPBase{
     };
   }
 
+  private getQuayText(value: InternationalTextSchema | undefined): string | null {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      if (typeof value.text === 'string') {
+        return 'Stop ' + value.text;
+      }
+      if (typeof value.text === 'number') {
+        return 'Pl. ' + String(value.text);
+      }
+    }
+
+    return '';
+  }
+
   private readTextValue(value: InternationalTextSchema | undefined): string | null {
+    
     if (typeof value === 'string') {
       return value;
     }
