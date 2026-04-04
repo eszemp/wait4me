@@ -9,7 +9,7 @@ import type {
   TransferLegSchema,
   TripResultSchema,
 } from 'ojp-shared-types';
-import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTrip';
+import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTripTypes';
 import { OJPBase } from './ojp-base';
 import { Duration } from '../shared/models/duration';
 

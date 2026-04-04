@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OJPTrip } from '../../services/ojp-trip';
-import { PassengerTransferLeg, PassengerTrip } from '../../shared/types/PassengerTrip'
+import { PassengerTransferLeg, PassengerTrip } from '../../shared/types/PassengerTripTypes'
 import { Duration } from '../../shared/models/duration';
 
 @Component({

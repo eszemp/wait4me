@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouteFormComponent } from '../route-form/route-form.component';
 import { OJPTrip} from '../../services/ojp-trip';
-import { PassengerTrip } from '../../shared/types/PassengerTrip';
+import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
 import { Duration } from '../../shared/models/duration';
 
 @Component({
