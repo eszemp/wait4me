@@ -1,5 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { from } from 'rxjs';
+import { forkJoin, from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SDK, TripRequest } from 'ojp-sdk';
 import type {
@@ -62,35 +62,17 @@ export class OJPTrip extends OJPBase{
   }
 
   getTripInformation(origin_id: string, destination_id: string, day: string, time_of_day: string) {
-    // departure_time requires format:  "2026-03-23T07:49:30.519Z"
-    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
-    // time of day has format           "08:59" (HH:MM from time input)
-    const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth();
-    let date = now.getDate();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
 
-    if (day !== "") {
-      const dayParts = day.split('-');
-      year = parseInt(dayParts[0], 10);
-      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
-      date = parseInt(dayParts[2], 10);
-    }
+    const departureDate = this.parseDepartureDate(day, time_of_day);
 
-    if (time_of_day !== "") {
-      const timeParts = time_of_day.split(':');
-      hours = parseInt(timeParts[0], 10);
-      minutes = parseInt(timeParts[1], 10);
-    }
-
-    const departureDate = new Date(year, month, date, hours, minutes);
     const request = TripRequest.initWithPlaceRefsOrCoords(origin_id, destination_id);
 
     request.setDepartureDatetime(departureDate);
     request.setNumberOfResults(8);
     request.disableLinkProkection();
+
+    // ensure that OJP shows theoretically possible timetable connections but also includes realtime info (delays)
+    (request as any).payload.params.useRealtimeData = "explanatory";
 
     return from(request.fetchResponse(this.sdk)).pipe(
       map((response) => {
@@ -104,6 +86,7 @@ export class OJPTrip extends OJPBase{
       }),
     );
   }
+
 
   private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
 
@@ -246,4 +229,30 @@ export class OJPTrip extends OJPBase{
     return '';
   }
 
+  private parseDepartureDate(day: string, time_of_day: string): Date {
+         // departure_time requires format:  "2026-03-23T07:49:30.519Z"
+    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
+    // time of day has format           "08:59" (HH:MM from time input)
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let date = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    if (day !== "") {
+      const dayParts = day.split('-');
+      year = parseInt(dayParts[0], 10);
+      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
+      date = parseInt(dayParts[2], 10);
+    }
+
+    if (time_of_day !== "") {
+      const timeParts = time_of_day.split(':');
+      hours = parseInt(timeParts[0], 10);
+      minutes = parseInt(timeParts[1], 10);
+    }
+
+    return new Date(year, month, date, hours, minutes);
+  }
 }
