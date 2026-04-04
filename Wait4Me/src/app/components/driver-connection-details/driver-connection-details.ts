@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-
-import { DepartureLine, DepartureStop } from '../../services/ojp-stop-event';
+import { Duration } from '../../shared/models/duration';
+import { DepartureLine, DepartureStop } from '../../shared/types/DriverDeparturesTypes';
 
 type DriverStopRow = {
   id: string;
-  timeIso: string | null;
+  timeTimetable: Date;
+  timeEstimated: Date;
+  delay: Duration;
   label: string;
 };
 
@@ -71,7 +73,9 @@ export class DriverConnectionDetails {
 
         return {
           id: stop.id || `stop-${index}`,
-          timeIso: stop.timeIso,
+          timeTimetable: stop.timeTimetable,
+          timeEstimated: stop.timeEstimated,
+          delay: stop.delay,
           label: stopName,
         } satisfies DriverStopRow;
       })
@@ -84,12 +88,16 @@ export class DriverConnectionDetails {
     return [
       {
         id: 'origin',
-        timeIso: this.departure.departureIso,
+        timeTimetable: this.departure.departureTimetable,
+        timeEstimated: this.departure.departureEstimated,
+        delay: this.departure.departureDelay,
         label: this.originName,
       },
       {
         id: 'destination',
-        timeIso: this.departure.arrivalIso,
+        timeTimetable: this.departure.arrivalTimetable,
+        timeEstimated: this.departure.arrivalEstimated,
+        delay: this.departure.arrivalDelay,
         label: this.destinationLabel,
       },
     ];
