@@ -55,6 +55,10 @@
   font-family: sans-serif;
 }
 
+.trip-card.critical {
+  background-color: var(--light-red);
+}
+
 /* Timeline Graphic */
 .trip-timeline {
   display: flex;

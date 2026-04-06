@@ -110,8 +110,9 @@ export class OJPTrip extends OJPBase{
       finalWalkTime = legs.at(-1)?.duration || Duration.initFromTotalMinutes(0);
     }
 
-    // filter out transfers
+    // filter out transfers and timed legs
     const timedLegs = legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    const transferLegs = legs.filter((leg): leg is PassengerTransferLeg => leg.kind === 'transfer');
 
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
@@ -128,17 +129,18 @@ export class OJPTrip extends OJPBase{
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
       departurePlatform: firstTimedLeg.boardPlatform,
       legs,
+      criticalTransfer: transferLegs.find(transferLeg => this.transferIsCritical(transferLeg, timedLegs, legs.length))?.id ?? null,
     };
   }
 
   private toPassengerLeg(leg: LegSchema, index: number): PassengerLeg | null {
     const legDuration = Duration.initWithDurationSchema(leg.duration);
     if (leg.timedLeg) {
-      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, legDuration, index);
+      return this.toPassengerTimedLeg(leg.timedLeg, Number(leg.id), legDuration, index);
     }
 
     if (leg.transferLeg) {
-      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, legDuration, index);
+      return this.toPassengerTransferLeg(leg.transferLeg, Number(leg.id), legDuration, index);
     }
 
     return null;
@@ -146,7 +148,7 @@ export class OJPTrip extends OJPBase{
 
   private toPassengerTimedLeg(
     timedLeg: TimedLegSchema,
-    legId: string,
+    legId: number,
     legDuration: Duration,
     index: number,
   ): PassengerTimedLeg {
@@ -157,7 +159,7 @@ export class OJPTrip extends OJPBase{
 
     return {
       kind: 'timed',
-      id: this.asString(legId) || `timed-${index}`,
+      id: legId,
       duration: legDuration,
       boardTimeTimetable: new Date(this.asString(board?.serviceDeparture?.timetabledTime)),
       boardTimeEstimated: new Date(this.asString(board?.serviceDeparture?.estimatedTime)),
@@ -169,6 +171,19 @@ export class OJPTrip extends OJPBase{
       destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
       boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
+    };
+  }
+
+  private toPassengerTransferLeg(
+    transferLeg: TransferLegSchema,
+    legId: number,
+    legDuration: Duration,
+    index: number,
+  ): PassengerTransferLeg {
+    return {
+      kind: 'transfer',
+      id: legId,
+      duration: legDuration,
     };
   }
 
@@ -184,17 +199,17 @@ export class OJPTrip extends OJPBase{
   
   }
 
-  private toPassengerTransferLeg(
-    transferLeg: TransferLegSchema,
-    legId: string,
-    legDuration: Duration,
-    index: number,
-  ): PassengerTransferLeg {
-    return {
-      kind: 'transfer',
-      id: this.asString(legId) || `transfer-${index}`,
-      duration: legDuration,
-    };
+  private transferIsCritical(transferLeg: PassengerTransferLeg, timedLegs: PassengerTimedLeg[], totalLegs: number): Boolean {
+    // LegIds start at 1 (not 0)
+    if (!(transferLeg.id === 1 || transferLeg.id === totalLegs)) {
+      const previous_leg = timedLegs.find(leg => leg.id === transferLeg.id - 1);
+      const following_leg = timedLegs.find(leg => leg.id === transferLeg.id + 1);
+      const arrival = previous_leg?.alightTimeEstimated;
+      const departure = following_leg?.boardTimeEstimated;
+      if (!arrival || !departure) return false; // Safety fallback
+      return (transferLeg.duration.addToDate(arrival) > departure);
+    }
+    return false;
   }
 
   private getQuayText(value: InternationalTextSchema | undefined): string | null {

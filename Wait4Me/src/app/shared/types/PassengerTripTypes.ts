@@ -2,7 +2,7 @@ import { Duration } from '../models/duration';
 
 export type PassengerTimedLeg = {
   kind: 'timed';
-  id: string;
+  id: number;
   duration: Duration;
   boardTimeTimetable: Date;
   boardTimeEstimated: Date;
@@ -18,7 +18,7 @@ export type PassengerTimedLeg = {
 
 export type PassengerTransferLeg = {
   kind: 'transfer';
-  id: string;
+  id: number;
   duration: Duration;
 };
 
@@ -36,4 +36,5 @@ export type PassengerTrip = {
   transfers: number;
   departurePlatform: string | null;
   legs: PassengerLeg[];
+  criticalTransfer: number | null; // id of critical PassengerTransferLeg
 };

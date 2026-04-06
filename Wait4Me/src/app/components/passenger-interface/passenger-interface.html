@@ -2,7 +2,9 @@
 
 <section class="content">
 @for (trip of tripService.tripResults(); track trip.id) {
-    <section class="trip-card" (click)="selectConnection(trip)">
+    <section class="trip-card" 
+              (click)="selectConnection(trip)" 
+              [class.critical]="trip.criticalTransfer !== null">
     <div class="trip-timeline">
       <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
         <span class="dot top"></span>
@@ -39,6 +41,7 @@
     <div class="meta-column">
       <span class="platform"> {{ trip.departurePlatform }}</span>
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
+      <span> </span>
     </div>
   </section>
 } 
