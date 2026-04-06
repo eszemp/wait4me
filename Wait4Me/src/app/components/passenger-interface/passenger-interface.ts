@@ -3,12 +3,13 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouteFormComponent } from '../route-form/route-form.component';
-import { OJPTrip, PassengerTrip } from '../../services/ojp-trip';
-import { DurationPipe } from '../../shared/pipes/duration.pipes';
+import { OJPTrip} from '../../services/ojp-trip';
+import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
+import { Duration } from '../../shared/models/duration';
 
 @Component({
   selector: 'app-passenger-interface',
-  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent, DurationPipe],
+  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent],
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css','./passenger-interface.css'],
 })
@@ -44,6 +45,14 @@ export class PassengerInterface {
     // Set initial values
     this.tripService.departureDay.set(this.tripForm.value.date || null);
     this.tripService.departureTimeOfDay.set(this.tripForm.value.time || null);
+
+    // fill out form fields with saved values (if they exist)
+    if (sessionStorage.getItem("departure_day") && sessionStorage.getItem("departure_time_of_day")){
+      this.tripForm.patchValue({
+        date: sessionStorage.getItem("departure_day") ?? '',
+        time: sessionStorage.getItem("departure_time_of_day") ?? ''
+      });
+    }
   }
 
   readonly tripForm = new FormGroup({

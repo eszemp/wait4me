@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-import { StopLookupResult } from '../../../services/ojp-stop-event';
+import { StopLookupResult } from '../../../shared/types/DriverDeparturesTypes';
 
 @Component({
   selector: 'app-driver-status',

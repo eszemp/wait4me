@@ -121,7 +121,7 @@
   position: relative;
   min-height: 76px;
   display: grid;
-  grid-template-columns: 44px 90px 1fr 150px;
+  grid-template-columns: 44px auto 1fr 150px;
   align-items: center;
   column-gap: 12px;
 }
@@ -201,6 +201,11 @@
   font-size: 28px;
   line-height: 1;
   color: #111111;
+  margin-right: 15px;
+}
+
+.time-delay {
+  color: red;
 }
 
 .label {

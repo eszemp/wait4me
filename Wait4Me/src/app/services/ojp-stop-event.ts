@@ -1,38 +1,11 @@
 import { Injectable } from '@angular/core';
 import { from, map, Observable } from 'rxjs';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
-
+import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../shared/types/DriverDeparturesTypes';
 import { OJPBase } from './ojp-base';
+import { Duration } from '../shared/models/duration';
 
-export type DepartureLine = {
-  line: string;
-  course: string | null;
-  direction: string;
-  departureIso: string;
-  arrivalIso: string | null;
-  departurePlatformOrStop: string | null;
-  stops: DepartureStop[];
-};
 
-export type DepartureStop = {
-  id: string;
-  name: string;
-  timeIso: string | null;
-};
-
-export type StopLookupResult = {
-  stopPlaceRef: string;
-  stopPlaceName: string;
-  latitude: number | null;
-  longitude: number | null;
-  distanceMeters: number | null;
-};
-
-type NearbyStopLookupResult = StopLookupResult & {
-  latitude: number;
-  longitude: number;
-  distanceMeters: number;
-};
 
 @Injectable({
   providedIn: 'root',
@@ -82,18 +55,26 @@ export class OJPStopEvent extends OJPBase {
             );
             const course = this.extractCourseNumber(this.asString(service?.journeyRef));
             const direction = this.asString(this.readTextValue(service?.destinationText));
-            const departure = this.asString(
-              callAtStop?.serviceDeparture?.estimatedTime ??
-                callAtStop?.serviceDeparture?.timetabledTime,
-            );
-            const arrival = this.asString(
-              lastOnwardCall?.serviceArrival?.estimatedTime ??
-                lastOnwardCall?.serviceArrival?.timetabledTime ??
-                firstOnwardCall?.serviceArrival?.estimatedTime ??
-                firstOnwardCall?.serviceArrival?.timetabledTime ??
-                callAtStop?.serviceArrival?.estimatedTime ??
-                callAtStop?.serviceArrival?.timetabledTime,
-            );
+            //const departure = this.asString(
+            //  callAtStop?.serviceDeparture?.estimatedTime ??
+            //    callAtStop?.serviceDeparture?.timetabledTime,
+            //);
+            const departureTimetable = new Date(this.asString(callAtStop?.serviceDeparture?.timetabledTime));
+            const departureEstimated = new Date(this.asString(callAtStop?.serviceDeparture?.estimatedTime));
+            const departureDelayInMinutes = departureEstimated.getMinutes() - departureTimetable.getMinutes();
+            const departureDelay = Duration.initFromTotalMinutes(departureDelayInMinutes);
+            //const arrival = this.asString(
+            //  lastOnwardCall?.serviceArrival?.estimatedTime ??
+            //    lastOnwardCall?.serviceArrival?.timetabledTime ??
+            //    firstOnwardCall?.serviceArrival?.estimatedTime ??
+            //    firstOnwardCall?.serviceArrival?.timetabledTime ??
+            //    callAtStop?.serviceArrival?.estimatedTime ??
+            //    callAtStop?.serviceArrival?.timetabledTime,
+            //);
+            const arrivalTimetable = new Date(this.asString(lastOnwardCall?.serviceArrival?.timetabledTime));
+            const arrivalEstimated = new Date(this.asString(lastOnwardCall?.serviceArrival?.estimatedTime));
+            const arrivalDelayInMinutes = arrivalEstimated.getMinutes() - arrivalTimetable.getMinutes();
+            const arrivalDelay = Duration.initFromTotalMinutes(arrivalDelayInMinutes);
             const departurePlatformOrStop = this.asNullableString(
               this.readTextValue(callAtStop?.estimatedQuay) ??
                 this.readTextValue(callAtStop?.plannedQuay) ??
@@ -101,24 +82,25 @@ export class OJPStopEvent extends OJPBase {
             );
 
             const currentStopName = this.asString(this.readTextValue(callAtStop?.stopPointName));
-            const currentStopTime = this.asNullableString(
-              callAtStop?.serviceDeparture?.estimatedTime ??
-                callAtStop?.serviceDeparture?.timetabledTime ??
-                callAtStop?.serviceArrival?.estimatedTime ??
-                callAtStop?.serviceArrival?.timetabledTime,
-            );
+            //    callAtStop?.serviceArrival?.estimatedTime ??
+            //    callAtStop?.serviceArrival?.timetabledTime,
+            //    TODO: see below
+            const currentStopTimeTimetable = new Date(this.asString(callAtStop?.serviceDeparture?.timetabledTime));
+            const currentStopTimeEstimated = new Date(this.asString(callAtStop?.serviceDeparture?.estimatedTime ));
+            const currentStopDelayInMinutes = currentStopTimeEstimated.getMinutes() - currentStopTimeTimetable.getMinutes();
+            const currentStopDelay = Duration.initFromTotalMinutes(currentStopDelayInMinutes);
 
             const onwardStops: DepartureStop[] = onwardCalls
               .map((onwardCall, index) => {
                 const onwardStop = onwardCall.callAtStop;
                 const stopName = this.asString(this.readTextValue(onwardStop?.stopPointName));
-                const stopTime = this.asNullableString(
-                  onwardStop?.serviceArrival?.estimatedTime ??
-                    onwardStop?.serviceArrival?.timetabledTime ??
-                    onwardStop?.serviceDeparture?.estimatedTime ??
-                    onwardStop?.serviceDeparture?.timetabledTime,
-                );
-
+                // TODO: include serviceArrival at Stops as well?
+                // onwardStop?.serviceArrival?.estimatedTime ??
+                // onwardStop?.serviceArrival?.timetabledTime ??
+                const stopTimeTimetable = new Date(this.asString(onwardStop?.serviceDeparture?.timetabledTime));
+                const stopTimeEstimated = new Date(this.asString(onwardStop?.serviceDeparture?.estimatedTime));
+                const stopDelayInMinutes = stopTimeEstimated.getMinutes() - stopTimeTimetable.getMinutes();
+                const stopDelay = Duration.initFromTotalMinutes(stopDelayInMinutes);
                 if (!stopName) {
                   return null;
                 }
@@ -126,7 +108,9 @@ export class OJPStopEvent extends OJPBase {
                 return {
                   id: `onward-${index}`,
                   name: stopName,
-                  timeIso: stopTime,
+                  timeTimetable: stopTimeTimetable,
+                  timeEstimated: stopTimeEstimated,
+                  delay: stopDelay,
                 } satisfies DepartureStop;
               })
               .filter((stop): stop is DepartureStop => stop !== null);
@@ -135,7 +119,9 @@ export class OJPStopEvent extends OJPBase {
               {
                 id: 'origin',
                 name: currentStopName || this.asString(this.readTextValue(service?.originText)) || 'Current stop',
-                timeIso: currentStopTime,
+                timeTimetable: currentStopTimeTimetable,
+                timeEstimated: currentStopTimeEstimated,
+                delay: currentStopDelay,
               },
               ...onwardStops,
             ];
@@ -144,14 +130,18 @@ export class OJPStopEvent extends OJPBase {
               line,
               course,
               direction,
-              departureIso: departure,
-              arrivalIso: this.asNullableString(arrival),
+              departureTimetable,
+              departureEstimated,
+              departureDelay,
+              arrivalTimetable,
+              arrivalEstimated,
+              arrivalDelay,
               departurePlatformOrStop,
               stops,
             };
           })
-          .filter((row) => row.line.trim().length > 0 && row.departureIso.trim().length > 0)
-          .sort((a, b) => a.departureIso.localeCompare(b.departureIso));
+          .filter((row) => row.line.trim().length > 0 && row.departureTimetable instanceof Date)
+          .sort((a, b) => a.departureTimetable.getTime() - b.departureTimetable.getTime());
 
         const uniqueRows = rows.filter((row, index, allRows) => {
           return (
@@ -160,8 +150,8 @@ export class OJPStopEvent extends OJPBase {
                 candidate.line === row.line &&
                 candidate.course === row.course &&
                 candidate.direction === row.direction &&
-                candidate.departureIso === row.departureIso &&
-                candidate.arrivalIso === row.arrivalIso &&
+                candidate.departureTimetable === row.departureTimetable &&
+                candidate.arrivalTimetable === row.arrivalTimetable &&
                 candidate.departurePlatformOrStop === row.departurePlatformOrStop
               );
             }) === index

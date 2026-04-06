@@ -8,14 +8,15 @@
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   padding: 28px 54px 34px;
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   font-family: sans-serif;
+  gap: 15px;
 }
 
 .leg {
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 15px;
   background: white;
@@ -40,6 +41,22 @@
 .walking-icon {
   height: 30px;
   width: 30px;
-  transform: translateY(-5px);
+  transform: translateY(-20px);
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  z-index: 10;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.back-button img {
+  width: 36px;
+  height: 36px;
 }
 

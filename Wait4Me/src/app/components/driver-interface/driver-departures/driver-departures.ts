@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 
-import { DepartureLine } from '../../../services/ojp-stop-event';
+import { DepartureLine } from '../../../shared/types/DriverDeparturesTypes';
 
 @Component({
   selector: 'app-driver-departures',

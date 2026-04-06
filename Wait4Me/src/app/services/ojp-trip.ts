@@ -1,5 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { from } from 'rxjs';
+import { forkJoin, from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SDK, TripRequest } from 'ojp-sdk';
 import type {
@@ -9,37 +9,9 @@ import type {
   TransferLegSchema,
   TripResultSchema,
 } from 'ojp-shared-types';
+import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTripTypes';
 import { OJPBase } from './ojp-base';
-
-export type PassengerTimedLeg = {
-  kind: 'timed';
-  id: string;
-  duration: string;
-  boardTime: string;
-  alightTime: string;
-  boardStopName: string;
-  destinationText: string;
-  alightStopName: string;
-  boardPlatform: string | null;
-};
-
-export type PassengerTransferLeg = {
-  kind: 'transfer';
-  id: string;
-  duration: string;
-};
-
-export type PassengerLeg = PassengerTimedLeg | PassengerTransferLeg;
-
-export type PassengerTrip = {
-  id: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
-  transfers: number;
-  departurePlatform: string | null;
-  legs: PassengerLeg[];
-};
+import { Duration } from '../shared/models/duration';
 
 @Injectable({
   providedIn: 'root',
@@ -90,35 +62,17 @@ export class OJPTrip extends OJPBase{
   }
 
   getTripInformation(origin_id: string, destination_id: string, day: string, time_of_day: string) {
-    // departure_time requires format:  "2026-03-23T07:49:30.519Z"
-    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
-    // time of day has format           "08:59" (HH:MM from time input)
-    const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth();
-    let date = now.getDate();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
 
-    if (day !== "") {
-      const dayParts = day.split('-');
-      year = parseInt(dayParts[0], 10);
-      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
-      date = parseInt(dayParts[2], 10);
-    }
+    const departureDate = this.parseDepartureDate(day, time_of_day);
 
-    if (time_of_day !== "") {
-      const timeParts = time_of_day.split(':');
-      hours = parseInt(timeParts[0], 10);
-      minutes = parseInt(timeParts[1], 10);
-    }
-
-    const departureDate = new Date(year, month, date, hours, minutes);
     const request = TripRequest.initWithPlaceRefsOrCoords(origin_id, destination_id);
 
     request.setDepartureDatetime(departureDate);
     request.setNumberOfResults(8);
     request.disableLinkProkection();
+
+    // ensure that OJP shows theoretically possible timetable connections but also includes realtime info (delays)
+    (request as any).payload.params.useRealtimeData = "explanatory";
 
     return from(request.fetchResponse(this.sdk)).pipe(
       map((response) => {
@@ -133,7 +87,9 @@ export class OJPTrip extends OJPBase{
     );
   }
 
+
   private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
+
     const trip = result.trip;
     if (!trip) {
       return null;
@@ -143,26 +99,48 @@ export class OJPTrip extends OJPBase{
       .map((leg, index) => this.toPassengerLeg(leg, index))
       .filter((leg): leg is PassengerLeg => leg !== null);
 
-    const departurePlatform = legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed')?.boardPlatform ?? null;
+    let initialWalkTime = Duration.initFromTotalMinutes(0);
+    let finalWalkTime = Duration.initFromTotalMinutes(0);
+
+    if (legs.at(0)?.kind=='transfer') {
+      initialWalkTime = legs.at(0)?.duration || Duration.initFromTotalMinutes(0);
+    }
+
+    if (legs.at(-1)?.kind=='transfer') {
+      finalWalkTime = legs.at(-1)?.duration || Duration.initFromTotalMinutes(0);
+    }
+
+    // filter out transfers and timed legs
+    const timedLegs = legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    const transferLegs = legs.filter((leg): leg is PassengerTransferLeg => leg.kind === 'transfer');
+
+    const firstTimedLeg = timedLegs[0];
+    const lastTimedLeg = timedLegs[timedLegs.length - 1];
 
     return {
       id: this.asString(trip.id) || this.asString(result.id),
-      startTime: this.asString(trip.startTime),
-      endTime: this.asString(trip.endTime),
-      duration: this.asString(trip.duration),
+      startTime: new Date(this.asString(trip.startTime)),
+      scheduledStart: initialWalkTime.subtractFromDate(firstTimedLeg?.boardTimeTimetable),
+      startDelay: firstTimedLeg.boardDelay,
+      endTime: new Date(this.asString(trip.endTime)),
+      scheduledEnd: finalWalkTime.addToDate(lastTimedLeg?.alightTimeTimetable),
+      endDelay: lastTimedLeg.alightDelay,
+      duration: Duration.initWithDurationSchema(trip.duration),
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
-      departurePlatform,
+      departurePlatform: firstTimedLeg.boardPlatform,
       legs,
+      criticalTransfer: transferLegs.find(transferLeg => this.transferIsCritical(transferLeg, timedLegs, legs.length))?.id ?? null,
     };
   }
 
   private toPassengerLeg(leg: LegSchema, index: number): PassengerLeg | null {
+    const legDuration = Duration.initWithDurationSchema(leg.duration);
     if (leg.timedLeg) {
-      return this.toPassengerTimedLeg(leg.timedLeg, leg.id, leg.duration, index);
+      return this.toPassengerTimedLeg(leg.timedLeg, Number(leg.id), legDuration, index);
     }
 
     if (leg.transferLeg) {
-      return this.toPassengerTransferLeg(leg.transferLeg, leg.id, leg.duration, index);
+      return this.toPassengerTransferLeg(leg.transferLeg, Number(leg.id), legDuration, index);
     }
 
     return null;
@@ -170,44 +148,89 @@ export class OJPTrip extends OJPBase{
 
   private toPassengerTimedLeg(
     timedLeg: TimedLegSchema,
-    legId: string | undefined,
-    legDuration: string | undefined,
+    legId: number,
+    legDuration: Duration,
     index: number,
   ): PassengerTimedLeg {
     const board = timedLeg.legBoard;
     const alight = timedLeg.legAlight;
+    const boardDelay = this.calculateDelay(board?.serviceDeparture?.timetabledTime, board?.serviceDeparture?.estimatedTime);
+    const alightDelay = this.calculateDelay(alight?.serviceArrival?.timetabledTime, alight?.serviceArrival?.estimatedTime);
 
     return {
       kind: 'timed',
-      id: this.asString(legId) || `timed-${index}`,
-      duration: this.asString(legDuration),
-      boardTime: this.asString(
-        board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime,
-      ),
-      alightTime: this.asString(
-        alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime,
-      ),
+      id: legId,
+      duration: legDuration,
+      boardTimeTimetable: new Date(this.asString(board?.serviceDeparture?.timetabledTime)),
+      boardTimeEstimated: new Date(this.asString(board?.serviceDeparture?.estimatedTime)),
+      boardDelay: boardDelay,
+      alightTimeTimetable: new Date(this.asString(alight?.serviceArrival?.timetabledTime)),
+      alightTimeEstimated: new Date(this.asString(alight?.serviceArrival?.estimatedTime)),
+      alightDelay: alightDelay,
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
-      boardPlatform: this.readTextValue(board?.estimatedQuay) ?? this.readTextValue(board?.plannedQuay),
+      boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
     };
   }
 
   private toPassengerTransferLeg(
     transferLeg: TransferLegSchema,
-    legId: string | undefined,
-    legDuration: string | undefined,
+    legId: number,
+    legDuration: Duration,
     index: number,
   ): PassengerTransferLeg {
     return {
       kind: 'transfer',
-      id: this.asString(legId) || `transfer-${index}`,
-      duration: this.asString(legDuration),
+      id: legId,
+      duration: legDuration,
     };
   }
 
+  private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): Duration {
+    // times have format: 2026-03-30T10:11:18Z
+    const scheduled = new Date(this.asString(timetabledTime)).getTime();
+    const estimated = new Date(this.asString(estimatedTime)).getTime();
+
+    const diffInMs = estimated - scheduled; // in ms
+    const delayInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+    return Duration.initFromTotalMinutes(delayInMinutes);
+  
+  }
+
+  private transferIsCritical(transferLeg: PassengerTransferLeg, timedLegs: PassengerTimedLeg[], totalLegs: number): Boolean {
+    // LegIds start at 1 (not 0)
+    if (!(transferLeg.id === 1 || transferLeg.id === totalLegs)) {
+      const previous_leg = timedLegs.find(leg => leg.id === transferLeg.id - 1);
+      const following_leg = timedLegs.find(leg => leg.id === transferLeg.id + 1);
+      const arrival = previous_leg?.alightTimeEstimated;
+      const departure = following_leg?.boardTimeEstimated;
+      if (!arrival || !departure) return false; // Safety fallback
+      return (transferLeg.duration.addToDate(arrival) > departure);
+    }
+    return false;
+  }
+
+  private getQuayText(value: InternationalTextSchema | undefined): string | null {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      if (typeof value.text === 'string') {
+        return 'Stop ' + value.text;
+      }
+      if (typeof value.text === 'number') {
+        return 'Pl. ' + String(value.text);
+      }
+    }
+
+    return '';
+  }
+
   private readTextValue(value: InternationalTextSchema | undefined): string | null {
+    
     if (typeof value === 'string') {
       return value;
     }
@@ -237,4 +260,30 @@ export class OJPTrip extends OJPBase{
     return '';
   }
 
+  private parseDepartureDate(day: string, time_of_day: string): Date {
+         // departure_time requires format:  "2026-03-23T07:49:30.519Z"
+    // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
+    // time of day has format           "08:59" (HH:MM from time input)
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let date = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    if (day !== "") {
+      const dayParts = day.split('-');
+      year = parseInt(dayParts[0], 10);
+      month = parseInt(dayParts[1], 10) - 1; // months are 0-based
+      date = parseInt(dayParts[2], 10);
+    }
+
+    if (time_of_day !== "") {
+      const timeParts = time_of_day.split(':');
+      hours = parseInt(timeParts[0], 10);
+      minutes = parseInt(timeParts[1], 10);
+    }
+
+    return new Date(year, month, date, hours, minutes);
+  }
 }

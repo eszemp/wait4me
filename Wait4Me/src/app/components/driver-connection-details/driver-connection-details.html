@@ -32,7 +32,12 @@
             }
           </div>
 
-          <span class="time">{{ stop.timeIso ? (stop.timeIso | date: 'HH:mm') : '--:--' }}</span>
+          <span class="time">
+            {{ stop.timeTimetable | date: 'HH:mm:ss' }}
+            <span *ngIf="stop.delay.isBiggerThanZero()" class="time-delay">
+              +{{ stop.delay.format() }}
+            </span>
+          </span>
           <span class="label">{{ stop.label }}</span>
           <span class="request">No request</span>
         </div>

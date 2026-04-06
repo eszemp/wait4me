@@ -18,7 +18,7 @@
 
 .departure-pill {
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: 20px 1fr auto;
   gap: 15px;
   align-items: center;
   background: #ffffff;
@@ -34,6 +34,7 @@
   display: flex;
   gap: 20px;
   align-items: stretch;
+  height: 60px;
 }
 
 .timeline-line {
@@ -64,13 +65,14 @@
   bottom: -5px;
 }
 
-.time-column,
-.location-column {
+.time-and-location-column {
   display: flex;
   color: black;
   flex-direction: column;
   justify-content: space-between;
   height: 60px;
+  flex-shrink: 0;
+  gap: 15px;
 }
 
 .time-start,
@@ -79,6 +81,17 @@
 .location-end {
   font-size: 1.1rem;
   font-weight: 500;
+}
+
+.time-start, .time-end {
+  margin-right: 20px;
+  display: inline-block;
+}
+
+.time-delay {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: red;
 }
 
 .meta-column {
