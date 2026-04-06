@@ -24,6 +24,7 @@ textarea {
   --grey: #3b3b3b;
   --light-grey: #dbdbdb;
   --light-red: #ffd1d1;
+  --red: red;
 }
 
 .app-shell {

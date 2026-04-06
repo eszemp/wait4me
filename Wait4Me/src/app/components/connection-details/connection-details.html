@@ -84,6 +84,16 @@
     }
 
     @else if (leg.kind === 'transfer') {
+      @if (trip.criticalTransfer === leg.id) {
+        <div class="transfer-warning">
+          <div class="time-column">
+              <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
+          </div>
+          <div class="time-and-location-column">
+              Likely to miss transfer!
+          </div>
+        </div>
+      }
       <div class="leg transfer-leg" (click)="popup_walking_route(leg)">
           <div class="time-column">
               <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
