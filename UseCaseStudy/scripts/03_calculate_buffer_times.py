@@ -5,8 +5,10 @@ import json
 from datetime import datetime, timedelta
 from tqdm import tqdm
 from helpers.ojp_arrivals_and_departures import OJPStopDepArrRequest
+from helpers.write_log import initialize_logfile, add_to_log
 
 FILE_PATH = "../data/stop-places-schwyz/stop-places-schwyz.shp" 
+LOG = '03_calculate_buffer_times_LOGFILE.txt'
 
 
 def inread_data():
@@ -22,12 +24,10 @@ def process_all_stops(stops):
 
     stops['buffer_timeseries'] = None
 
+    initialize_logfile(LOG)
     print("Processing entries...")
     for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
-        #if index>50:
-        #    break
         result = get_buffer_timeseries(row, OJPDepArr)
-
         if result:
             stops.at[index, 'buffer_timeseries'] = result['buffer_timeseries']
 
@@ -70,7 +70,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 
         last_result = results[-1]['time']
         current_time = last_result
-        time.sleep(1.3)
+        # time.sleep(1.3)
 
     # delete all entries where time > end_time
     results = [r for r in results if r['time'] <= end_time]
@@ -94,8 +94,7 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
         print("departures:", all_departures)
 
     if all_arrivals.empty or all_departures.empty:
-        print(f"\n{row['Name']} ({row['Nummer']}) has no services")
-        time.sleep(1.3)
+        add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no services")
         return {'buffer_timeseries':'NO SERVICE'}
 
     combined = pd.merge(all_arrivals, all_departures, how='cross', suffixes=('_arr', '_dep'))
@@ -107,8 +106,7 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
     valid_options = combined[mask]
 
     if len(valid_options)==0:
-        print(f"\n{row['Name']} ({row['Nummer']}) has no transfers")
-        time.sleep(1.3)
+        add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no transfers")
         return {'buffer_timeseries':'NO TRANSFERS'}
 
     # find the 'First' departure for each arrival, sort by departure time first, then group by the unique arrival (time + line)
@@ -127,7 +125,7 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
     if debug:
         print(matches)
 
-    print(f"\n{row['Name']} ({row['Nummer']}) has average buffer time: {average_buffer} seconds")
+    add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has average buffer time: {average_buffer} seconds")
 
     timeseries = (
         matches[['time_arr', 'buffer_seconds']]
@@ -135,14 +133,10 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
         .rename(columns={'time_arr': 'time', 'buffer_seconds': 'buffer'})
     )
     
-    # Convert timestamps to ISO strings for JSON
-    timeseries['time'] = timeseries['time'].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-    
-    # Convert to JSON string
-    timeseries_json = json.dumps(timeseries.to_dict(orient='records'))
+    timeseries['time'] = timeseries['time'].dt.strftime("%Y-%m-%dT%H:%M:%SZ") # timestamps to ISO strings for JSON
+    timeseries_json = json.dumps(timeseries.to_dict(orient='records')) # Convert to JSON string
 
-    print(f"\n{row['Name']} ({row['Nummer']}) processed.")
-
+    add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) processed.")
     return {'buffer_timeseries': timeseries_json}
     
 
