@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import subprocess
-from PythonBackend.helpers.db_interactions import *
-from PythonBackend.helpers.geofencing import is_valid_request
+from helpers.db_interactions import *
+from helpers.geofencing import is_valid_request
 
 
 backend_app = Flask(__name__)

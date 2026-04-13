@@ -1,4 +1,5 @@
 .vscode
 UseCaseStudy/scripts/helpers/__pycache__/*.pyc
+PythonBackend/helpers/__pycache__
 Wait4Me/src/environments/environments.ts
 PythonBackend/.env
