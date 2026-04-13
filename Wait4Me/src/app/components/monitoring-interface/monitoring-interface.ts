@@ -14,7 +14,7 @@ export class MonitoringInterface implements AfterViewInit {
     const map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json',
-      center: [8.23, 46.82],
+      center: [8.65, 47.02],
       zoom: 8.5,
       minZoom: 5,
       maxZoom: 18,
