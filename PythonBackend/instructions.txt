@@ -1,0 +1,8 @@
+TESTING (LOCAL MACHINE)
+
+ensure .env file exists and contains all necessary DB configs (see .env.example)
+
+run 'python c:/Workspace/Wait4Me/wait4me/PythonBackend/backend_app.py'
+keep this terminal window open, so that the backend is running and listening
+
+run 'ng serve' normally in other terminal window
