@@ -8,7 +8,7 @@ class OJPStopInfoRequest:
     
     def __init__(self):
         self.api_key = os.environ.get('OJP_ACCESS_TOKEN')
-        self.endpoint = "https://api.opentransportdata.swiss/ojp20"
+        self.endpoint = "https://odpch-api.clients.liip.ch/ojp20-beta"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "text/xml; charset=utf-8",

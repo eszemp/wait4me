@@ -1,3 +1,25 @@
 # Buffer Analysis
 ## Set Up
-Use requirements.txt to create python kernel for running jupyter notebooks in scripts folder.
+To set up the Python environment for running the Jupyter notebooks in the scripts folder:
+
+1. Create a virtual environment:
+   ```bash
+   python -m venv env
+   ```
+
+2. Activate the virtual environment:
+   ```bash
+   source env/bin/activate
+   ```
+
+3. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Create a Jupyter kernel:
+   ```bash
+   python -m ipykernel install --user --name buffer-analysis --display-name "Buffer Analysis"
+   ```
+
+Now you can select the "Buffer Analysis" kernel in your Jupyter notebooks.

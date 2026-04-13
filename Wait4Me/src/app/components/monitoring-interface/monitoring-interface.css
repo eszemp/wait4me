@@ -1,6 +1,14 @@
-iframe {
+:host {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 40px 0;
+}
+
+.monitoring-map {
   border: 0;
-  width: 1000px;
+  width: min(1200px, 90%);
   height: 600px;
   border-radius: 20px;
+  margin: 0 auto;
 }
