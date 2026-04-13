@@ -3,7 +3,7 @@ import { Home } from './components/home/home';
 import { PassengerInterface } from './components/passenger-interface/passenger-interface';
 import { DriverInterface } from './components/driver-interface/driver-interface';
 import { MonitoringInterface } from './components/monitoring-interface/monitoring-interface';
-import { ConnectionDetails } from './components/connection-details/connection-details'
+import { ConnectionDetails } from './components/passenger-connection-details/connection-details'
 import { DriverConnectionDetails } from './components/driver-connection-details/driver-connection-details';
 
 export const routes: Routes = [

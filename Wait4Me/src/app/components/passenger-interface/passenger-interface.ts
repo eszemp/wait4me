@@ -2,14 +2,15 @@ import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { RouteFormComponent } from '../route-form/route-form.component';
+import { RouteFormComponent } from './route-form/route-form.component';
+import { Wait4MeButton } from './wait4me-button/wait4me-button';
 import { OJPTrip} from '../../services/ojp-trip';
 import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
 import { Duration } from '../../shared/models/duration';
 
 @Component({
   selector: 'app-passenger-interface',
-  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouteFormComponent, Wait4MeButton],
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css','./passenger-interface.css'],
 })
