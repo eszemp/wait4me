@@ -4,7 +4,7 @@
 @for (trip of tripService.tripResults(); track trip.id) {
     <section class="trip-card" 
               (click)="selectConnection(trip)" 
-              [class.critical]="trip.criticalTransfer !== null">
+              [class.critical]="trip.criticalTransferId !== null">
     <div class="trip-timeline">
       <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
         <span class="dot top"></span>

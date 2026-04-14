@@ -63,7 +63,7 @@
                     +{{ leg.boardDelay.format() }}
                   </span>
                 </span>
-                <span class="location-start">{{ leg.boardStopName }}  Dir. {{ leg.destinationText }}</span>
+                <span class="location-start">{{ leg.boardStopName }} <i>{{leg.lineName}} to {{ leg.destinationText }}</i></span>
               </div>
               <div>
                 <span class="time-end"> 
@@ -84,7 +84,7 @@
     }
 
     @else if (leg.kind === 'transfer') {
-      @if (trip.criticalTransfer === leg.id) {
+      @if (trip.criticalTransferId === leg.id) {
         <div class="transfer-warning">
           <div class="time-column">
               <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
