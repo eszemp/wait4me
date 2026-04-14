@@ -47,11 +47,25 @@ def get_from_db(command, params, multiple=False):
 def create_new_request(data):
     request_id = str(uuid.uuid4())[:8]
     
-    command = """ INSERT INTO wait4me_requests 
-                (request_id, passenger_id, incoming_service, outgoing_service, requested_delay) 
-                VALUES (%s, %s, %s, %s, %s) """
+    command = """ INSERT INTO wait4me_requests (
+                    request_id, 
+                    passenger_id, 
+                    incoming_journey_ref, 
+                    outgoing_journey_ref, 
+                    transfer_stop_ref,
+                    scheduled_departure_time,
+                    requested_delay_min
+                ) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s) """
      
-    params = (request_id, data['passenger_id'], data['incoming_service'], data['outgoing_service'], data['requested_delay'])
+    params = (request_id, 
+              data['passenger_id'], 
+              data['incoming_journey_ref'], 
+              data['outgoing_journey_ref'], 
+              data['transfer_stop_ref'],
+              data['scheduled_departure_time'],
+              data['requested_delay']
+              )
     
     db_transaction = post_to_db(command, params)
     if db_transaction=='success':
@@ -64,7 +78,7 @@ def change_request_status(request_id, data):
     command = """
         UPDATE wait4me_requests 
         SET status = %s 
-        WHERE id = %s
+        WHERE request_id = %s
     """
     params = (data['status'], request_id)
     
@@ -73,27 +87,15 @@ def change_request_status(request_id, data):
     if db_transaction=='success':
         return jsonify({"status": "changed", "request_id": request_id}), 201
     else:
-        return jsonify({"error": db_transaction}), 500
-    
-def change_request_status(request_id, data):
-
-    command = """
-        UPDATE wait4me_requests 
-        SET status = %s 
-        WHERE id = %s
-    """
-    params = (data['status'], request_id)
-    
-    db_transaction = post_to_db(command, params)
-
-    if db_transaction=='success':
-        return jsonify({"status": "changed", "request_id": request_id}), 201
-    else:
-        return jsonify({"error": db_transaction}), 500
+        return jsonify({"error": db_transaction}), 500   
     
 def get_request_status(request_id):
 
-    command = "SELECT status FROM wait4me_requests WHERE id = %s"
+    command = """
+        SELECT status 
+        FROM wait4me_requests 
+        WHERE request_id = %s
+    """
     params = (request_id,)
 
     result = get_from_db(command, params)
@@ -105,8 +107,12 @@ def get_request_status(request_id):
 
 def get_incoming_requests(stop_ref, service):
 
-    command = "SELECT * FROM wait4me_requests WHERE status = %s"
-    params = ('pending',)
+    command = """
+        SELECT * 
+        FROM wait4me_requests 
+        WHERE outgoing_journey_ref = %s AND transfer_stop_ref = %s AND status = %s
+    """
+    params = (service, stop_ref, 'pending')
 
     results = get_from_db(command, params, multiple=True)
 
@@ -116,6 +122,4 @@ def get_incoming_requests(stop_ref, service):
 
     return jsonify(results), 200
 
-        
-
-        
+    

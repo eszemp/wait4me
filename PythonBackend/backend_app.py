@@ -28,10 +28,9 @@ def update_request(request_id):
 @backend_app.route('/get-status/<request_id>', methods=['GET'])
 def get_status(request_id):
     return get_request_status(request_id)
-    
 
 # GET all pending requests (driver-side)
-# example usage: /driver/request?transfer_stop_ref=123&outgoing_service=bus45
+# example usage: /driver/request?transfer_stop_ref=xxx&outgoing_service=xxx
 @backend_app.route('/driver/get-requests', methods=['GET'])
 def get_requests():
     stop_ref = request.args.get('transfer_stop_ref')
