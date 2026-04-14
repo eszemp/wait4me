@@ -11,9 +11,11 @@ export type PassengerTimedLeg = {
   alightTimeEstimated: Date;
   alightDelay: Duration;
   boardStopName: string;
-  destinationText: string;
   alightStopName: string;
   boardPlatform: string | null;
+  destinationText: string;
+  journeyRef: string;
+  lineName: string;
 };
 
 export type PassengerTransferLeg = {
@@ -36,5 +38,14 @@ export type PassengerTrip = {
   transfers: number;
   departurePlatform: string | null;
   legs: PassengerLeg[];
-  criticalTransfer: number | null; // id of critical PassengerTransferLeg
+  criticalTransferId: number | null;
+  criticalTransfer: CriticalTransfer | null;
 };
+
+export type CriticalTransfer = {
+  incomingJourneyRef: string;
+  outgoingJourneyRef: string;
+  transferStopRef: number;
+  scheduledOutgoingDeparture: Date;
+  requestedDelay: Duration;
+}

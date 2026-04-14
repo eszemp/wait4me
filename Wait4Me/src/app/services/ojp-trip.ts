@@ -1,5 +1,5 @@
-import { Injectable, signal, effect } from '@angular/core';
-import { forkJoin, from, Observable } from 'rxjs';
+import { Injectable, signal, effect, inject } from '@angular/core';
+import { from, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SDK, TripRequest } from 'ojp-sdk';
 import type {
@@ -7,10 +7,11 @@ import type {
   LegSchema,
   TimedLegSchema,
   TransferLegSchema,
-  TripResultSchema,
+  TripResultSchema
 } from 'ojp-shared-types';
-import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg } from '../shared/types/PassengerTripTypes';
+import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg, CriticalTransfer } from '../shared/types/PassengerTripTypes';
 import { OJPBase } from './ojp-base';
+import { OJPLocation } from './ojp-location';
 import { Duration } from '../shared/models/duration';
 
 @Injectable({
@@ -25,6 +26,8 @@ export class OJPTrip extends OJPBase{
     },
     'en',
   );
+
+  private locationService = inject(OJPLocation);
 
   originId = signal<string | null>(null);
   originName = signal<string | null>(null);
@@ -44,8 +47,10 @@ export class OJPTrip extends OJPBase{
       const to = this.destinationId();
 
       if (from && to) {
-        this.getTripInformation(from, to, this.departureDay() || "", this.departureTimeOfDay() || "").subscribe(results => {
-          this.tripResults.set(results);
+        this.getTripInformation(from, to, this.departureDay() || "", this.departureTimeOfDay() || "")
+        .subscribe(async (results) => {
+          const resolvedResults = await Promise.all(results); 
+          this.tripResults.set(resolvedResults);
         });
         this.originName.set(sessionStorage.getItem("origin_name"));
         this.destinationName.set(sessionStorage.getItem("destination_name"));
@@ -82,13 +87,13 @@ export class OJPTrip extends OJPBase{
 
         return (response.value.tripResult ?? [])
           .map((result) => this.toPassengerTrip(result))
-          .filter((trip): trip is PassengerTrip => trip !== null);
+          .filter((trip): trip is Promise<PassengerTrip> => trip !== null);
       }),
     );
   }
 
 
-  private toPassengerTrip(result: TripResultSchema): PassengerTrip | null {
+  private async toPassengerTrip(result: TripResultSchema): Promise<PassengerTrip | null> {
 
     const trip = result.trip;
     if (!trip) {
@@ -117,6 +122,8 @@ export class OJPTrip extends OJPBase{
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
 
+    const [criticalTransferId, criticalTransfer] = await this.findCriticalTransfer(transferLegs, timedLegs, legs.length);
+
     return {
       id: this.asString(trip.id) || this.asString(result.id),
       startTime: new Date(this.asString(trip.startTime)),
@@ -129,7 +136,8 @@ export class OJPTrip extends OJPBase{
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
       departurePlatform: firstTimedLeg.boardPlatform,
       legs,
-      criticalTransfer: transferLegs.find(transferLeg => this.transferIsCritical(transferLeg, timedLegs, legs.length))?.id ?? null,
+      criticalTransferId: criticalTransferId,
+      criticalTransfer: criticalTransfer,
     };
   }
 
@@ -168,9 +176,11 @@ export class OJPTrip extends OJPBase{
       alightTimeEstimated: new Date(this.asString(alight?.serviceArrival?.estimatedTime)),
       alightDelay: alightDelay,
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
-      destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
       boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
+      destinationText: this.readTextValue(timedLeg.service?.destinationText) ?? '',
+      journeyRef: timedLeg.service?.journeyRef ?? '',
+      lineName: this.readTextValue(timedLeg.service?.publishedServiceName) ?? ' '
     };
   }
 
@@ -187,6 +197,29 @@ export class OJPTrip extends OJPBase{
     };
   }
 
+  private async toCriticalTransfer(
+    transfer_leg: PassengerTransferLeg,
+    prev_leg: PassengerTimedLeg,
+    next_leg: PassengerTimedLeg,
+  ): Promise<CriticalTransfer> {
+    const arrival = prev_leg.alightTimeEstimated;
+    const actual_arrival = transfer_leg.duration.addToDate(arrival);
+    const departure = next_leg.boardTimeEstimated;
+    const req_delay_min = Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60);
+    const transferStopName = next_leg.boardStopName;
+    const suggestions = await firstValueFrom(this.locationService.getLocationInformation(transferStopName, 1));
+    const transferStopRef = suggestions[0]?.stopPlaceRef ?? '';
+    const incomingServiceRef = prev_leg.journeyRef;
+    const outgoingServiceRef = next_leg.journeyRef;
+    return {
+      incomingJourneyRef: incomingServiceRef ?? '',
+      outgoingJourneyRef: outgoingServiceRef ?? '',
+      transferStopRef: Number(transferStopRef),
+      scheduledOutgoingDeparture: departure,
+      requestedDelay: Duration.initFromTotalMinutes(req_delay_min)
+    };
+  }
+
   private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): Duration {
     // times have format: 2026-03-30T10:11:18Z
     const scheduled = new Date(this.asString(timetabledTime)).getTime();
@@ -196,7 +229,19 @@ export class OJPTrip extends OJPBase{
     const delayInMinutes = Math.floor(diffInMs / (1000 * 60));
 
     return Duration.initFromTotalMinutes(delayInMinutes);
-  
+  }
+
+  private async findCriticalTransfer(transferLegs: PassengerTransferLeg[], timedLegs: PassengerTimedLeg[], no_of_legs: number): Promise<[number | null, CriticalTransfer | null]> {
+    const id = transferLegs.find(transferLeg => this.transferIsCritical(transferLeg, timedLegs, no_of_legs))?.id ?? null;
+    if (id===null) {
+      return [id, null];
+    }
+    const previous_leg = timedLegs.find(leg => leg.id === id - 1);
+    const transfer_leg = transferLegs.find(leg => leg.id===id);
+    const following_leg = timedLegs.find(leg => leg.id === id + 1);
+    if (!previous_leg || !transfer_leg || !following_leg) return [id, null]; // Safety fallback
+    const transfer = await this.toCriticalTransfer(transfer_leg, previous_leg, following_leg);
+    return [id, transfer];
   }
 
   private transferIsCritical(transferLeg: PassengerTransferLeg, timedLegs: PassengerTimedLeg[], totalLegs: number): Boolean {
