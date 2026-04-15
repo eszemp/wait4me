@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { BehaviorSubject, Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
 import { CriticalTransfer } from '../shared/types/PassengerTripTypes';
 import { PassengerTrip } from '../shared/types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,26 +10,38 @@ interface CreateRequestResponse {
   request_id?: string;
 }
 
+const BACKEND_URL = 'http://127.0.0.1:5000';
+
 
 @Injectable({ providedIn: 'root' })
 export class W4MPassengerService {
 
-  status: string;
+  private readonly statusSubject = new BehaviorSubject<string>('inactive');
+  status$ = this.statusSubject.asObservable();
+
+  get status(): string {
+    return this.statusSubject.value;
+  }
+
+  private set status(value: string) {
+    this.statusSubject.next(value);
+  }
   // possible values:
   // 'inactive':  no critical transfer selected where a request could be sent
   // 'enabled':   this.transfer is not null, but no request has been sent yet or the request has been cancelled
   // 'pending':   ...
   // 'accepted':  ...
   // 'declined':  ...
+
   trip: PassengerTrip | null;
   transfer: CriticalTransfer | null;
   passenger_id: string;
   request_id: string | null;
 
+  private pollingSubscription: Subscription | null = null;
 
   private currentTrip = new BehaviorSubject<any>(null);
   currentTrip$ = this.currentTrip.asObservable();
-  
 
   constructor(private http: HttpClient) {
     this.status = 'inactive';
@@ -43,6 +55,7 @@ export class W4MPassengerService {
     this.currentTrip.next(trip);
     return;
   }
+
 
   enable_if_eligible(transfer: CriticalTransfer) {
     // TODO: determine max allowed requested delay and difference to current time
@@ -93,7 +106,7 @@ export class W4MPassengerService {
       requested_delay: this.transfer?.requestedDelay.totalMinutes,
     }
     const response = await lastValueFrom(
-      this.http.post<CreateRequestResponse>('http://127.0.0.1:5000/create-request', request)
+      this.http.post<CreateRequestResponse>(`${BACKEND_URL}/create-request`, request)
     );
 
     console.log('Script Output:', response);
@@ -101,7 +114,71 @@ export class W4MPassengerService {
     if (response.status === "created") {
       this.request_id = response.request_id ?? null;
       this.status = 'pending';
+      this.startStatusPolling();
     }
     return;
   }
+
+  async cancel_request() {
+    if (this.status !== 'pending' || !this.request_id) {
+      return;
+    }
+
+    try {
+      const response = await lastValueFrom(
+        this.http.post<{ status: string; request_id?: string }>(
+          `${BACKEND_URL}/update-request/${this.request_id}`,
+          { status: 'cancelled' }
+        )
+      );
+
+      if (response.status === 'changed') {
+        this.stopStatusPolling();
+        this.request_id = null;
+        this.status = 'enabled';
+        return;
+      }
+
+      console.error('Cancel request failed, backend did not confirm change:', response);
+    } catch (error) {
+      console.error('Cancel request failed:', error);
+    }
+  }
+
+  private stopStatusPolling() {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
+    }
+  }
+
+  private startStatusPolling() {
+    if (!this.request_id || this.pollingSubscription) {
+      return;
+    }
+
+    this.pollingSubscription = timer(0, 5000)
+      .pipe(
+        switchMap(() => this.http.get<CreateRequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
+        tap(response => {
+          if (response.status === 'pending') {
+            this.status = 'pending';
+            console.log('request still pending')
+            return;
+          }
+
+          if (response.status === 'accepted' || response.status === 'declined') {
+            this.status = response.status;
+            console.log('request status changed from pending to ', this.status)
+            this.stopStatusPolling();
+          }
+        })
+      )
+      .subscribe({
+        error: error => {
+          console.error('Request status polling failed:', error);
+        }
+      });
+  }
+
 }

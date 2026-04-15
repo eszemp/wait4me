@@ -101,9 +101,9 @@ def get_request_status(request_id):
     result = get_from_db(command, params)
 
     if result == 'Not found':
-        return jsonify({"error": "Not found"}), 404
+        return jsonify({"status": "Not found"}), 404
 
-    return jsonify(result), 200
+    return jsonify({"status": result}), 200
 
 def get_incoming_requests(stop_ref, service):
 
