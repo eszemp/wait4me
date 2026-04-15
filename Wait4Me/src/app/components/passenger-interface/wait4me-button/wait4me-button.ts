@@ -1,9 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { OJPTrip } from '../../../services/ojp-trip';
-import { PassengerTrip } from '../../../shared/types/PassengerTripTypes';
-import { Duration } from '../../../shared/models/duration';
+import { W4MPassengerService } from '../../../services/w4m-passenger';
 
 @Component({
     selector: 'w4m-button',
@@ -12,12 +9,6 @@ import { Duration } from '../../../shared/models/duration';
     styleUrls: ['./wait4me-button.css'],
 })
 export class Wait4MeButton {
-    trip: PassengerTrip | null = null;
+    public w4mService = inject(W4MPassengerService);
 
-    public tripService = inject(OJPTrip);
-
-    constructor(private router: Router) {
-        const navigation = this.router.currentNavigation();
-        this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
-    }
 }

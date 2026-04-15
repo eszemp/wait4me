@@ -1,1 +1,12 @@
-<button type="button" class="w4m-button">Wait4Me</button>
+@if (w4mService.status === 'pending') {
+    <div> Other pop-up</div>
+}
+@if (w4mService.status === 'accepted') {
+    <div> Other pop-up</div>
+}
+@if (w4mService.status === 'declined') {
+    <div> Other pop-up</div>
+}
+<button type="button" class="w4m-button" [class.is_enabled]="w4mService.status!=='inactive'" (click)="w4mService.click_on_button()">
+    Wait4Me
+</button>

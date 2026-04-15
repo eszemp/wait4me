@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { RouteFormComponent } from './route-form/route-form.component';
 import { Wait4MeButton } from './wait4me-button/wait4me-button';
 import { OJPTrip} from '../../services/ojp-trip';
+import { W4MPassengerService } from '../../services/w4m-passenger';
 import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
 import { Duration } from '../../shared/models/duration';
 
@@ -18,6 +19,7 @@ import { Duration } from '../../shared/models/duration';
 export class PassengerInterface {
 
   public tripService = inject(OJPTrip);
+  public w4mService = inject(W4MPassengerService);
   private router = inject(Router);
 
   constructor() {
@@ -79,6 +81,7 @@ export class PassengerInterface {
     this.router.navigate(['/passenger/connection-details'], { 
       state: { selectedTrip: trip } 
     });
+    // TODO: W4M if no active request, make sure w4m button is disabled when a new connection is selected
     return;
   }
 }

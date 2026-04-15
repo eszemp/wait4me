@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Wait4MeButton } from '../passenger-interface/wait4me-button/wait4me-button';
 import { OJPTrip } from '../../services/ojp-trip';
+import { W4MPassengerService } from '../../services/w4m-passenger';
 import { PassengerTransferLeg, PassengerTrip } from '../../shared/types/PassengerTripTypes'
 import { Duration } from '../../shared/models/duration';
 
@@ -17,13 +18,21 @@ export class ConnectionDetails {
   trip: PassengerTrip | null = null;
 
   public tripService = inject(OJPTrip);
+  public w4mService = inject(W4MPassengerService);
 
   constructor(private router: Router) {
     const navigation = this.router.currentNavigation();
     this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
+    if (this.trip?.criticalTransfer) {
+      console.log(this.trip?.criticalTransfer);
+      this.w4mService.enable_if_eligible(this.trip?.criticalTransfer)
+      // TODO: change the component Wait4MeButton accordingly if eligible.
+    }
   }
 
+
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
+    // TODO display walking route
     console.log("see detailed walking route for transfer");
     return;
   }
