@@ -10,3 +10,8 @@ export type Wait4MeRequest = {
     requestedDelay: Duration;
     status: string;
 }
+
+export interface RequestResponse {
+  status: string;
+  request_id?: string;
+}

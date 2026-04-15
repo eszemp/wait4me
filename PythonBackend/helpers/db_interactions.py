@@ -117,9 +117,8 @@ def get_incoming_requests(stop_ref, service):
     results = get_from_db(command, params, multiple=True)
 
     if results == 'Not found':
-        # TODO: Handle this so its not an Error
-        return jsonify({"Message": "No incoming connections"}), 200
+        return jsonify({"message": "No incoming connections"}), 200
 
-    return jsonify(results), 200
+    return jsonify({"data": "No incoming connections"}), 200
 
     

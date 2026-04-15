@@ -4,11 +4,8 @@ import { CriticalTransfer } from '../shared/types/PassengerTripTypes';
 import { PassengerTrip } from '../shared/types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
+import { RequestResponse } from '../shared/types/Wait4MeRequest';
 
-interface CreateRequestResponse {
-  status: string;
-  request_id?: string;
-}
 
 const BACKEND_URL = 'http://127.0.0.1:5000';
 
@@ -54,6 +51,7 @@ export class W4MPassengerService {
     if (delay_too_big || request_too_early) {
       return;
     }
+    // TODO: geofencing
     // TODO: also check DB to see if there is already a denied request for this transferstop and outgoing service for the same or a smaller delay.
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
@@ -96,7 +94,7 @@ export class W4MPassengerService {
       requested_delay: this.transfer?.requestedDelay.totalMinutes,
     }
     const response = await lastValueFrom(
-      this.http.post<CreateRequestResponse>(`${BACKEND_URL}/create-request`, request)
+      this.http.post<RequestResponse>(`${BACKEND_URL}/create-request`, request)
     );
 
     console.log('Script Output:', response);
@@ -150,7 +148,7 @@ export class W4MPassengerService {
 
     this.pollingSubscription = timer(0, 5000)
       .pipe(
-        switchMap(() => this.http.get<CreateRequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
+        switchMap(() => this.http.get<RequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
         tap(response => {
           if (response.status === 'pending') {
             this.status.set('pending');
