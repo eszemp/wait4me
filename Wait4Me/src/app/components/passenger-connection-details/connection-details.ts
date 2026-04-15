@@ -26,7 +26,6 @@ export class ConnectionDetails {
     if (this.trip?.criticalTransfer) {
       console.log(this.trip?.criticalTransfer);
       this.w4mService.enable_if_eligible(this.trip?.criticalTransfer)
-      // TODO: change the component Wait4MeButton accordingly if eligible.
     }
   }
 
