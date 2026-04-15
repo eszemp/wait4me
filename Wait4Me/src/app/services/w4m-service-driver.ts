@@ -16,19 +16,31 @@ const BACKEND_URL = 'http://127.0.0.1:5000';
 @Injectable({ providedIn: 'root' })
 export class W4MDriverService {
 
+  // for querying all request at a stop
   journey_ref: string = '';
   stop_ref: Number = 0;
 
+  // for editing a stop
+  edit_mode: Boolean = false;
+  request_id: string = ' ';
+
   constructor(private http: HttpClient) {}
 
-  public set_params(journey: string, stop: Number) {
+  public accept_request() : void {
+    // TODO
+  }
+  public decline_request() : void {
+    // TODO
+  }
+
+  public set_params_query(journey: string, stop: Number) {
     this.journey_ref = journey;
     console.log("Jouney_Ref:", this.journey_ref);
     this.stop_ref = stop;
     console.log("Stop Ref: ", this.stop_ref);
   }
 
-  async get_all_requests(): Promise<Wait4MeRequest[]> {
+  async query_all_requests(): Promise<Wait4MeRequest[]> {
     try {
       const response = await lastValueFrom(
         this.http.get<any>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${this.stop_ref}&outgoing_service=${this.journey_ref}`)
