@@ -6,9 +6,14 @@ import { W4MPassengerService } from '../../../services/w4m-passenger';
     selector: 'w4m-button',
     imports: [CommonModule],
     templateUrl: './wait4me-button.html',
-    styleUrls: ['./wait4me-button.css'],
+    styleUrls: ['./wait4me-button.css', '../../../app.css'],
 })
 export class Wait4MeButton {
     public w4mService = inject(W4MPassengerService);
 
+    cancel_request() {
+        // TODO: Pop Up asking if user is sure
+        console.log('user wants to cancel');
+        this.w4mService.cancel_request();
+    }
 }

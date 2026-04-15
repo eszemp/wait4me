@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject, Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
 import { CriticalTransfer } from '../shared/types/PassengerTripTypes';
 import { PassengerTrip } from '../shared/types/PassengerTripTypes';
@@ -16,16 +16,7 @@ const BACKEND_URL = 'http://127.0.0.1:5000';
 @Injectable({ providedIn: 'root' })
 export class W4MPassengerService {
 
-  private readonly statusSubject = new BehaviorSubject<string>('inactive');
-  status$ = this.statusSubject.asObservable();
-
-  get status(): string {
-    return this.statusSubject.value;
-  }
-
-  private set status(value: string) {
-    this.statusSubject.next(value);
-  }
+  readonly status: WritableSignal<'inactive' | 'enabled' | 'pending' | 'accepted' | 'declined'> = signal('inactive');
   // possible values:
   // 'inactive':  no critical transfer selected where a request could be sent
   // 'enabled':   this.transfer is not null, but no request has been sent yet or the request has been cancelled
@@ -44,7 +35,6 @@ export class W4MPassengerService {
   currentTrip$ = this.currentTrip.asObservable();
 
   constructor(private http: HttpClient) {
-    this.status = 'inactive';
     this.trip = null;
     this.transfer = null;
     this.passenger_id = uuidv4();
@@ -66,20 +56,20 @@ export class W4MPassengerService {
     }
     // TODO: also check DB to see if there is already a denied request for this transferstop and outgoing service for the same or a smaller delay.
     // if eligible, change service State and save criticalTransfer to Service
-    this.status = 'enabled';
+    this.status.set('enabled');
     this.transfer = transfer;
     return;
   }
 
   async click_on_button() {
-    console.log("Initial status: ", this.status)
-    switch (this.status) {
+    console.log("Initial status: ", this.status())
+    switch (this.status()) {
     case 'inactive':
       console.log("Button is not enabled. Select a connection with a eligible critical transfer first. A transfer is eligible for a request if...");
       break;
     case 'enabled':
       await this.trigger_new_request();
-      console.log("Sent request with ID: ", this.request_id, "New status: ", this.status);
+      console.log("Sent request with ID: ", this.request_id, "New status: ", this.status());
       break;
     case 'pending':
       console.log("There is a pending request. Open info dialogue with cancel option.");
@@ -113,14 +103,15 @@ export class W4MPassengerService {
 
     if (response.status === "created") {
       this.request_id = response.request_id ?? null;
-      this.status = 'pending';
+      this.status.set('pending');
       this.startStatusPolling();
     }
     return;
   }
 
   async cancel_request() {
-    if (this.status !== 'pending' || !this.request_id) {
+    console.log('cancelling request', this.request_id, 'current status', this.status());
+    if (!this.request_id || (this.status() !== 'pending' && this.status() !== 'accepted')) {
       return;
     }
 
@@ -135,7 +126,7 @@ export class W4MPassengerService {
       if (response.status === 'changed') {
         this.stopStatusPolling();
         this.request_id = null;
-        this.status = 'enabled';
+        this.status.set('enabled');
         return;
       }
 
@@ -162,14 +153,14 @@ export class W4MPassengerService {
         switchMap(() => this.http.get<CreateRequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
         tap(response => {
           if (response.status === 'pending') {
-            this.status = 'pending';
+            this.status.set('pending');
             console.log('request still pending')
             return;
           }
 
           if (response.status === 'accepted' || response.status === 'declined') {
-            this.status = response.status;
-            console.log('request status changed from pending to ', this.status)
+            this.status.set(response.status as 'accepted' | 'declined');
+            console.log('request status changed from pending to ', this.status());
             this.stopStatusPolling();
           }
         })
