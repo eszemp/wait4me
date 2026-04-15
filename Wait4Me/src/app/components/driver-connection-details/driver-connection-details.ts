@@ -2,14 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DepartureLine, DepartureStop, DriverStopRow } from '../../shared/types/DriverDeparturesTypes';
-import { W4MDriverService } from '../../services/w4m-driver';
+import { W4MDriverService } from '../../services/w4m-service-driver';
 import { Wait4MeDisplay } from '../driver-interface/w4m-display/w4m-display';
+import { Wait4MeEditBar } from '../driver-interface/w4m-edit-bar/w4m-edit-bar';
 
 
 
 @Component({
   selector: 'app-driver-connection-details',
-  imports: [CommonModule, Wait4MeDisplay],
+  imports: [CommonModule, Wait4MeDisplay, Wait4MeEditBar],
   templateUrl: './driver-connection-details.html',
   styleUrls: ['../../app.css', './driver-connection-details.css'],
 })
