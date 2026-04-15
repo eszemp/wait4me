@@ -1,6 +1,35 @@
+.w4m-display-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 76px;
+  height: max-content;
+}
+
 .request {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   justify-self: end;
   font-size: 28px;
+  padding: 14px 18px;
+  min-height: 76px;
+  text-wrap: nowrap;
+}
+.none {
   color: #595959;
   font-style: italic;
+}
+.open {
+  color: black;
+  text-wrap: nowrap;
+  border: 1px solid var(--fir-green);
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  z-index: 0;
+}
+
+.selected {
+   background:var(--mint);
 }

@@ -1,7 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { W4MDriverService } from '../../../services/w4m-driver';
+import { W4MDriverService } from '../../../services/w4m-service-driver';
 import { OJPLocation } from '../../../services/ojp-location';
 import { Wait4MeRequest } from '../../../shared/types/Wait4MeRequest';
 
@@ -45,8 +45,8 @@ export class Wait4MeDisplay {
     }
 
     private async query_db(): Promise<void> {
-        this.w4mService.set_params(this.serviceJourneyRef, Number(this.stopRef));
-        this.open_requests = await this.w4mService.get_all_requests();
+        this.w4mService.set_params_query(this.serviceJourneyRef, Number(this.stopRef));
+        this.open_requests = await this.w4mService.query_all_requests();
         if (this.open_requests.length===0) {
             this.state = 'No requests';
         }
@@ -54,5 +54,14 @@ export class Wait4MeDisplay {
             this.state = 'open';
             this.current_request = this.open_requests[0]
         }
+    }
+    process_request(): void {
+        console.log("clicked on request")
+        if(this.current_request) {
+            this.w4mService.edit_mode = true;
+            this.w4mService.request_id = this.current_request.requestId;
+            console.log("communicated to service to enable edit mode for request", this.w4mService.request_id );
+        }
+        return;
     }
 }
