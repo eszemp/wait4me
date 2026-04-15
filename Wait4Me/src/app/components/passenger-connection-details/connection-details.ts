@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Wait4MeButton } from '../passenger-interface/wait4me-button/wait4me-button';
 import { OJPTrip } from '../../services/ojp-trip';
-import { W4MPassengerService } from '../../services/w4m-passenger';
+import { W4MPassengerService } from '../../services/w4m-service-passenger';
 import { PassengerTransferLeg, PassengerTrip } from '../../shared/types/PassengerTripTypes'
 import { Duration } from '../../shared/models/duration';
 

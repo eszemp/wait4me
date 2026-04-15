@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { W4MPassengerService } from '../../../services/w4m-passenger';
+import { W4MPassengerService } from '../../../services/w4m-service-passenger';
 
 @Component({
     selector: 'w4m-button',
