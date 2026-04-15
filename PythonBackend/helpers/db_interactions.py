@@ -45,7 +45,7 @@ def get_from_db(command, params, multiple=False):
     return "Not found"      
 
 def create_new_request(data):
-    request_id = str(uuid.uuid4())[:8]
+    request_id = str(uuid.uuid4())
     
     command = """ INSERT INTO wait4me_requests (
                     request_id, 
@@ -71,7 +71,7 @@ def create_new_request(data):
     if db_transaction=='success':
         return jsonify({"status": "created", "request_id": request_id}), 201
     else:
-        return jsonify({"error": db_transaction}), 500
+        return jsonify({"status": db_transaction}), 500
 
 def change_request_status(request_id, data):
 
