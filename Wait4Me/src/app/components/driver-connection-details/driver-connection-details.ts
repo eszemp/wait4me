@@ -85,7 +85,7 @@ export class DriverConnectionDetails {
     return [
       {
         id: 'origin',
-        name: '', //TODO
+        name: '',
         timeTimetable: this.departure.departureTimetable,
         timeEstimated: this.departure.departureEstimated,
         delay: this.departure.departureDelay,
@@ -93,7 +93,7 @@ export class DriverConnectionDetails {
       },
       {
         id: 'destination',
-        name: '', //TODO
+        name: '',
         timeTimetable: this.departure.arrivalTimetable,
         timeEstimated: this.departure.arrivalEstimated,
         delay: this.departure.arrivalDelay,

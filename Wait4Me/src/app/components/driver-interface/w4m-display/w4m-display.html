@@ -1,6 +1,6 @@
-@if(this.stopRef) {
-    <span class="request">StopRef: {{stopRef}}</span>
+@if(this.state!='open') {
+    <span class="request">{{this.state}}</span>
 }
 @else {
-    <span class="request">Loading...</span>
+    <span class="request">{{this.current_request?.requestedDelay?.format()}}</span>
 }
