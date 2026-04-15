@@ -1,20 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Duration } from '../../shared/models/duration';
-import { DepartureLine, DepartureStop } from '../../shared/types/DriverDeparturesTypes';
+import { DepartureLine, DepartureStop, DriverStopRow } from '../../shared/types/DriverDeparturesTypes';
+import { W4MDriverService } from '../../services/w4m-driver';
+import { Wait4MeDisplay } from '../driver-interface/w4m-display/w4m-display';
 
-type DriverStopRow = {
-  id: string;
-  timeTimetable: Date;
-  timeEstimated: Date;
-  delay: Duration;
-  label: string;
-};
+
 
 @Component({
   selector: 'app-driver-connection-details',
-  imports: [CommonModule],
+  imports: [CommonModule, Wait4MeDisplay],
   templateUrl: './driver-connection-details.html',
   styleUrls: ['../../app.css', './driver-connection-details.css'],
 })
@@ -35,6 +30,7 @@ export class DriverConnectionDetails {
     };
 
     this.departure = state.selectedDeparture ?? null;
+    console.log("Journey Ref", this.departure?.journeyRef);
     this.originName = state.originName?.trim() || 'Current stop';
 
     const timer = window.setInterval(() => {
@@ -73,6 +69,7 @@ export class DriverConnectionDetails {
 
         return {
           id: stop.id || `stop-${index}`,
+          name: stopName,
           timeTimetable: stop.timeTimetable,
           timeEstimated: stop.timeEstimated,
           delay: stop.delay,
@@ -81,13 +78,14 @@ export class DriverConnectionDetails {
       })
       .filter((stop): stop is DriverStopRow => stop !== null);
 
-    if (apiStops.length > 0) {
+      if (apiStops.length > 0) {
       return apiStops;
     }
 
     return [
       {
         id: 'origin',
+        name: '', //TODO
         timeTimetable: this.departure.departureTimetable,
         timeEstimated: this.departure.departureEstimated,
         delay: this.departure.departureDelay,
@@ -95,6 +93,7 @@ export class DriverConnectionDetails {
       },
       {
         id: 'destination',
+        name: '', //TODO
         timeTimetable: this.departure.arrivalTimetable,
         timeEstimated: this.departure.arrivalEstimated,
         delay: this.departure.arrivalDelay,

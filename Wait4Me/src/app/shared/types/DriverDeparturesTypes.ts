@@ -3,6 +3,7 @@ import { Duration } from '../models/duration';
 export type DepartureLine = {
   line: string;
   course: string | null;
+  journeyRef: string;
   direction: string;
   departureTimetable: Date;
   departureEstimated: Date;
@@ -34,4 +35,13 @@ export type NearbyStopLookupResult = StopLookupResult & {
   latitude: number;
   longitude: number;
   distanceMeters: number;
+};
+
+export type DriverStopRow = {
+  id: string;
+  name: string;
+  timeTimetable: Date;
+  timeEstimated: Date;
+  delay: Duration;
+  label: string;
 };
