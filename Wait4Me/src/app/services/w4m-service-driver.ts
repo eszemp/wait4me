@@ -26,11 +26,52 @@ export class W4MDriverService {
 
   constructor(private http: HttpClient) {}
 
-  public accept_request() : void {
-    // TODO
+  public async accept_request() : Promise<void> {
+    console.log('accepting request', this.request_id);
+    if (!this.request_id) {
+      return;
+    }
+    try {
+      const response = await lastValueFrom(
+        this.http.post<{ status: string; request_id?: string }>(
+          `${BACKEND_URL}/update-request/${this.request_id}`,
+          { status: 'accepted' }
+        )
+      );
+
+      if (response.status === 'changed') {
+        this.request_id = ' ';
+        this.edit_mode = false;
+        return;
+      }
+      console.error('Accepting request failed, backend did not confirm change:', response);
+    } catch (error) {
+      console.error('Accepting request failed:', error);
+    }
   }
-  public decline_request() : void {
-    // TODO
+
+  public async decline_request() : Promise<void> {
+    console.log('declining request', this.request_id);
+    if (!this.request_id) {
+      return;
+    }
+    try {
+      const response = await lastValueFrom(
+        this.http.post<{ status: string; request_id?: string }>(
+          `${BACKEND_URL}/update-request/${this.request_id}`,
+          { status: 'declined' }
+        )
+      );
+
+      if (response.status === 'changed') {
+        this.request_id = ' ';
+        this.edit_mode = false;
+        return;
+      }
+      console.error('Declining request failed, backend did not confirm change:', response);
+    } catch (error) {
+      console.error('Declining request failed:', error);
+    }
   }
 
   public set_params_query(journey: string, stop: Number) {
