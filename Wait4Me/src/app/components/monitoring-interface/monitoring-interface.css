@@ -10,6 +10,7 @@
   width: calc(100% - 20px);
   height: 700px;
   border-radius: 20px;
+  overflow: hidden;
   margin: -20px auto 0 auto;
 }
 
