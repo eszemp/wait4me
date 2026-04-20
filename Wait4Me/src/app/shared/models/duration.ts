@@ -78,7 +78,6 @@ export class Duration {
   }
 
   public addToDate(timestamp: Date): Date {
-    // TODO: make more exact then minutes
     const newDate = new Date(timestamp.getTime());
     newDate.setMinutes(newDate.getMinutes() + this.totalMinutes);
     return newDate;

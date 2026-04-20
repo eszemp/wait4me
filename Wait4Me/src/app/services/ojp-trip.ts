@@ -205,7 +205,8 @@ export class OJPTrip extends OJPBase{
     const arrival = prev_leg.alightTimeEstimated;
     const actual_arrival = transfer_leg.duration.addToDate(arrival);
     const departure = next_leg.boardTimeEstimated;
-    const req_delay_min = Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60);
+    // TODO: maybe adjust so its rounded up to the nearest half minute
+    const req_delay_min = Math.ceil(Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60));
     const transferStopName = next_leg.boardStopName;
     const suggestions = await firstValueFrom(this.locationService.getLocationInformation(transferStopName, 1));
     const transferStopRef = suggestions[0]?.stopPlaceRef ?? '';
