@@ -36,7 +36,7 @@
             {{ stop.timeTimetable | date: 'HH:mm:ss' }}
             @if (false) {
               <span class="time-delay">
-                +{{ stop.delay.plus(someService.added_delay_from_request).format()  TODO: implement properly }}
+                +{{ stop.delay.format()}}
               </span>
             }
             @else {

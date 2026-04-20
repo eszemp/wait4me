@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, OnDestroy, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OJPStopEvent } from '../../../services/ojp-stop-event';
+import { OJPStopEvent } from '../../../shared/services/ojp-stop-event';
 import type { StopLookupResult, DepartureLine } from '../../../shared/types/DriverDeparturesTypes';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';

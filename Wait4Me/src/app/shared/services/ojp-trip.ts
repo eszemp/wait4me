@@ -87,7 +87,7 @@ export class OJPTrip extends OJPBase{
 
         return (response.value.tripResult ?? [])
           .map((result) => this.toPassengerTrip(result))
-          .filter((trip): trip is PassengerTrip => trip !== null);
+          .filter((trip): trip is Promise<PassengerTrip> => trip !== null);
       }),
     );
   }
