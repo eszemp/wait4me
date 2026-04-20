@@ -2,7 +2,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
 import os
-from flask import jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,12 +30,16 @@ def post_to_db(command, params):
 def get_from_db(command, params, multiple=False):
 
     conn = psycopg2.connect(**DB_CONFIG)
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute(command, params)
+    
     if multiple:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(command, params)
         result=cur.fetchall()
     else:
-        result = cur.fetchone()
+        cur = conn.cursor()
+        cur.execute(command, params)
+        result=cur.fetchone()[0]
+
     cur.close()
     conn.close()
 
@@ -45,77 +48,92 @@ def get_from_db(command, params, multiple=False):
     return "Not found"      
 
 def create_new_request(data):
-    request_id = str(uuid.uuid4())[:8]
+    request_id = str(uuid.uuid4())
     
-    command = """ INSERT INTO wait4me_requests 
-                (request_id, passenger_id, incoming_service, outgoing_service, requested_delay) 
-                VALUES (%s, %s, %s, %s, %s) """
+    command = """ INSERT INTO wait4me_requests (
+                    request_id, 
+                    passenger_id, 
+                    incoming_journey_ref, 
+                    outgoing_journey_ref, 
+                    transfer_stop_ref,
+                    scheduled_departure_time,
+                    requested_delay_min
+                ) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s) """
      
-    params = (request_id, data['passenger_id'], data['incoming_service'], data['outgoing_service'], data['requested_delay'])
+    params = (request_id, 
+              data['passenger_id'], 
+              data['incoming_journey_ref'], 
+              data['outgoing_journey_ref'], 
+              data['transfer_stop_ref'],
+              data['scheduled_departure_time'],
+              data['requested_delay']
+              )
     
     db_transaction = post_to_db(command, params)
     if db_transaction=='success':
-        return jsonify({"status": "created", "request_id": request_id}), 201
+        return "created", request_id
     else:
-        return jsonify({"error": db_transaction}), 500
+        return db_transaction, 0
 
 def change_request_status(request_id, data):
 
     command = """
         UPDATE wait4me_requests 
         SET status = %s 
-        WHERE id = %s
+        WHERE request_id = %s
     """
     params = (data['status'], request_id)
     
     db_transaction = post_to_db(command, params)
 
     if db_transaction=='success':
-        return jsonify({"status": "changed", "request_id": request_id}), 201
+        return "changed", request_id
     else:
-        return jsonify({"error": db_transaction}), 500
-    
-def change_request_status(request_id, data):
-
-    command = """
-        UPDATE wait4me_requests 
-        SET status = %s 
-        WHERE id = %s
-    """
-    params = (data['status'], request_id)
-    
-    db_transaction = post_to_db(command, params)
-
-    if db_transaction=='success':
-        return jsonify({"status": "changed", "request_id": request_id}), 201
-    else:
-        return jsonify({"error": db_transaction}), 500
+        return db_transaction, 0  
     
 def get_request_status(request_id):
 
-    command = "SELECT status FROM wait4me_requests WHERE id = %s"
+    command = """
+        SELECT status 
+        FROM wait4me_requests 
+        WHERE request_id = %s
+    """
     params = (request_id,)
-
     result = get_from_db(command, params)
-
-    if result == 'Not found':
-        return jsonify({"error": "Not found"}), 404
-
-    return jsonify(result), 200
+    return result
 
 def get_incoming_requests(stop_ref, service):
 
-    command = "SELECT * FROM wait4me_requests WHERE status = %s"
-    params = ('pending',)
+    command = """
+        SELECT * 
+        FROM wait4me_requests 
+        WHERE outgoing_journey_ref = %s AND transfer_stop_ref = %s AND status = %s
+    """
+    params = (service, stop_ref, 'pending')
 
     results = get_from_db(command, params, multiple=True)
 
-    if results == 'Not found':
-        # TODO: Handle this so its not an Error
-        return jsonify({"Message": "No incoming connections"}), 200
+    return results
 
-    return jsonify(results), 200
+def cleanup_expired_requests():
+    """
+    Updates all pending requests to 'expired' if their scheduled 
+    departure time is in the past.
+    """
 
-        
+    command = """
+        UPDATE wait4me_requests 
+        SET status = 'expired' 
+        WHERE status = 'pending' 
+        AND scheduled_departure_time < CURRENT_TIMESTAMP
+    """
+    
+    db_transaction = post_to_db(command, ())
+    
+    if db_transaction == 'success':
+        return "successful"
+    else:
+        return f"failed: {db_transaction}"
 
-        
+    

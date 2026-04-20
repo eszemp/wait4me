@@ -4,9 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouteFormComponent } from './route-form/route-form.component';
 import { Wait4MeButton } from './wait4me-button/wait4me-button';
-import { OJPTrip} from '../../services/ojp-trip';
+import { OJPTrip} from '../../shared/services/ojp-trip';
 import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
-import { Duration } from '../../shared/models/duration';
 
 @Component({
   selector: 'app-passenger-interface',
@@ -79,6 +78,7 @@ export class PassengerInterface {
     this.router.navigate(['/passenger/connection-details'], { 
       state: { selectedTrip: trip } 
     });
+    // TODO: W4M if no active request, make sure w4m button is disabled when a new connection is selected
     return;
   }
 }

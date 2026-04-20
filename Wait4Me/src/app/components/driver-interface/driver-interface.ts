@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { OJPStopEvent } from '../../services/ojp-stop-event';
+import { OJPStopEvent } from '../../shared/services/ojp-stop-event';
 import { DepartureLine, StopLookupResult } from  '../../shared/types/DriverDeparturesTypes';
 import { DriverDeparturesComponent } from './driver-departures/driver-departures';
 import { DriverStatusComponent } from './driver-status/driver-status';

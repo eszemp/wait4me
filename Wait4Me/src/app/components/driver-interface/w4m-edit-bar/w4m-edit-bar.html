@@ -1,0 +1,12 @@
+<div class="edit-bar">
+    @if (this.w4mService.edit_mode) {
+        <button type="button" class="accept" (click)="this.w4mService.accept_request()">
+            Accept
+        </button>
+        <button type="button" class="decline" (click)="this.w4mService.decline_request()">
+            Decline
+        </button>
+        <div class="total_requests">1x requested</div>
+    }
+</div>
+

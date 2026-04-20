@@ -1,7 +1,7 @@
 import { Component, input, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { LocationSuggestion, OJPLocation } from '../../../services/ojp-location';
-import { OJPTrip } from '../../../services/ojp-trip';
+import { LocationSuggestion, OJPLocation } from '../../../shared/services/ojp-location';
+import { OJPTrip } from '../../../shared/services/ojp-trip';
 
 @Component({
   selector: 'app-destination-autocomplete',

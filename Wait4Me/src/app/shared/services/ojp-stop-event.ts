@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { from, map, Observable } from 'rxjs';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
-import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../shared/types/DriverDeparturesTypes';
+import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../types/DriverDeparturesTypes';
 import { OJPBase } from './ojp-base';
-import { Duration } from '../shared/models/duration';
+import { Duration } from '../models/duration';
 
 
 
@@ -46,6 +46,7 @@ export class OJPStopEvent extends OJPBase {
             const service = result.stopEvent?.service;
             const callAtStop = result.stopEvent?.thisCall?.callAtStop;
             const onwardCalls = result.stopEvent?.onwardCall ?? [];
+            const journeyRef = this.asString(service?.journeyRef);
             const firstOnwardCall = onwardCalls[0]?.callAtStop;
             const lastOnwardCall = onwardCalls[onwardCalls.length - 1]?.callAtStop;
             const line = this.asString(
@@ -130,6 +131,7 @@ export class OJPStopEvent extends OJPBase {
             return {
               line,
               course,
+              journeyRef,
               direction,
               destinationStopPointRef,
               departureTimetable,

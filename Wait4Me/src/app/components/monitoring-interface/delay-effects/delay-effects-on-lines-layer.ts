@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, inject, OnDestroy, ViewChild } fr
 import maplibregl from 'maplibre-gl';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { OJPTrip } from '../../../services/ojp-trip';
+import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { LineSearchComponent, type SelectedConnectionPayload } from '../line-search/line-search.component';
 
 @Component({

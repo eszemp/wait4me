@@ -1,0 +1,13 @@
+<div class="w4m-display-shell">
+    @if(this.state!='open') {
+        <div class="request none">
+            <span>{{this.state}}</span>
+        </div>
+    }
+    @else {
+        <div class="request open" (click)="this.process_request()">
+            <span>+ {{this.current_request?.requestedDelay?.format()}} min ?</span>
+        </div>
+    }
+</div>
+

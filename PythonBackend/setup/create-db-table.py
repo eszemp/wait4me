@@ -1,7 +1,7 @@
+# this file also serves as a test for db connectivity
+# the create db command is not necessarily representative of the current column names and types
 import psycopg2
-import uuid
 import os
-from flask import jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,16 +33,16 @@ def execute_sql(command, request_id):
 
 if __name__ == "__main__":
 
-    command = """CREATE TABLE wait4me_requests (
-        request_id VARCHAR(10) PRIMARY KEY,
-        passenger_id VARCHAR(10),
-        incoming_service VARCHAR(100),
-        outgoing_service VARCHAR(100),
+    command = """CREATE TABLE wait4me_requests2 (
+        request_id VARCHAR(100) PRIMARY KEY,
+        passenger_id VARCHAR(100),
+        incoming_journey_ref VARCHAR(100),
+        outgoing_journey_ref VARCHAR(100),
         transfer_stop_ref INTEGER,
-        outgoing_departure_time TIMESTAMP,
-        requested_delay INTEGER,
+        scheduled_departure_time TIMESTAMP WITH TIME ZONE,
+        requested_delay_min FLOAT,
         status VARCHAR(20) DEFAULT 'pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );"""
     response = execute_sql(command, None)
     print(response)

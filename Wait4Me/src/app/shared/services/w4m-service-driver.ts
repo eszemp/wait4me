@@ -1,0 +1,117 @@
+import { Injectable } from '@angular/core';
+import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
+import { Wait4MeRequest, PostResponse, GetRequestResponse, BACKEND_URL } from '../types/Wait4MeRequest';
+import { HttpClient } from '@angular/common/http';
+import { Duration } from '../models/duration';
+
+
+
+
+
+@Injectable({ providedIn: 'root' })
+export class W4MDriverService {
+
+  // for querying all request at a stop
+  journey_ref: string = '';
+  stop_ref: Number = 0;
+
+  // for editing a stop
+  edit_mode: Boolean = false;
+  request_id: string = ' ';
+
+  constructor(private http: HttpClient) {}
+
+  public async accept_request() : Promise<void> {
+    console.log('accepting request', this.request_id);
+    if (!this.request_id) {
+      return;
+    }
+    try {
+      const response = await lastValueFrom(
+        this.http.post<PostResponse>(
+          `${BACKEND_URL}/update-request/${this.request_id}`,
+          { status: 'accepted' }
+        )
+      );
+
+      console.log(response.api_status);
+
+      if (response.api_status === 'changed') {
+        this.request_id = ' ';
+        this.edit_mode = false;
+        return;
+      }
+      console.error('Accepting request failed, backend did not confirm change:', response.api_status);
+    } catch (error) {
+      console.error('Accepting request failed:', error);
+    }
+  }
+
+  public async decline_request() : Promise<void> {
+    console.log('declining request', this.request_id);
+    if (!this.request_id) {
+      return;
+    }
+    try {
+      const response = await lastValueFrom(
+        this.http.post<PostResponse>(
+          `${BACKEND_URL}/update-request/${this.request_id}`,
+          { status: 'declined' }
+        )
+      );
+
+      if (response.api_status === 'changed') {
+        this.request_id = ' ';
+        this.edit_mode = false;
+        return;
+      }
+      console.error('Declining request failed, backend did not confirm change:', response.api_status);
+    } catch (error) {
+      console.error('Declining request failed:', error);
+    }
+  }
+
+  public set_params_query(journey: string, stop: Number) {
+    this.journey_ref = journey;
+    console.log("Jouney_Ref:", this.journey_ref);
+    this.stop_ref = stop;
+    console.log("Stop Ref: ", this.stop_ref);
+  }
+
+  async query_all_requests(): Promise<Wait4MeRequest[]> {
+    try {
+      const response = await lastValueFrom(
+        this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${this.stop_ref}&outgoing_service=${this.journey_ref}`)
+      );
+
+      console.log('API Response:', response);
+
+      // Check for the "No incoming connections" message inside the object
+      if (response.api_status === "No incoming connections") {
+        return [];
+      }
+
+      const array_of_requests = response.data.map((data: any) => {
+        return {
+          requestId: data.request_id,
+          passengerId: data.passenger_id,
+          incomingJourneyRef: data.incoming_journey_ref,
+          outgoingJourneyRef: data.outgoing_journey_ref,
+          transferStopRef: data.transfer_stop_ref,
+          scheduledDepartureTime: new Date(data.scheduled_departure_time),
+          requestedDelay: Duration.initFromTotalMinutes(data.requested_delay_min),
+          status: data.status
+        } satisfies Wait4MeRequest;
+      });
+
+      console.log(array_of_requests);
+      return array_of_requests;
+
+    } catch (error) {
+      console.error('DB Query of all requests failed:', error);
+      return [];
+    }
+  }
+
+
+}
