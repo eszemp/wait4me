@@ -9,6 +9,9 @@ import maplibregl from 'maplibre-gl';
   standalone: true,
   imports: [CommonModule],
 })
+/**
+ * Renders station transfer-time histogram points and interactive popups.
+ */
 export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
@@ -21,6 +24,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     color: this.binColors[index],
   }));
 
+  /** Initializes the map and loads the histogram layer once style data is ready. */
   ngAfterViewInit(): void {
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
@@ -58,7 +62,6 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
 
     const response = await fetch('/map-data/stop_histogram_schwyz.geojson');
     if (!response.ok) {
-      console.error('Failed to load stop histogram GeoJSON:', response.statusText);
       return;
     }
 

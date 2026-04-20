@@ -11,7 +11,7 @@
 .monitoring-map {
   border: 2px solid var(--fir-green);
   width: 100%;
-  height: 700px;
+  height: calc(100vh - 70px);
   border-radius: 20px;
   overflow: hidden;
 }

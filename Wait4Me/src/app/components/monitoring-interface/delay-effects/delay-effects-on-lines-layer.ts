@@ -1,18 +1,23 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import maplibregl from 'maplibre-gl';
+import { LineSearchComponent } from '../line-search/line-search.component';
 
 @Component({
   selector: 'app-delay-effects-on-lines-layer',
   templateUrl: './delay-effects-on-lines-layer.html',
   styleUrls: ['./delay-effects-on-lines-layer.css'],
   standalone: true,
-  imports: [],
+  imports: [LineSearchComponent],
 })
+/**
+ * Hosts the delay-effects map and overlays the line search control.
+ */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   private map: maplibregl.Map | null = null;
 
+  /** Creates a non-rotatable map instance for delay visualization. */
   ngAfterViewInit(): void {
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
@@ -36,6 +41,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     });
   }
 
+  /** Disposes map resources when the component is destroyed. */
   ngOnDestroy(): void {
     this.map?.remove();
     this.map = null;

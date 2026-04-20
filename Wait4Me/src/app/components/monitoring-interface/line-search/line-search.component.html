@@ -1,0 +1,82 @@
+<div class="line-search-container">
+  <div class="connections-wrapper">
+    @if (selectedStation()) {
+      @if (selectedLine(); as line) {
+        <div class="selected-line-display">
+          <span class="line-number">{{ line.line }}</span>
+          <span class="line-direction">{{ line.direction }}</span>
+          @if (line.departureTimetable) {
+            <span class="line-time">{{ formatDepartureTime(line.departureTimetable) }}</span>
+          }
+          <button
+            type="button"
+            class="clear-line-btn"
+            (click)="selectedLine.set(null); showDepartureDropdown.set(true)"
+          >
+            ✕
+          </button>
+        </div>
+      } @else {
+        @if (error()) {
+          <div class="error">{{ error() }}</div>
+        }
+
+        @if (showDepartureDropdown() && departingLines().length > 0) {
+          <ul class="departures-dropdown">
+            @for (line of departingLines(); track line.line) {
+              <li class="departure-item">
+                <button
+                  type="button"
+                  class="departure-button"
+                  (mousedown)="selectLine(line)"
+                >
+                  <span class="line-number">{{ line.line }}</span>
+                  <span class="line-direction">{{ line.direction }}</span>
+                  @if (line.departureTimetable) {
+                    <span class="line-time">{{ formatDepartureTime(line.departureTimetable) }}</span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    }
+  </div>
+
+  <div class="search-wrapper">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search station..."
+      [(ngModel)]="stationQuery"
+      (input)="onStationQueryChange(stationQuery)"
+      (focus)="showStationSuggestions = stationQuery.length >= 2"
+      (blur)="closeStationSuggestions()"
+      autocomplete="off"
+    />
+
+    <input
+      type="time"
+      class="time-input"
+      [(ngModel)]="selectedTime"
+      (change)="onTimeChange()"
+    />
+
+    @if (showStationSuggestions && stationSuggestions().length > 0) {
+      <ul class="suggestions-dropdown">
+        @for (station of stationSuggestions(); track station.stopPlaceRef) {
+          <li>
+            <button
+              type="button"
+              class="suggestion-item"
+              (mousedown)="selectStation(station)"
+            >
+              {{ station.stopPlaceName }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

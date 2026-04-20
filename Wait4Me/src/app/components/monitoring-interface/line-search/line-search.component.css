@@ -1,0 +1,230 @@
+.line-search-container {
+  --control-height: 60px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.connections-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.search-wrapper {
+  position: relative;
+  width: auto;
+  flex-shrink: 0;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  background: white;
+  height: var(--control-height);
+  border-radius: 12px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.search-wrapper input {
+  flex-shrink: 0;
+}
+
+.search-input {
+  padding: 0 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--grey);
+  outline: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  width: 200px;
+  height: var(--control-height);
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.search-input::placeholder {
+  color: #565656;
+  opacity: 1;
+}
+
+.time-input {
+  padding: 0 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--grey);
+  outline: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  width: 100px;
+  text-align: center;
+  flex-shrink: 0;
+  height: var(--control-height);
+  box-sizing: border-box;
+}
+
+.time-input:focus {
+  border-color: transparent;
+  border-right: 2px solid var(--fir-green);
+  box-shadow: none;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: calc(var(--control-height) + 6px);
+  left: 0;
+  right: 0;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: white;
+  border-radius: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
+  z-index: 140;
+  min-width: 300px;
+}
+
+.suggestion-item {
+  width: 100%;
+  padding: 7px 10px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--grey);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background: #f0f4f2;
+}
+
+.departures-dropdown {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 12px);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: white;
+  border-radius: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  z-index: 110;
+  min-width: 280px;
+}
+
+.departure-item {
+  padding: 2px 4px;
+}
+
+.departure-button {
+  width: 100%;
+  padding: 8px 15px;
+  background: transparent;
+  border: none;
+  border-radius: 15px;
+  color: var(--grey);
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.departure-button:hover {
+  background: var(--light-grey);
+}
+
+.line-number {
+  font-weight: 700;
+  min-width: 45px;
+  background: var(--fir-green);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.line-direction {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--grey);
+}
+
+.line-time {
+  font-size: 14px;
+  color: var(--grey);
+  opacity: 0.7;
+  min-width: 55px;
+  text-align: right;
+}
+
+.error {
+  padding: 12px 15px;
+  background: var(--light-red);
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  color: var(--grey);
+  text-align: center;
+  font-size: 16px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  margin-top: 6px;
+}
+
+.selected-line-display {
+  height: var(--control-height);
+  padding: 0 15px;
+  background: white;
+  border-radius: 12px;
+  color: var(--grey);
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 200px;
+  box-sizing: border-box;
+}
+
+.clear-line-btn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--grey);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s ease;
+  font-weight: bold;
+}
+
+.clear-line-btn:hover {
+  color: var(--fir-green);
+}
