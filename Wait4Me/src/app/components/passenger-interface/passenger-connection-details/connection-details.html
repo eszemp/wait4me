@@ -59,9 +59,16 @@
               <div>
                 <span class="time-start"> 
                   {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
-                  <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
-                    +{{ leg.boardDelay.format() }}
-                  </span>
+                  @if ((w4mService.status()==='accepted') && (trip.criticalTransferId! + 1 === leg.id)) {
+                    <span class="time-delay">
+                      +{{ leg.boardDelay.plus(w4mService.transfer!.requestedDelay).format() }}
+                    </span>
+                  }
+                  @else {
+                    <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
+                      +{{ leg.boardDelay.format() }}
+                    </span>
+                  }
                 </span>
                 <span class="location-start">{{ leg.boardStopName }} <i>{{leg.lineName}} to {{ leg.destinationText }}</i></span>
               </div>
@@ -84,7 +91,7 @@
     }
 
     @else if (leg.kind === 'transfer') {
-      @if (trip.criticalTransferId === leg.id) {
+      @if ((trip.criticalTransferId === leg.id) && w4mService.status() != 'accepted') {
         <div class="transfer-warning">
           <div class="time-column">
               <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
