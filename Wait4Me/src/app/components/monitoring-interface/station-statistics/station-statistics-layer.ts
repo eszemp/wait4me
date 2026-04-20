@@ -4,8 +4,8 @@ import maplibregl from 'maplibre-gl';
 
 @Component({
   selector: 'app-station-statistics-layer',
-  templateUrl: './station-statistics-layer.component.html',
-  styleUrls: ['./station-statistics-layer.component.css'],
+  templateUrl: './station-statistics-layer.html',
+  styleUrls: ['./station-statistics-layer.css'],
   standalone: true,
   imports: [CommonModule],
 })

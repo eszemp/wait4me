@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { StationStatisticsLayerComponent } from './layers/station-statistics-layer.component';
-import { DelayEffectsOnLinesLayerComponent } from './layers/delay-effects-on-lines-layer.component';
+import { StationStatisticsLayerComponent } from './station-statistics/station-statistics-layer';
+import { DelayEffectsOnLinesLayerComponent } from './delay-effects/delay-effects-on-lines-layer';
 
 type MonitoringLayerId = 'station-statistics' | 'delay-effects-on-lines';
 
