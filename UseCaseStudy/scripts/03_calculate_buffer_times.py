@@ -16,29 +16,37 @@ LOG = SCRIPT_DIR / "03_calculate_buffer_times_LOGFILE.txt"
 
 
 def inread_data():
+    """Load stop places from the configured shapefile."""
     print(f"Loading shapefile: {FILE_PATH}")
     return gpd.read_file(str(FILE_PATH))
 
+
 def process_all_stops(stops):
     """
-    ...
+    Compute transfer-buffer timeseries for each stop and write results to GeoPackage.
+
+    Args:
+        stops: GeoDataFrame containing stop metadata including Nummer and Name.
+
+    Returns:
+        None. Results are written to disk and stored in the buffer_timeseries column.
     """
 
     OJPDepArr = OJPStopDepArrRequest()
 
-    stops['buffer_timeseries'] = None
+    stops["buffer_timeseries"] = None
 
     initialize_logfile(LOG)
     print("Processing entries...")
     for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
         result = get_buffer_timeseries(row, OJPDepArr)
         if result:
-            stops.at[index, 'buffer_timeseries'] = result['buffer_timeseries']
+            stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
 
     # Export to GeoPackage
     output_path = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
     stops.to_file(str(output_path), driver="GPKG", layer="stop_buffers")
-    
+
     print(f"\nSuccessfully saved {len(stops)} rows to {output_path}")
 
 
@@ -50,7 +58,12 @@ def load_required_transfer_times_by_stop():
     """
     transfers_df = pd.read_csv(
         TRANSFER_FILE_PATH,
-        dtype={"from_stop_id": str, "to_stop_id": str, "transfer_type": str, "min_transfer_time": str},
+        dtype={
+            "from_stop_id": str,
+            "to_stop_id": str,
+            "transfer_type": str,
+            "min_transfer_time": str,
+        },
         usecols=["from_stop_id", "to_stop_id", "transfer_type", "min_transfer_time"],
     )
 
@@ -64,11 +77,15 @@ def load_required_transfer_times_by_stop():
     if station_defaults.empty:
         return {}
 
-    station_defaults["min_transfer_time"] = pd.to_numeric(station_defaults["min_transfer_time"], errors="coerce")
+    station_defaults["min_transfer_time"] = pd.to_numeric(
+        station_defaults["min_transfer_time"], errors="coerce"
+    )
     station_defaults = station_defaults.dropna(subset=["min_transfer_time"])
 
     # If multiple rows exist for the same stop, keep the first (values are typically identical).
-    station_defaults = station_defaults.drop_duplicates(subset=["from_stop_id"], keep="first")
+    station_defaults = station_defaults.drop_duplicates(
+        subset=["from_stop_id"], keep="first"
+    )
 
     return {
         row["from_stop_id"]: timedelta(seconds=int(row["min_transfer_time"]))
@@ -77,6 +94,7 @@ def load_required_transfer_times_by_stop():
 
 
 def get_stop_ref_candidates(stop_place_ref):
+    """Build normalized stop-id candidates used for transfer-time lookup."""
     value = str(stop_place_ref).strip()
     digits_only = "".join(ch for ch in value if ch.isdigit())
 
@@ -86,7 +104,20 @@ def get_stop_ref_candidates(stop_place_ref):
 
     return candidates
 
+
 def get_required_transfer_time(StopPlaceRef):
+    """
+    Resolve required transfer time for a stop.
+
+    Looks up GTFS transfer_type=2 station defaults in transfers.txt and falls back
+    to 2 minutes if no explicit match is found.
+
+    Args:
+        StopPlaceRef: Stop identifier used in OJP requests.
+
+    Returns:
+        timedelta representing required interchange time.
+    """
     transfer_times_by_stop = load_required_transfer_times_by_stop()
 
     for candidate in get_stop_ref_candidates(StopPlaceRef):
@@ -96,7 +127,19 @@ def get_required_transfer_time(StopPlaceRef):
     # Fallback if no explicit entry exists in transfers.txt.
     return timedelta(minutes=2)
 
+
 def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
+    """
+    Fetch all arrivals or departures for a stop in the configured analysis window.
+
+    Args:
+        OJPDepArr: OJPStopDepArrRequest client instance.
+        StopPlaceRef: Stop identifier used by the OJP API.
+        RequestType: Either "arrival" or "departure".
+
+    Returns:
+        DataFrame with fetched records, truncated to the end of the time window.
+    """
 
     # look at 15th April (typical weekday)
     start_time = datetime(year=2026, month=4, day=15, hour=0, minute=0, second=0)
@@ -106,33 +149,44 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
     results = []
 
     while current_time < end_time:
-        new_batch= OJPDepArr.fetch_departures_or_arrivals(stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time)
+        new_batch = OJPDepArr.fetch_departures_or_arrivals(
+            stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time
+        )
 
         if not new_batch:
             # print("No more results returned from API.")
             break
-        
-        if new_batch[-1]['time'] <= current_time:
+
+        if new_batch[-1]["time"] <= current_time:
             # print("Repeating Data. Stopping.")
             break
 
         results.extend(new_batch)
 
-        last_result = results[-1]['time']
+        last_result = results[-1]["time"]
         current_time = last_result
         # time.sleep(1.3)
 
     # delete all entries where time > end_time
-    results = [r for r in results if r['time'] <= end_time]
+    results = [r for r in results if r["time"] <= end_time]
 
     return pd.DataFrame(results)
 
 
 def get_buffer_timeseries(row, OJPDepArr, debug=False):
     """
-    ...
+    Calculate the transfer-buffer timeseries for a single stop.
+
+    Args:
+        row: Row from the stop GeoDataFrame (must contain Nummer and Name).
+        OJPDepArr: OJPStopDepArrRequest client instance.
+        debug: If True, overrides stop id with a fixed debug stop.
+
+    Returns:
+        Dict with key buffer_timeseries containing a JSON string, or status strings
+        "NO SERVICE" / "NO TRANSFERS" when no valid result can be computed.
     """
-    StopPlaceRef = row['Nummer']
+    StopPlaceRef = row["Nummer"]
     if debug:
         StopPlaceRef = 8505084
 
@@ -145,50 +199,66 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
 
     if all_arrivals.empty or all_departures.empty:
         add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no services")
-        return {'buffer_timeseries':'NO SERVICE'}
+        return {"buffer_timeseries": "NO SERVICE"}
 
-    combined = pd.merge(all_arrivals, all_departures, how='cross', suffixes=('_arr', '_dep'))
+    combined = pd.merge(
+        all_arrivals, all_departures, how="cross", suffixes=("_arr", "_dep")
+    )
 
-    mask = (
-        (combined['time_dep'] >= combined['time_arr'] + req_transfer_time) & 
-        (combined['line_arr'] != combined['line_dep'])
+    mask = (combined["time_dep"] >= combined["time_arr"] + req_transfer_time) & (
+        combined["line_arr"] != combined["line_dep"]
     )
     valid_options = combined[mask]
 
-    if len(valid_options)==0:
+    if len(valid_options) == 0:
         add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no transfers")
-        return {'buffer_timeseries':'NO TRANSFERS'}
+        return {"buffer_timeseries": "NO TRANSFERS"}
 
     # find the 'First' departure for each arrival, sort by departure time first, then group by the unique arrival (time + line)
     matches = (
-        valid_options
-        .sort_values('time_dep')
-        .groupby(['time_arr', 'line_arr'])
+        valid_options.sort_values("time_dep")
+        .groupby(["time_arr", "line_arr"])
         .first()
         .reset_index()
     )
 
     # calculate final buffer
-    matches['buffer_seconds'] = (matches['time_dep'] - (matches['time_arr'] + req_transfer_time)).dt.total_seconds()
-    average_buffer = matches['buffer_seconds'].mean()
+    matches["buffer_seconds"] = (
+        matches["time_dep"] - (matches["time_arr"] + req_transfer_time)
+    ).dt.total_seconds()
+    average_buffer = matches["buffer_seconds"].mean()
 
     if debug:
         print(matches)
 
-    add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has average buffer time: {average_buffer} seconds")
+    add_to_log(
+        LOG,
+        f"{row['Name']} ({row['Nummer']}) has average buffer time: {average_buffer} seconds",
+    )
 
     timeseries = (
-        matches[['time_arr', 'buffer_seconds']]
+        matches[["time_arr", "line_arr", "line_dep", "buffer_seconds"]]
         .copy()
-        .rename(columns={'time_arr': 'time', 'buffer_seconds': 'buffer'})
+        .rename(
+            columns={
+                "time_arr": "time",
+                "line_arr": "incoming_line_id",
+                "line_dep": "outgoing_line_id",
+                "buffer_seconds": "buffer",
+            }
+        )
     )
-    
-    timeseries['time'] = timeseries['time'].dt.strftime("%Y-%m-%dT%H:%M:%SZ") # timestamps to ISO strings for JSON
-    timeseries_json = json.dumps(timeseries.to_dict(orient='records')) # Convert to JSON string
+
+    timeseries["time"] = timeseries["time"].dt.strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )  # timestamps to ISO strings for JSON
+    timeseries_json = json.dumps(
+        timeseries.to_dict(orient="records")
+    )  # Convert to JSON string
 
     add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) processed.")
-    return {'buffer_timeseries': timeseries_json}
-    
+    return {"buffer_timeseries": timeseries_json}
+
 
 if __name__ == "__main__":
 
