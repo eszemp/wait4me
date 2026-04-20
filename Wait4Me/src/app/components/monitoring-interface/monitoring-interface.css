@@ -5,74 +5,41 @@
   padding: 0px 0;
 }
 
-.monitoring-map {
-  border: 2px solid var(--fir-green);
+.monitoring-shell {
   width: calc(100% - 20px);
-  height: 700px;
-  border-radius: 20px;
-  overflow: hidden;
   margin: -20px auto 0 auto;
 }
 
-:host ::ng-deep .stop-histogram-popup .maplibregl-popup-content {
-  font-family: inherit;
-  color: var(--fir-green);
-  min-width: 320px;
-  max-width: 360px;
-  padding: 16px;
-  border-radius: 5px;
+.map-stage {
+  position: relative;
 }
 
-:host ::ng-deep .stop-histogram-popup .maplibregl-popup-close-button {
-  width: 28px;
-  height: 28px;
-  font-size: 28px;
-  line-height: 24px;
-  color: var(--fir-green);
-}
-
-:host ::ng-deep .histogram-popup-content {
-  width: 100%;
-}
-
-:host ::ng-deep .histogram-title {
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 1.2;
-  margin-bottom: 12px;
-  color: var(--fir-green);
-}
-
-:host ::ng-deep .histogram-row {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 36px;
-  column-gap: 8px;
+.map-toolbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
+  display: flex;
   align-items: center;
-  margin: 8px 0;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-:host ::ng-deep .histogram-label {
-  font-size: 16px;
+.layer-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fir-green);
   white-space: nowrap;
 }
 
-:host ::ng-deep .histogram-bar-track {
-  height: 22px;
-  width: 100%;
-  background: #d8dde1;
-  border-radius: 11px;
-  overflow: hidden;
-}
-
-:host ::ng-deep .histogram-bar-fill {
-  height: 100%;
-  background: #177d8c;
-  border-radius: 11px;
-}
-
-:host ::ng-deep .histogram-value {
-  text-align: right;
-  font-size: 16px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.layer-select {
+  min-width: 220px;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: white;
+  color: var(--grey);
 }
