@@ -1,7 +1,7 @@
 import { Component, input, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DestinationAutocompleteComponent } from '../destination-autocomplete/destination-autocomplete.component';
-import { OJPTrip } from '../../../services/ojp-trip';
+import { OJPTrip } from '../../../shared/services/ojp-trip';
 
 type TripForm = FormGroup<{
   from: FormControl<string>;

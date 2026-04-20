@@ -9,10 +9,10 @@ import type {
   TransferLegSchema,
   TripResultSchema
 } from 'ojp-shared-types';
-import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg, CriticalTransfer } from '../shared/types/PassengerTripTypes';
+import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferLeg, CriticalTransfer } from '../types/PassengerTripTypes';
 import { OJPBase } from './ojp-base';
 import { OJPLocation } from './ojp-location';
-import { Duration } from '../shared/models/duration';
+import { Duration } from '../models/duration';
 
 @Injectable({
   providedIn: 'root',

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { from, map, Observable } from 'rxjs';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
-import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../shared/types/DriverDeparturesTypes';
+import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../types/DriverDeparturesTypes';
 import { OJPBase } from './ojp-base';
-import { Duration } from '../shared/models/duration';
+import { Duration } from '../models/duration';
 
 
 

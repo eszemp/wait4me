@@ -1,8 +1,8 @@
 import { Component, inject, Input } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { W4MDriverService } from '../../../services/w4m-service-driver';
-import { OJPLocation } from '../../../services/ojp-location';
+import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
+import { OJPLocation } from '../../../shared/services/ojp-location';
 import { Wait4MeRequest } from '../../../shared/types/Wait4MeRequest';
 
 

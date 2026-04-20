@@ -1,10 +1,10 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject, Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
-import { CriticalTransfer } from '../shared/types/PassengerTripTypes';
-import { PassengerTrip } from '../shared/types/PassengerTripTypes';
+import { CriticalTransfer } from '../types/PassengerTripTypes';
+import { PassengerTrip } from '../types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
-import { GetStatusResponse, PostResponse, BACKEND_URL } from '../shared/types/Wait4MeRequest';
+import { GetStatusResponse, PostResponse, BACKEND_URL } from '../types/Wait4MeRequest';
 
 
 

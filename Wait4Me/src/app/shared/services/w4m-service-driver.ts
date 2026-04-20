@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
-import { Wait4MeRequest, PostResponse, GetRequestResponse, BACKEND_URL } from '../shared/types/Wait4MeRequest';
+import { Wait4MeRequest, PostResponse, GetRequestResponse, BACKEND_URL } from '../types/Wait4MeRequest';
 import { HttpClient } from '@angular/common/http';
-import { Duration } from '../shared/models/duration';
+import { Duration } from '../models/duration';
 
 
 

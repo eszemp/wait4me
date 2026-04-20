@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { DepartureLine, DepartureStop, DriverStopRow } from '../../shared/types/DriverDeparturesTypes';
-import { W4MDriverService } from '../../services/w4m-service-driver';
-import { Wait4MeDisplay } from '../driver-interface/w4m-display/w4m-display';
-import { Wait4MeEditBar } from '../driver-interface/w4m-edit-bar/w4m-edit-bar';
+import { DepartureLine, DepartureStop, DriverStopRow } from '../../../shared/types/DriverDeparturesTypes';
+import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
+import { Wait4MeDisplay } from '../w4m-display/w4m-display';
+import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
 
 
 
@@ -12,7 +12,7 @@ import { Wait4MeEditBar } from '../driver-interface/w4m-edit-bar/w4m-edit-bar';
   selector: 'app-driver-connection-details',
   imports: [CommonModule, Wait4MeDisplay, Wait4MeEditBar],
   templateUrl: './driver-connection-details.html',
-  styleUrls: ['../../app.css', './driver-connection-details.css'],
+  styleUrls: ['../../../app.css', './driver-connection-details.css'],
 })
 export class DriverConnectionDetails {
   private readonly router = inject(Router);
