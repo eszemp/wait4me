@@ -13,13 +13,14 @@ import { GetStatusResponse, PostResponse, BACKEND_URL } from '../shared/types/Wa
 @Injectable({ providedIn: 'root' })
 export class W4MPassengerService {
 
-  readonly status: WritableSignal<'inactive' | 'enabled' | 'pending' | 'accepted' | 'declined'> = signal('inactive');
+  readonly status: WritableSignal<'inactive' | 'enabled' | 'pending' | 'accepted' | 'declined' | 'expired'> = signal('inactive');
   // possible values:
   // 'inactive':  no critical transfer selected where a request could be sent
   // 'enabled':   this.transfer is not null, but no request has been sent yet or the request has been cancelled
   // 'pending':   ...
   // 'accepted':  ...
   // 'declined':  ...
+  // 'expired': ...
 
   trip: PassengerTrip | null;
   transfer: CriticalTransfer | null;
@@ -28,9 +29,6 @@ export class W4MPassengerService {
 
   private pollingSubscription: Subscription | null = null;
 
-  private currentTrip = new BehaviorSubject<any>(null);
-  currentTrip$ = this.currentTrip.asObservable();
-
   constructor(private http: HttpClient) {
     this.trip = null;
     this.transfer = null;
@@ -38,21 +36,17 @@ export class W4MPassengerService {
     this.request_id = null;
   }
 
-  updateTrip(trip: any) {
-    this.currentTrip.next(trip);
-    return;
-  }
-
-
   enable_if_eligible(transfer: CriticalTransfer) {
     // TODO: determine max allowed requested delay and difference to current time
     const delay_too_big = (transfer.requestedDelay.totalMinutes>=60);
     const request_too_early = false;// TODO: (transfer.scheduledOutgoingDeparture);
-    if (delay_too_big || request_too_early) {
+    const request_too_late = false;
+    if (delay_too_big || request_too_early || request_too_late) {
       return;
     }
     // TODO: geofencing
     // TODO: also check DB to see if there is already a denied request for this transferstop and outgoing service for the same or a smaller delay.
+    // TODO: aslo check if its in the past
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
     this.transfer = transfer;
@@ -76,7 +70,10 @@ export class W4MPassengerService {
       console.log("There is an accepted request. Open info dialogue with cancel option.");
       break;
     case 'declined':
-      console.log("Request denied. Open info dialogue with cancel option.");
+      console.log("Request denied. Re-route to find an alternative connection.");
+      break;
+    case 'expired':
+      console.log("Request expired. Re-route to find an alternative connection.");
       break;
     default:
       //nothing happens
@@ -155,6 +152,15 @@ export class W4MPassengerService {
           if (response.request_status=== 'pending') {
             this.status.set('pending');
             console.log('request still pending')
+  
+            const curDate = new Date();
+            if (this.transfer!.scheduledOutgoingDeparture < curDate) {
+              console.log('request technically expired, kept pending during development');
+              // TODO: post status change to DB
+              // this.status.set('expired');
+              // return;
+            }  
+
             return;
           }
 
