@@ -37,6 +37,10 @@ def get_requests():
     service = request.args.get('outgoing_service')
     return get_incoming_requests(stop_ref, service)
 
+@backend_app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"message": "Health check okay"}), 200
+
 
 if __name__ == '__main__':
-    backend_app.run(host='0.0.0.0', port=5000)
+    backend_app.run(host='0.0.0.0', port=8000)

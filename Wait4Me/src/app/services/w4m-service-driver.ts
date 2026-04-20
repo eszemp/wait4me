@@ -10,7 +10,7 @@ interface GetRequestResponse {
   data?: JSON;
 }
 
-const BACKEND_URL = 'http://127.0.0.1:5000';
+const BACKEND_URL = 'http://127.0.0.1:8000';
 
 
 @Injectable({ providedIn: 'root' })
@@ -38,6 +38,8 @@ export class W4MDriverService {
           { status: 'accepted' }
         )
       );
+
+      console.log(response.status);
 
       if (response.status === 'changed') {
         this.request_id = ' ';

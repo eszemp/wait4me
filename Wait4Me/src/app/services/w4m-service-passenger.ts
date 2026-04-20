@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { RequestResponse } from '../shared/types/Wait4MeRequest';
 
 
-const BACKEND_URL = 'http://127.0.0.1:5000';
+const BACKEND_URL = 'http://127.0.0.1:8000';
 
 
 @Injectable({ providedIn: 'root' })
@@ -142,6 +142,7 @@ export class W4MPassengerService {
   }
 
   private startStatusPolling() {
+    console.log("polling results from db for request", this.request_id);
     if (!this.request_id || this.pollingSubscription) {
       return;
     }
@@ -150,14 +151,21 @@ export class W4MPassengerService {
       .pipe(
         switchMap(() => this.http.get<RequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
         tap(response => {
-          if (response.status === 'pending') {
+
+          //TODO: handle in backend
+          let currentStatus = response.status;
+          if (typeof currentStatus === 'object' && currentStatus !== null) {
+              currentStatus = (currentStatus as any).status;
+          }
+
+          if (currentStatus=== 'pending') {
             this.status.set('pending');
             console.log('request still pending')
             return;
           }
 
-          if (response.status === 'accepted' || response.status === 'declined') {
-            this.status.set(response.status as 'accepted' | 'declined');
+          if (currentStatus === 'accepted' || currentStatus === 'declined') {
+            this.status.set(currentStatus as 'accepted' | 'declined');
             console.log('request status changed from pending to ', this.status());
             this.stopStatusPolling();
           }
@@ -169,5 +177,4 @@ export class W4MPassengerService {
         }
       });
   }
-
 }
