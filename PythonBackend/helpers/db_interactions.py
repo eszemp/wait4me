@@ -2,7 +2,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
 import os
-from flask import jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -116,5 +115,25 @@ def get_incoming_requests(stop_ref, service):
     results = get_from_db(command, params, multiple=True)
 
     return results
+
+def cleanup_expired_requests():
+    """
+    Updates all pending requests to 'expired' if their scheduled 
+    departure time is in the past.
+    """
+
+    command = """
+        UPDATE wait4me_requests 
+        SET status = 'expired' 
+        WHERE status = 'pending' 
+        AND scheduled_departure_time < CURRENT_TIMESTAMP
+    """
+    
+    db_transaction = post_to_db(command, ())
+    
+    if db_transaction == 'success':
+        return "successful"
+    else:
+        return f"failed: {db_transaction}"
 
     

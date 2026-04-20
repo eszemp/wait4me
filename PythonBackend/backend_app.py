@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import subprocess
+from flask_apscheduler import APScheduler
 from helpers.db_interactions import *
 from helpers.geofencing import is_valid_request
 
 
 backend_app = Flask(__name__)
 CORS(backend_app)
+scheduler = APScheduler()
 
 # POST a passenger request
 @backend_app.route('/create-request', methods=['POST'])
@@ -53,10 +54,22 @@ def get_requests():
 
     return jsonify({"api_status": "incoming connection(s)", "data": result}), 200
 
+# GET health check (see if API is running)
 @backend_app.route("/health", methods=["GET"])
 def health():
     return jsonify({"api_status": "Health check okay"}), 200
 
+def expire_old_requests():
+    """
+    Checks all pending requests and sets them to 'expired' 
+    if departure time is in the past.
+    """
+    result = cleanup_expired_requests()
+    print(f"Hourly cleanup {result}")
+
 
 if __name__ == '__main__':
+    scheduler.add_job(id='ExpiredRequestCleanup', func=expire_old_requests, trigger='interval', hours=1)
+    scheduler.start()
+
     backend_app.run(host='localhost', port=8000)
