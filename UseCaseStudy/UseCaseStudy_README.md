@@ -23,3 +23,12 @@ To set up the Python environment for running the Jupyter notebooks in the script
    ```
 
 Now you can select the "Buffer Analysis" kernel in your Jupyter notebooks.
+
+## OJP API token
+Create a file named `.env` in `UseCaseStudy/` with this content:
+
+```bash
+OJP_ACCESS_TOKEN=your_access_token_here
+```
+
+The helper scripts in `scripts/helpers/` load that file automatically.

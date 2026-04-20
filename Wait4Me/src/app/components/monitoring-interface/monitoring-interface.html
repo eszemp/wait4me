@@ -1,1 +1,26 @@
-<div #mapContainer class="monitoring-map"></div>
+<div class="monitoring-shell">
+  <div class="map-stage">
+    <div class="map-toolbar">
+      <label class="layer-label" for="monitoring-layer-select">Layer</label>
+      <select
+        id="monitoring-layer-select"
+        class="layer-select"
+        [value]="selectedLayerId"
+        (change)="onLayerChange($event)"
+      >
+        @for (layer of layerOptions; track layer.id) {
+          <option [value]="layer.id">{{ layer.label }}</option>
+        }
+      </select>
+    </div>
+
+    @switch (selectedLayerId) {
+      @case ('station-statistics') {
+        <app-station-statistics-layer />
+      }
+      @case ('delay-effects-on-lines') {
+        <app-delay-effects-on-lines-layer />
+      }
+    }
+  </div>
+</div>
