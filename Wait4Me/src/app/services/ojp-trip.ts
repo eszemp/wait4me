@@ -1,5 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { forkJoin, from, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SDK, TripRequest } from 'ojp-sdk';
 import type {
@@ -83,6 +83,97 @@ export class OJPTrip extends OJPBase{
         return (response.value.tripResult ?? [])
           .map((result) => this.toPassengerTrip(result))
           .filter((trip): trip is PassengerTrip => trip !== null);
+      }),
+    );
+  }
+
+  getConnectionTrack(
+    originStopPlaceRef: string,
+    destinationStopPlaceRef: string,
+    departureDate: Date,
+    selectedLineCode?: string,
+  ): Observable<{ type: 'FeatureCollection'; features: Array<{ type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } }> }> {
+    const request = TripRequest.initWithPlaceRefsOrCoords(originStopPlaceRef, destinationStopPlaceRef);
+
+    request.setDepartureDatetime(departureDate);
+    request.setNumberOfResults(8);
+
+    if (request.payload.params) {
+      request.payload.params.includeTrackSections = true;
+      request.payload.params.includeLegProjection = true;
+      request.payload.params.useRealtimeData = 'explanatory';
+    }
+
+    return from(request.fetchResponse(this.sdk)).pipe(
+      map((response) => {
+        if (!response.ok) {
+          throw response.error;
+        }
+
+        const targetDepartureTs = departureDate.getTime();
+        const normalizedLineCode = (selectedLineCode ?? '').trim().toLowerCase();
+        let bestScore = Number.POSITIVE_INFINITY;
+        let bestFeatures: Array<{ type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } }> = [];
+
+        for (const result of response.value.tripResult ?? []) {
+          for (const leg of result.trip?.leg ?? []) {
+            const timedLeg = leg.timedLeg;
+            const trackSections = timedLeg?.legTrack?.trackSection ?? [];
+            if (!timedLeg || trackSections.length === 0) {
+              continue;
+            }
+
+            const legLineCode = this.asString(
+              timedLeg.service?.publicCode ?? this.readTextValue(timedLeg.service?.publishedServiceName),
+            ).trim();
+
+            if (normalizedLineCode && legLineCode.toLowerCase() !== normalizedLineCode) {
+              continue;
+            }
+
+            const departureTs = new Date(this.asString(timedLeg.legBoard?.serviceDeparture?.timetabledTime)).getTime();
+            const departureDistance = Number.isFinite(departureTs)
+              ? Math.abs(departureTs - targetDepartureTs)
+              : Number.POSITIVE_INFINITY;
+
+            const features = trackSections
+              .map((section) => {
+                const coordinates = (section.linkProjection?.position ?? [])
+                  .map((position) => [position.longitude, position.latitude] as number[])
+                  .filter((coordinate) => coordinate.length === 2);
+
+                if (coordinates.length < 2) {
+                  return null;
+                }
+
+                return {
+                  type: 'Feature' as const,
+                  geometry: {
+                    type: 'LineString' as const,
+                    coordinates,
+                  },
+                  properties: {
+                    line: legLineCode,
+                  },
+                };
+              })
+              .filter((feature): feature is { type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } } => feature !== null);
+
+            if (features.length === 0) {
+              continue;
+            }
+
+            if (departureDistance < bestScore) {
+              bestScore = departureDistance;
+              bestFeatures = features;
+            }
+          }
+        }
+
+        return {
+          type: 'FeatureCollection' as const,
+          features: bestFeatures,
+        };
       }),
     );
   }

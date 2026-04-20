@@ -4,6 +4,7 @@ export type DepartureLine = {
   line: string;
   course: string | null;
   direction: string;
+  destinationStopPointRef?: string | null;
   departureTimetable: Date;
   departureEstimated: Date;
   departureDelay: Duration;

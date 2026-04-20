@@ -1,10 +1,17 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, EventEmitter, inject, OnDestroy, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OJPStopEvent } from '../../../services/ojp-stop-event';
 import type { StopLookupResult, DepartureLine } from '../../../shared/types/DriverDeparturesTypes';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+
+export type SelectedConnectionPayload = {
+  originStopPlaceRef: string;
+  destinationStopPlaceRef: string;
+  departureTime: Date;
+  lineCode: string;
+};
 
 @Component({
   selector: 'app-line-search',
@@ -33,6 +40,8 @@ export class LineSearchComponent implements OnDestroy {
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
+
+  @Output() lineSelected = new EventEmitter<SelectedConnectionPayload | null>();
 
   constructor() {
     this.searchSubject
@@ -71,6 +80,8 @@ export class LineSearchComponent implements OnDestroy {
   /** Selects a station and loads departures for the chosen time. */
   selectStation(station: StopLookupResult): void {
     this.selectedStation.set(station);
+    this.selectedLine.set(null);
+    this.lineSelected.emit(null);
     this.stationQuery = station.stopPlaceName;
     this.showStationSuggestions = false;
     this.error.set(null);
@@ -80,6 +91,11 @@ export class LineSearchComponent implements OnDestroy {
 
   /** Refreshes departures after the time selector changes. */
   onTimeChange(): void {
+    if (this.selectedLine()) {
+      this.selectedLine.set(null);
+      this.lineSelected.emit(null);
+    }
+
     if (this.selectedStation()) {
       this.fetchDepartures();
     }
@@ -114,6 +130,26 @@ export class LineSearchComponent implements OnDestroy {
   selectLine(line: DepartureLine): void {
     this.selectedLine.set(line);
     this.showDepartureDropdown.set(false);
+
+    const station = this.selectedStation();
+    const destinationStopPlaceRef = line.destinationStopPointRef;
+    if (!station || !destinationStopPlaceRef) {
+      this.lineSelected.emit(null);
+      return;
+    }
+
+    this.lineSelected.emit({
+      originStopPlaceRef: station.stopPlaceRef,
+      destinationStopPlaceRef,
+      departureTime: line.departureTimetable,
+      lineCode: line.line,
+    });
+  }
+
+  clearSelectedLine(): void {
+    this.selectedLine.set(null);
+    this.showDepartureDropdown.set(true);
+    this.lineSelected.emit(null);
   }
 
   /** Formats departure times as dd.MM.yyyy HH:mm. */
