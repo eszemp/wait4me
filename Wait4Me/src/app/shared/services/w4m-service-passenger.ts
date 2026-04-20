@@ -164,8 +164,20 @@ export class W4MPassengerService {
             return;
           }
 
-          if (response.request_status === 'accepted' || response.request_status === 'declined') {
-            this.status.set(response.request_status as 'accepted' | 'declined');
+          if (response.request_status === 'accepted') {
+            this.status.set('accepted');
+            console.log('request status changed from pending to ', this.status());
+            this.stopStatusPolling();
+          }
+
+          if (response.request_status === 'declined') {
+            this.status.set('declined');
+            console.log('request status changed from pending to ', this.status());
+            this.stopStatusPolling();
+          }
+
+          if (response.request_status === 'expired') {
+            this.status.set('expired');
             console.log('request status changed from pending to ', this.status());
             this.stopStatusPolling();
           }
