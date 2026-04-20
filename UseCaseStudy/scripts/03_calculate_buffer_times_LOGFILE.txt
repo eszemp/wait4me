@@ -1,23 +1,23 @@
-Vitznau, Unterwilen (8577219) has average buffer time: 25240.8 seconds
+Vitznau, Unterwilen (8577219) has average buffer time: 24815.384615384617 seconds
 Vitznau, Unterwilen (8577219) processed.
-Weggis, Lützelau (8592427) has average buffer time: 25166.153846153848 seconds
-Weggis, Lützelau (8592427) processed.
+Weggis, LÃ¼tzelau (8592427) has average buffer time: 24654.878048780487 seconds
+Weggis, LÃ¼tzelau (8592427) processed.
 Weggis, Lorbeerweg (8595630) has no transfers
 Gersau (See) (8508468) has no transfers
 Gersau, Schiffstation (8505671) has average buffer time: 1457.2727272727273 seconds
 Gersau, Schiffstation (8505671) processed.
 Gersau, Kirche (8505127) has no services
-Gersau Förstli (Fähre) (8530722) has no transfers
-Gersau, Förstli (8577224) has average buffer time: 25496.727272727272 seconds
-Gersau, Förstli (8577224) processed.
+Gersau FÃ¶rstli (FÃ¤hre) (8530722) has no transfers
+Gersau, FÃ¶rstli (8577224) has average buffer time: 25496.727272727272 seconds
+Gersau, FÃ¶rstli (8577224) processed.
 Gersau, Rotschuo (8505666) has average buffer time: 25374.545454545456 seconds
 Gersau, Rotschuo (8505666) processed.
 Vitznau, Floralpina (8577223) has average buffer time: 25130.18181818182 seconds
 Vitznau, Floralpina (8577223) processed.
 Gersau, Altes Rathaus (8509538) has no transfers
-Gersau, Wehri (8577225) has average buffer time: 2190.0 seconds
+Gersau, Wehri (8577225) has average buffer time: 2698.235294117647 seconds
 Gersau, Wehri (8577225) processed.
-Gersau, Rosenbrücke (8507419) has no transfers
+Gersau, RosenbrÃ¼cke (8507419) has no transfers
 Gersau, Felsenegg (8591890) has average buffer time: 25557.81818181818 seconds
 Gersau, Felsenegg (8591890) processed.
 Gersau, Rotacher (8509499) has no transfers
@@ -26,33 +26,33 @@ Gersau, Huob (8510015) has no transfers
 Gersau, Platten (8507423) has no transfers
 Gersau, Oberried (8507425) has no transfers
 Gersau, Weidli (8507427) has no transfers
-Brunnen, Seeschlössli (8505082) has average buffer time: 1561.4516129032259 seconds
-Brunnen, Seeschlössli (8505082) processed.
-Brunnen, Fallenbach (8577444) has average buffer time: 1438.0645161290322 seconds
+Brunnen, SeeschlÃ¶ssli (8505082) has average buffer time: 1901.25 seconds
+Brunnen, SeeschlÃ¶ssli (8505082) processed.
+Brunnen, Fallenbach (8577444) has average buffer time: 1644.84375 seconds
 Brunnen, Fallenbach (8577444) processed.
-Brunnen, Seilbahn Urmiberg (8577442) has average buffer time: 557.7931034482758 seconds
+Brunnen, Seilbahn Urmiberg (8577442) has average buffer time: 760.2684563758389 seconds
 Brunnen, Seilbahn Urmiberg (8577442) processed.
-Brunnen, Schiller (8577443) has average buffer time: 618.3582089552239 seconds
+Brunnen, Schiller (8577443) has average buffer time: 834.7826086956521 seconds
 Brunnen, Schiller (8577443) processed.
-Brunnen, Marina Fallenbach (8510564) has average buffer time: 1433.7096774193549 seconds
+Brunnen, Marina Fallenbach (8510564) has average buffer time: 1641.09375 seconds
 Brunnen, Marina Fallenbach (8510564) processed.
-Lauerz, Seegütli (8577427) has average buffer time: 6292.173913043478 seconds
-Lauerz, Seegütli (8577427) processed.
+Lauerz, SeegÃ¼tli (8577427) has average buffer time: 6292.173913043478 seconds
+Lauerz, SeegÃ¼tli (8577427) processed.
 Gersau, Brand (8588460) has no transfers
 Gersau, Gibel (8507429) has no transfers
 Gersau, Ober Gibel (8507431) has no transfers
-Gersau, Rübi (8507433) has no transfers
+Gersau, RÃ¼bi (8507433) has no transfers
 Gersau, Mittel Gschwend (8507435) has no transfers
 Gersau, Ober Gschwend (8507437) has no transfers
 Gersau Gschwend (8530797) has no transfers
 Burggeist (Rigi Scheidegg) (8530798) has no transfers
 Rigi Scheidegg (8505078) has no services
-Kräbel (Talstation Scheidegg) (8530683) has no services
+KrÃ¤bel (Talstation Scheidegg) (8530683) has no services
 Vitznau, Unteraltdorf (8577222) has average buffer time: 25038.545454545456 seconds
 Vitznau, Unteraltdorf (8577222) processed.
 Vitznau, Station (8577221) has average buffer time: 24254.074074074073 seconds
 Vitznau, Station (8577221) processed.
-Vitznau, Park Hotel (8577220) has average buffer time: 25212.289156626506 seconds
+Vitznau, Park Hotel (8577220) has average buffer time: 24720.0 seconds
 Vitznau, Park Hotel (8577220) processed.
 Mittlerschwanden (8505079) has average buffer time: 4470.0 seconds
 Mittlerschwanden (8505079) processed.
@@ -63,27 +63,27 @@ Freibergen (8505072) processed.
 Romiti Felsentor (8505073) has average buffer time: 5070.0 seconds
 Romiti Felsentor (8505073) processed.
 Fruttli (8505065) has no transfers
-Lauerz, Mühle (8577428) has average buffer time: 6307.826086956522 seconds
-Lauerz, Mühle (8577428) processed.
+Lauerz, MÃ¼hle (8577428) has average buffer time: 6307.826086956522 seconds
+Lauerz, MÃ¼hle (8577428) processed.
 Lauerz, Dorf (8505087) has average buffer time: 2980.0 seconds
 Lauerz, Dorf (8505087) processed.
 Goldau, Waage (8589871) has no transfers
 Goldau, Buosingen Camping (8589872) has no transfers
-Goldau, Bernerhöhe (8589873) has no transfers
+Goldau, BernerhÃ¶he (8589873) has no transfers
 Arth-Goldau Ost (Abzw) (8515397) has no services
-Goldau, Löwenplatz (8577399) has average buffer time: 358.72340425531917 seconds
-Goldau, Löwenplatz (8577399) processed.
+Goldau, LÃ¶wenplatz (8577399) has average buffer time: 358.72340425531917 seconds
+Goldau, LÃ¶wenplatz (8577399) processed.
 Goldau, Tierpark (8577400) has average buffer time: 366.06382978723406 seconds
 Goldau, Tierpark (8577400) processed.
 Steinerberg (8503280) has average buffer time: 37177.89473684211 seconds
 Steinerberg (8503280) processed.
 Goldau, Sportplatz (8510563) has average buffer time: 3335.4545454545455 seconds
 Goldau, Sportplatz (8510563) processed.
-Kräbel (8505064) has no transfers
+KrÃ¤bel (8505064) has no transfers
 Goldau A4 (8505062) has no transfers
 Goldau, Kehlmattli (8589874) has no transfers
 Arth-Goldau RB (8505063) has no transfers
-Arth-Goldau (8505004) has average buffer time: 275.06493506493507 seconds
+Arth-Goldau (8505004) has average buffer time: 406.5822784810127 seconds
 Arth-Goldau (8505004) processed.
 Arth-Goldau Nordwest (8515396) has no services
 Arth-Goldau, Bahnhof (8577398) has average buffer time: 341.6949152542373 seconds
@@ -94,24 +94,24 @@ Oberarth, Dorf (8577404) has average buffer time: 884.6616541353384 seconds
 Oberarth, Dorf (8577404) processed.
 Oberarth, Rischi (8577402) has average buffer time: 811.1278195488721 seconds
 Oberarth, Rischi (8577402) processed.
-Rigi Klösterli (8505066) has no transfers
-Rigi Wölfertschen-First (8505067) has no transfers
-Rigi Staffel (8505068) has average buffer time: 769.7142857142857 seconds
+Rigi KlÃ¶sterli (8505066) has no transfers
+Rigi WÃ¶lfertschen-First (8505067) has no transfers
+Rigi Staffel (8505068) has average buffer time: 829.7142857142857 seconds
 Rigi Staffel (8505068) processed.
 Rigi Kulm (8505069) has average buffer time: 2438.823529411765 seconds
 Rigi Kulm (8505069) processed.
 Brunnmatt (Spw) (8505042) has no services
-Bisisthal, Schlänggen (8587795) has no services
-Muotathal, Säge (8577464) has no transfers
-Muotathal, hintere Brücke (8587533) has no transfers
+Bisisthal, SchlÃ¤nggen (8587795) has no services
+Muotathal, SÃ¤ge (8577464) has no transfers
+Muotathal, hintere BrÃ¼cke (8587533) has no transfers
 Muotathal, Balm (8577466) has no transfers
 Muotathal, Sternen (8577463) has no transfers
-Muotathal, Stützli (8592407) has average buffer time: 4320.0 seconds
-Muotathal, Stützli (8592407) processed.
+Muotathal, StÃ¼tzli (8592407) has average buffer time: 4320.0 seconds
+Muotathal, StÃ¼tzli (8592407) processed.
 Muotathal, Post (8505093) has average buffer time: 6087.6 seconds
 Muotathal, Post (8505093) processed.
 Muotathal, Lustnau (8588293) has no transfers
-Muotathal, Militärspital (8588114) has no transfers
+Muotathal, MilitÃ¤rspital (8588114) has no transfers
 Muotathal, Weid (8577462) has no transfers
 Sisikon Nord (8515426) has no services
 Morschach, Swiss Holiday Park (8577505) has no transfers
@@ -122,7 +122,7 @@ Ried (Muotathal), Seilb.Illgau (8505083) has no transfers
 Ried (Muotathal) (Seilbahn) (8530400) has no transfers
 Ried (Muotathal), Kappelmatt (8577458) has no transfers
 Illgau (Luftseilbahn) (8530401) has no transfers
-Ried (Muotathal), Mühlestuden (8577457) has no transfers
+Ried (Muotathal), MÃ¼hlestuden (8577457) has no transfers
 Ried (Muotathal), Hesigen (8577456) has no transfers
 Schwyz Stoosbahn (Talstation) (8505090) has no services
 Schwyz, Stoosbahn (8577453) has no transfers
@@ -134,51 +134,51 @@ Mettlen (Fronalpstock) (8530984) has no services
 Stoos SZ (8505091) has no services
 Stoos(Sesselbahn Fronalpstock) (8530391) has no services
 Stoos Bergstat. (Luftseilb) (8530393) has no transfers
-Morschach, Schwyzerhöhe (8577506) has no transfers
+Morschach, SchwyzerhÃ¶he (8577506) has no transfers
 Morschach, Luftseilbahn (8577507) has no transfers
 Morschach, Dorf (8505085) has no transfers
 Brunnen, Wolfsprung (8511569) has no services
 Morschach, Wil (8588113) has no transfers
 Brunnen, Axenstrasse (8511568) has no services
-Brunnen Süd (Abzw) (8515380) has no services
+Brunnen SÃ¼d (Abzw) (8515380) has no services
 Brunnen (See) (8508470) has no transfers
 Brunnen, See/Schiffstation (8505099) has no transfers
-Brunnen, Kleinstadtstrasse (8505126) has average buffer time: 576.1643835616438 seconds
+Brunnen, Kleinstadtstrasse (8505126) has average buffer time: 577.9591836734694 seconds
 Brunnen, Kleinstadtstrasse (8505126) processed.
-Brunnen, Hafenstrasse (8577438) has average buffer time: 605.3424657534247 seconds
+Brunnen, Hafenstrasse (8577438) has average buffer time: 606.530612244898 seconds
 Brunnen, Hafenstrasse (8577438) processed.
-Brunnen, Kantonalbank (8577436) has average buffer time: 363.3644859813084 seconds
+Brunnen, Kantonalbank (8577436) has average buffer time: 365.30232558139534 seconds
 Brunnen, Kantonalbank (8577436) processed.
 Morschach Talstat. (Luftseilb) (8505089) has no transfers
-Ibach, Oberschönenbuch (8587739) has no transfers
+Ibach, OberschÃ¶nenbuch (8587739) has no transfers
 Ibach, Kapelle (8595231) has no transfers
-Ibach, Abzw. Unterschönenbuch (8592394) has no transfers
+Ibach, Abzw. UnterschÃ¶nenbuch (8592394) has no transfers
 Schwyz, Bierkeller (8577452) has no transfers
 Ibach, Husmatt (8592396) has no transfers
 Ibach, Kieswerk (8592397) has no transfers
 Ibach, Rest. Rose (8592402) has no transfers
 Ibach, Landsgemeindestrasse (8592398) has no services
-Schwyz, Schützenhaus (8577451) has no transfers
+Schwyz, SchÃ¼tzenhaus (8577451) has no transfers
 Ried (Muotathal), Selgis (8577455) has no transfers
-Ried (Muotathal), Grünenwald (8577454) has no transfers
+Ried (Muotathal), GrÃ¼nenwald (8577454) has no transfers
 Oberberg St. Karl (8530820) has no transfers
 Rickenbach SZ, Aufiberg/Gruobi (8577489) has no transfers
 Rickenbach SZ, Oberberg (8577496) has no transfers
-Rickenbach SZ, Gründel/St Karl (8577495) has no transfers
+Rickenbach SZ, GrÃ¼ndel/St Karl (8577495) has no transfers
 Rickenbach SZ, Handgruobi (8577494) has no transfers
 Rickenbach SZ, Chaisten (8577491) has no transfers
 Rickenbach SZ, Lauenen (8577493) has no transfers
 Rickenbach SZ, Windstock (8577490) has no transfers
-Ibach, Diesel (8577433) has average buffer time: 584.9006622516556 seconds
+Ibach, Diesel (8577433) has average buffer time: 587.4509803921569 seconds
 Ibach, Diesel (8577433) processed.
-Ibach, Plätzli (8592400) has no transfers
-Ibach, Erlen (8505096) has average buffer time: 542.384105960265 seconds
+Ibach, PlÃ¤tzli (8592400) has no transfers
+Ibach, Erlen (8505096) has average buffer time: 553.2467532467532 seconds
 Ibach, Erlen (8505096) processed.
 Ibach, Muotastrasse (8592399) has no transfers
 Ibach, Studenmatt (8592404) has no transfers
 Ibach, Eichenweg (8592395) has no transfers
 Schwyz, Grundkapelle (8577450) has no transfers
-Ibach, Kirche (8505084) has average buffer time: 388.9855072463768 seconds
+Ibach, Kirche (8505084) has average buffer time: 390.14218009478674 seconds
 Ibach, Kirche (8505084) processed.
 Rickenbach SZ, Bol (8588237) has average buffer time: 2796.3636363636365 seconds
 Rickenbach SZ, Bol (8588237) processed.
@@ -187,23 +187,23 @@ Brunnen, Heideweg (8577439) has average buffer time: 511.0204081632653 seconds
 Brunnen, Heideweg (8577439) processed.
 Brunnen, Sportplatzweg (8577440) has average buffer time: 511.0204081632653 seconds
 Brunnen, Sportplatzweg (8577440) processed.
-Brunnen (8505007) has average buffer time: 701.2903225806451 seconds
+Brunnen (8505007) has average buffer time: 952.5 seconds
 Brunnen (8505007) processed.
 Brunnen, Bahnhof (8505098) has average buffer time: 543.3898305084746 seconds
 Brunnen, Bahnhof (8505098) processed.
-Brunnen, Hopfräben (8577441) has average buffer time: 865.0 seconds
-Brunnen, Hopfräben (8577441) processed.
-Ingenbohl, Klosterstrasse (8505097) has average buffer time: 565.0331125827814 seconds
+Brunnen, HopfrÃ¤ben (8577441) has average buffer time: 865.0 seconds
+Brunnen, HopfrÃ¤ben (8577441) processed.
+Ingenbohl, Klosterstrasse (8505097) has average buffer time: 567.843137254902 seconds
 Ingenbohl, Klosterstrasse (8505097) processed.
-Ingenbohl, Gätzli (8577435) has average buffer time: 530.8609271523179 seconds
-Ingenbohl, Gätzli (8577435) processed.
-Ingenbohl, Fuchsenen (8577434) has average buffer time: 475.2317880794702 seconds
+Ingenbohl, GÃ¤tzli (8577435) has average buffer time: 534.1176470588235 seconds
+Ingenbohl, GÃ¤tzli (8577435) processed.
+Ingenbohl, Fuchsenen (8577434) has average buffer time: 479.2156862745098 seconds
 Ingenbohl, Fuchsenen (8577434) processed.
 Lauerz, Otten (8577425) has average buffer time: 6561.818181818182 seconds
 Lauerz, Otten (8577425) processed.
 Seewen SZ, Seemattli (8577424) has no transfers
 Bisisthal, Schwarzenbach (8587690) has no transfers
-Bisisthal, Dürrenboden (8505081) has no transfers
+Bisisthal, DÃ¼rrenboden (8505081) has no transfers
 Bisisthal, Zentrale EBS (8577470) has no transfers
 Bisisthal, vorder Seeberg (8587961) has no transfers
 Bisisthal, Mettlen (8587796) has no transfers
@@ -215,13 +215,13 @@ Klein Sternen (8530408) has no services
 Muotathal, Nuschlau (8577461) has no transfers
 Muotathal, Schulhaus (8507319) has no transfers
 Muotathal, Buebenmatt (8512087) has no transfers
-Muotathal, Hölloch (8587960) has no transfers
-Muotathal, Föllmisbrücke (8577460) has no transfers
-Ried (Muotathal), Vord. Brücke (8577459) has no transfers
+Muotathal, HÃ¶lloch (8587960) has no transfers
+Muotathal, FÃ¶llmisbrÃ¼cke (8577460) has no transfers
+Ried (Muotathal), Vord. BrÃ¼cke (8577459) has no transfers
 Illgau Dorf (8530819) has no transfers
 Spirstock (8530410) has no services
 Ibergeregg, Eseltritt (8577497) has no transfers
-Laucherenstöckli (8500317) has no services
+LaucherenstÃ¶ckli (8500317) has no services
 Sahli (Luftseilbahn Glattalp) (8530782) has no services
 Bisisthal, Sahli Seilbahnstat. (8587691) has no services
 Glattalp (8530781) has no services
@@ -232,7 +232,7 @@ Hoch-Ybrig Seebliboden (8530409) has no services
 Steinboden (8530405) has no services
 Gleit (8500316) has no services
 Ibergeregg, Alpstubli (8577500) has no transfers
-Ibergeregg, Passhöhe (8577499) has no transfers
+Ibergeregg, PasshÃ¶he (8577499) has no transfers
 Oberiberg, Wandli (8577501) has no transfers
 Oberiberg, Laburg (8577502) has no transfers
 Oberiberg (Talstation) (8530404) has no services
@@ -243,9 +243,9 @@ Hoch-Ybrig, Talst. Weglosen (8503753) has no transfers
 Unteriberg, Twingi (8573788) has no transfers
 Unteriberg, Boden (8573787) has no transfers
 Unteriberg, Waag (8503745) has no transfers
-Unteriberg, Jessenenbrücke (8503746) has no transfers
+Unteriberg, JessenenbrÃ¼cke (8503746) has no transfers
 Unteriberg, Herti (8573785) has no transfers
-Unteriberg, Guggelstrasse (8503759) has average buffer time: 3701.860465116279 seconds
+Unteriberg, Guggelstrasse (8503759) has average buffer time: 3217.6744186046512 seconds
 Unteriberg, Guggelstrasse (8503759) processed.
 Hoch-Ybrig, Talst. Laucheren (8503870) has average buffer time: 6640.0 seconds
 Hoch-Ybrig, Talst. Laucheren (8503870) processed.
@@ -259,8 +259,8 @@ Trachslau, altes Schulhaus (8573758) has no transfers
 Trachslau, alte Post (8503722) has no transfers
 Gross, Grossbach (8573774) has average buffer time: 3036.25 seconds
 Gross, Grossbach (8573774) processed.
-Einsiedeln, Rüti-Säge (8503721) has average buffer time: 4110.0 seconds
-Einsiedeln, Rüti-Säge (8503721) processed.
+Einsiedeln, RÃ¼ti-SÃ¤ge (8503721) has average buffer time: 4110.0 seconds
+Einsiedeln, RÃ¼ti-SÃ¤ge (8503721) processed.
 Gross, Ebenau (8503738) has average buffer time: 3028.75 seconds
 Gross, Ebenau (8503738) processed.
 Unteriberg, Nidlau (8573778) has average buffer time: 3246.3829787234044 seconds
@@ -270,13 +270,13 @@ Unteriberg, hint.Schmalzgruben (8573777) processed.
 Unteriberg, vord.Schmalzgruben (8573776) has average buffer time: 3444.255319148936 seconds
 Unteriberg, vord.Schmalzgruben (8573776) processed.
 Studen SZ, Adelmatt (8573784) has no transfers
-Studen SZ, Dörfli (8503742) has no transfers
-Euthal, Rüti (8503744) has average buffer time: 3237.391304347826 seconds
-Euthal, Rüti (8503744) processed.
-Euthal, Ängi (8583202) has no transfers
-Euthal, Höhport (8503741) has average buffer time: 1546.046511627907 seconds
-Euthal, Höhport (8503741) processed.
-Euthal, Schulhaus (8503775) has average buffer time: 1259.3181818181818 seconds
+Studen SZ, DÃ¶rfli (8503742) has no transfers
+Euthal, RÃ¼ti (8503744) has average buffer time: 3237.391304347826 seconds
+Euthal, RÃ¼ti (8503744) processed.
+Euthal, Ã„ngi (8583202) has no transfers
+Euthal, HÃ¶hport (8503741) has average buffer time: 1546.046511627907 seconds
+Euthal, HÃ¶hport (8503741) processed.
+Euthal, Schulhaus (8503775) has average buffer time: 955.2272727272727 seconds
 Euthal, Schulhaus (8503775) processed.
 Euthal, Drusberg (8573775) has average buffer time: 1175.3333333333333 seconds
 Euthal, Drusberg (8573775) processed.
@@ -295,23 +295,23 @@ Willerzell, Tschuppmoos (8573780) processed.
 Willerzell, Dimmerbach (8583528) has no transfers
 Willerzell, Kirche (8503737) has average buffer time: 1684.8 seconds
 Willerzell, Kirche (8503737) processed.
-Einsiedeln, Wäni (8582626) has no transfers
-Gross, Nügüetli (8573773) has average buffer time: 3468.2926829268295 seconds
-Gross, Nügüetli (8573773) processed.
-Einsiedeln,Altersheim Langrüti (8582622) has no transfers
+Einsiedeln, WÃ¤ni (8582626) has no transfers
+Gross, NÃ¼gÃ¼etli (8573773) has average buffer time: 3468.2926829268295 seconds
+Gross, NÃ¼gÃ¼etli (8573773) processed.
+Einsiedeln,Altersheim LangrÃ¼ti (8582622) has no transfers
 Einsiedeln, Allmeindstrasse (8582623) has no transfers
-Einsiedeln, Grotzenmühlestr. (8557001) has no transfers
-Gross, Rombüel (8577050) has average buffer time: 3195.0 seconds
-Gross, Rombüel (8577050) processed.
+Einsiedeln, GrotzenmÃ¼hlestr. (8557001) has no transfers
+Gross, RombÃ¼el (8577050) has average buffer time: 3195.0 seconds
+Gross, RombÃ¼el (8577050) processed.
 Einsiedeln, Klosterplatz (8573771) has no transfers
 Einsiedeln, Birchli/Stollern (8503736) has average buffer time: 1112.4 seconds
 Einsiedeln, Birchli/Stollern (8503736) processed.
 Einsiedeln, Rietstrasse (8582637) has no transfers
 Einsiedeln Gleisende (8516196) has no services
-Einsiedeln, Bahnhof (8573756) has average buffer time: 338.3225806451613 seconds
+Einsiedeln, Bahnhof (8573756) has average buffer time: 217.5483870967742 seconds
 Einsiedeln, Bahnhof (8573756) processed.
-Einsiedeln, Brüel (8573789) has average buffer time: 594.5454545454545 seconds
-Einsiedeln, Brüel (8573789) processed.
+Einsiedeln, BrÃ¼el (8573789) has average buffer time: 594.5454545454545 seconds
+Einsiedeln, BrÃ¼el (8573789) processed.
 Einsiedeln (8503283) has average buffer time: 964.3478260869565 seconds
 Einsiedeln (8503283) processed.
 Einsiedeln, Birchli/Sternen (8503735) has average buffer time: 924.0 seconds
@@ -324,16 +324,16 @@ Einsiedeln, Spital (8582627) has average buffer time: 2083.5 seconds
 Einsiedeln, Spital (8582627) processed.
 Einsiedeln, Birchli/Garage (8580858) has average buffer time: 939.0 seconds
 Einsiedeln, Birchli/Garage (8580858) processed.
-Einsiedeln, Heidenbühl (8580524) has average buffer time: 1984.8979591836735 seconds
-Einsiedeln, Heidenbühl (8580524) processed.
-Einsiedeln, Wissmüli (8573765) has average buffer time: 2923.2 seconds
-Einsiedeln, Wissmüli (8573765) processed.
+Einsiedeln, HeidenbÃ¼hl (8580524) has average buffer time: 1984.8979591836735 seconds
+Einsiedeln, HeidenbÃ¼hl (8580524) processed.
+Einsiedeln, WissmÃ¼li (8573765) has average buffer time: 2923.2 seconds
+Einsiedeln, WissmÃ¼li (8573765) processed.
 Schwyz, Grundstrasse (8592410) has no transfers
 Rickenbach SZ, Rotenfluebahn (8505092) has average buffer time: 2792.7272727272725 seconds
 Rickenbach SZ, Rotenfluebahn (8505092) processed.
 Rickenbach SZ (Rotenfluebahn) (8595499) has no services
-Ibach, Schützenstrasse (8592403) has no transfers
-Ibach, Mythen Center (8577430) has average buffer time: 253.81132075471697 seconds
+Ibach, SchÃ¼tzenstrasse (8592403) has no transfers
+Ibach, Mythen Center (8577430) has average buffer time: 258.51301115241637 seconds
 Ibach, Mythen Center (8577430) processed.
 Ibach, Eigenwies (8577429) has no transfers
 Rickenbach SZ, Dorf (8577487) has average buffer time: 2799.090909090909 seconds
@@ -345,38 +345,38 @@ Ibach, Seilerstrasse (8594996) processed.
 Rickenbach SZ, Allerheiligen (8505110) has no services
 Schwyz, Gartenlaubenstrasse (8588112) has average buffer time: 2866.3636363636365 seconds
 Schwyz, Gartenlaubenstrasse (8588112) processed.
-Schwyz, Lücken (8577431) has average buffer time: 467.7049180327869 seconds
-Schwyz, Lücken (8577431) processed.
-Schwyz, Obstmühle/Friedhof (8577448) has average buffer time: 1190.0 seconds
-Schwyz, Obstmühle/Friedhof (8577448) processed.
+Schwyz, LÃ¼cken (8577431) has average buffer time: 472.741935483871 seconds
+Schwyz, LÃ¼cken (8577431) processed.
+Schwyz, ObstmÃ¼hle/Friedhof (8577448) has average buffer time: 1190.0 seconds
+Schwyz, ObstmÃ¼hle/Friedhof (8577448) processed.
 Schwyz, Tschaibrunnen (8505109) has no services
-Schwyz, Steisteg (8577432) has average buffer time: 406.3448275862069 seconds
+Schwyz, Steisteg (8577432) has average buffer time: 608.5135135135135 seconds
 Schwyz, Steisteg (8577432) processed.
 Schwyz, Achermann (8587768) has average buffer time: 5398.064516129032 seconds
 Schwyz, Achermann (8587768) processed.
-Schwyz, Sonnenplätzli (8588238) has average buffer time: 1193.076923076923 seconds
-Schwyz, Sonnenplätzli (8588238) processed.
+Schwyz, SonnenplÃ¤tzli (8588238) has average buffer time: 1193.076923076923 seconds
+Schwyz, SonnenplÃ¤tzli (8588238) processed.
 Schwyz, Hinterdorf (8592412) has no services
-Schwyz, Zentrum (8505095) has average buffer time: 169.10526315789474 seconds
+Schwyz, Zentrum (8505095) has average buffer time: 294.7012987012987 seconds
 Schwyz, Zentrum (8505095) processed.
 Schwyz, Bachmatt (8595634) has no services
-Schwyz, Drei Könige (8592409) has average buffer time: 629.5522388059702 seconds
-Schwyz, Drei Könige (8592409) processed.
+Schwyz, Drei KÃ¶nige (8592409) has average buffer time: 629.5522388059702 seconds
+Schwyz, Drei KÃ¶nige (8592409) processed.
 Schwyz, Laubstrasse (8577486) has average buffer time: 2866.3636363636365 seconds
 Schwyz, Laubstrasse (8577486) processed.
 Schwyz, Herrengasse (8577471) has average buffer time: 773.7777777777778 seconds
 Schwyz, Herrengasse (8577471) processed.
-Schwyz, Lützelmatt (8577421) has average buffer time: 619.2156862745098 seconds
-Schwyz, Lützelmatt (8577421) processed.
+Schwyz, LÃ¼tzelmatt (8577421) has average buffer time: 619.2156862745098 seconds
+Schwyz, LÃ¼tzelmatt (8577421) processed.
 Schwyz, St. Martinstrasse (8592419) has average buffer time: 2643.8709677419356 seconds
 Schwyz, St. Martinstrasse (8592419) processed.
 Schwyz, Nietenbach (8577422) has average buffer time: 585.4901960784314 seconds
 Schwyz, Nietenbach (8577422) processed.
-Seewen SZ, Rösslimatt (8592421) has no transfers
+Seewen SZ, RÃ¶sslimatt (8592421) has no transfers
 Schwyz, Rest. Mythen (8592417) has no services
 Schwyz, Dorfbach (8592408) has no services
 Schwyz, Kollegi (8592413) has no transfers
-Schwyz, Lärchenweg/Kollegi (8592414) has no transfers
+Schwyz, LÃ¤rchenweg/Kollegi (8592414) has no transfers
 Seewen SZ, Stelzli (8577423) has average buffer time: 560.3921568627451 seconds
 Seewen SZ, Stelzli (8577423) processed.
 Schwyz, Eglismatt (8588121) has no transfers
@@ -393,7 +393,7 @@ Schwyz, Obermatt (8592416) has no transfers
 Schwyz, Mangelegg (8587740) has no transfers
 Schwyz, Salesheim (8592418) has no transfers
 Seewen SZ, Seewenfeld (8510052) has no transfers
-Schwyz, Riedbrücke (8594997) has no transfers
+Schwyz, RiedbrÃ¼cke (8594997) has no transfers
 Schwyz, Verkehrsamt (8577473) has no transfers
 Seewen SZ, Bienenheimstrasse (8587531) has no transfers
 Schwyz, Kaltbach (8577474) has no transfers
@@ -408,7 +408,7 @@ Brunni SZ (Talstation Holzegg) (8530402) has no services
 Brunni SZ, Rest. Brunni (8573764) has no transfers
 Alpthal, Stei (8573763) has no transfers
 Alpthal, Malosen (8503725) has no transfers
-Alpthal, Rütli (8580431) has no transfers
+Alpthal, RÃ¼tli (8580431) has no transfers
 Lauerz, Schwanau (8577426) has average buffer time: 6292.173913043478 seconds
 Lauerz, Schwanau (8577426) processed.
 Seewen SZ, Seewen Markt (8588733) has average buffer time: 1202.1818181818182 seconds
@@ -417,14 +417,14 @@ Steinen, Oelberg (8588118) has no transfers
 Steinen, Wyler (8588116) has no transfers
 Steinen, Buchenhof (8511076) has no services
 Schwyz, Hirschen (8577477) has no transfers
-Steinen (8505005) has average buffer time: 1066.2650602409637 seconds
+Steinen (8505005) has average buffer time: 1676.551724137931 seconds
 Steinen (8505005) processed.
 Steinen, Bahnhof (8587532) has no transfers
-Steinen, Müsigricht (8511077) has no services
+Steinen, MÃ¼sigricht (8511077) has no services
 Steinen, Hausmatt (8588117) has no transfers
-Steinen, Rest. Löwen (8588115) has average buffer time: 10778.4 seconds
-Steinen, Rest. Löwen (8588115) processed.
-Steinen, Dorfbrücke (8587959) has no transfers
+Steinen, Rest. LÃ¶wen (8588115) has average buffer time: 10778.4 seconds
+Steinen, Rest. LÃ¶wen (8588115) processed.
+Steinen, DorfbrÃ¼cke (8587959) has no transfers
 Steinen Nord (Spw) (8516179) has no services
 Steinen, Spiegelberg Schlag (8577478) has no transfers
 Steinen, Spiegelberg (8577479) has no transfers
@@ -447,11 +447,11 @@ Sattel (8505350) processed.
 Sattel, Schornen (8503714) has no transfers
 Rothenthurm, Biberegg (8587534) has no transfers
 Alpthal, Kirche (8503861) has no transfers
-Alpthal, Schnüerlismatt (8573762) has no transfers
+Alpthal, SchnÃ¼erlismatt (8573762) has no transfers
 Alpthal, Grund (8573761) has no transfers
 Alpthal, Gribsch (8573760) has no transfers
 Alpthal, Eigen (8503724) has no transfers
-Trachslau, alte Säge (8573759) has no transfers
+Trachslau, alte SÃ¤ge (8573759) has no transfers
 Rothenthurm, Dorf (8588109) has no transfers
 Rothenthurm, Bahnhofstrasse (8505125) has no services
 Rothenthurm, Erste Altmatt (8588236) has no transfers
@@ -483,7 +483,7 @@ Biberbrugg, Bahnhof (8573770) has average buffer time: 1837.142857142857 seconds
 Biberbrugg, Bahnhof (8573770) processed.
 Schindellegi, Chaltenboden (8594294) has no transfers
 Kaltenboden (Agl) (8503399) has no services
-Schindellegi, Zündi (8507302) has no transfers
+Schindellegi, ZÃ¼ndi (8507302) has no transfers
 Schindellegi, Kirche (8573818) has no transfers
 Schindellegi-Feusisberg, Bahnhof (8573819) has no transfers
 Schindellegi-Feusisberg (8503285) has average buffer time: 665.4545454545455 seconds
@@ -495,11 +495,11 @@ Feusisberg, Kreuzstrasse (8573811) has no transfers
 Schindellegi, Pauli (8573812) has no transfers
 Einsiedeln, Binzenweg (8511632) has average buffer time: 3679.090909090909 seconds
 Einsiedeln, Binzenweg (8511632) processed.
-Einsiedeln, Lärchenweg (8582634) has average buffer time: 1828.5 seconds
-Einsiedeln, Lärchenweg (8582634) processed.
+Einsiedeln, LÃ¤rchenweg (8582634) has average buffer time: 1828.5 seconds
+Einsiedeln, LÃ¤rchenweg (8582634) processed.
 Einsiedeln, Alpstrasse (8557000) has no transfers
-Horgenberg b. Einsied., Grütli (8573790) has average buffer time: 2210.0 seconds
-Horgenberg b. Einsied., Grütli (8573790) processed.
+Horgenberg b. Einsied., GrÃ¼tli (8573790) has average buffer time: 2210.0 seconds
+Horgenberg b. Einsied., GrÃ¼tli (8573790) processed.
 Einsiedeln, Eschbach (8581977) has average buffer time: 840.0 seconds
 Einsiedeln, Eschbach (8581977) processed.
 Einsiedeln, Horgenberg (8582636) has no transfers
@@ -513,18 +513,18 @@ Bennau, Burgeren (8503727) has no transfers
 Bennau, Kirche (8573767) has average buffer time: 7280.0 seconds
 Bennau, Kirche (8573767) processed.
 Einsiedeln, Badeanstalt (8503730) has no transfers
-Bennau, Rappenäst (8586566) has no transfers
+Bennau, RappenÃ¤st (8586566) has no transfers
 Egg SZ, Roblosen (8583223) has no transfers
 Neuberg (8503296) has no services
-Egg SZ, Langrüti (8503732) has no transfers
+Egg SZ, LangrÃ¼ti (8503732) has no transfers
 Egg SZ, Schlapprig (8503731) has no transfers
 Willerzell, Gasse (8583529) has no transfers
 Willerzell, Bodenmattli (8581746) has average buffer time: 1807.2 seconds
 Willerzell, Bodenmattli (8581746) processed.
-Willerzell, Grüene Aff (8503734) has average buffer time: 5322.857142857143 seconds
-Willerzell, Grüene Aff (8503734) processed.
-Willerzell, Birchbühl (8573793) has average buffer time: 3120.0 seconds
-Willerzell, Birchbühl (8573793) processed.
+Willerzell, GrÃ¼ene Aff (8503734) has average buffer time: 5322.857142857143 seconds
+Willerzell, GrÃ¼ene Aff (8503734) processed.
+Willerzell, BirchbÃ¼hl (8573793) has average buffer time: 3120.0 seconds
+Willerzell, BirchbÃ¼hl (8573793) processed.
 Egg SZ, Eintracht (8573792) has no transfers
 Egg SZ, Postplatz (8503733) has no transfers
 Feusisberg, Hotel Panorama (8573810) has no transfers
@@ -535,9 +535,9 @@ Feusisberg, Riedhof (8573807) has no transfers
 Feusisberg, Ried (8573808) has no transfers
 Feusisberg, First (8594295) has no transfers
 Weggis, Magnolienweg (8592428) has no transfers
-Weggis, Lützelaustrasse (8595631) has no transfers
+Weggis, LÃ¼tzelaustrasse (8595631) has no transfers
 Weggis, Lindenweg (8594998) has no transfers
-Weggis, Föhrenrain (8592425) has no transfers
+Weggis, FÃ¶hrenrain (8592425) has no transfers
 Weggis, Kastanienweg (8595541) has no transfers
 Weggis, Obstbaumstrasse (8592429) has no transfers
 Weggis, Lido (8510174) has no transfers
@@ -549,7 +549,7 @@ Weggis, Acher (8577216) processed.
 Weggis, Zinnenstrasse (8510176) has no transfers
 Weggis, Unterdorf (8510172) has no transfers
 Weggis, Bodenberg (8592424) has no transfers
-Weggis, Dorfplatz (8591706) has average buffer time: 3861.6 seconds
+Weggis, Dorfplatz (8591706) has average buffer time: 3866.0 seconds
 Weggis, Dorfplatz (8591706) processed.
 Weggis, Paradiesweg (8592430) has average buffer time: 5145.576923076923 seconds
 Weggis, Paradiesweg (8592430) processed.
@@ -557,8 +557,8 @@ Weggis, Kreuzstrasse (8510668) has no transfers
 Weggis, Rigistrasse (8595628) has no transfers
 Weggis, Seilbahn (8588807) has average buffer time: 3618.0 seconds
 Weggis, Seilbahn (8588807) processed.
-Weggis, Neubüel (8577213) has average buffer time: 714.392523364486 seconds
-Weggis, Neubüel (8577213) processed.
+Weggis, NeubÃ¼el (8577213) has average buffer time: 714.392523364486 seconds
+Weggis, NeubÃ¼el (8577213) processed.
 Weggis (Luftseilbahn) (8530388) has no transfers
 Weggis, Under Linde (8595633) has no transfers
 Weggis, Tannenbergstrasse (8592433) has no transfers
@@ -568,49 +568,49 @@ Weggis, Zingelistrasse (8595542) has no transfers
 Rigi Kaltbad (Luftseilbahn) (8530687) has no transfers
 Rigi Kaltbad-First (8505074) has average buffer time: 5520.0 seconds
 Rigi Kaltbad-First (8505074) processed.
-Merlischachen, Räbe (8591701) has no transfers
+Merlischachen, RÃ¤be (8591701) has no transfers
 Weggis, Langenzihl (8577211) has average buffer time: 2229.8823529411766 seconds
 Weggis, Langenzihl (8577211) processed.
-Rigi Staffelhöhe (8505075) has average buffer time: 6060.0 seconds
-Rigi Staffelhöhe (8505075) processed.
+Rigi StaffelhÃ¶he (8505075) has average buffer time: 6060.0 seconds
+Rigi StaffelhÃ¶he (8505075) processed.
 Greppen, Oberhaus (8505669) has average buffer time: 2133.8823529411766 seconds
 Greppen, Oberhaus (8505669) processed.
-Küssnacht am Rigi, Eichholtern (8577210) has average buffer time: 2145.176470588235 seconds
-Küssnacht am Rigi, Eichholtern (8577210) processed.
+KÃ¼ssnacht am Rigi, Eichholtern (8577210) has average buffer time: 2145.176470588235 seconds
+KÃ¼ssnacht am Rigi, Eichholtern (8577210) processed.
 Merlischachen (8505011) has no transfers
-Küssnacht am Rigi, Rotenhofstrasse (8595481) has average buffer time: 1348.0 seconds
-Küssnacht am Rigi, Rotenhofstrasse (8595481) processed.
+KÃ¼ssnacht am Rigi, Rotenhofstrasse (8595481) has average buffer time: 1348.0 seconds
+KÃ¼ssnacht am Rigi, Rotenhofstrasse (8595481) processed.
 Seebodenalp (8505088) has no transfers
-Küssnacht am Rigi, Breitfeld (8577209) has average buffer time: 400.44943820224717 seconds
-Küssnacht am Rigi, Breitfeld (8577209) processed.
+KÃ¼ssnacht am Rigi, Breitfeld (8577209) has average buffer time: 400.44943820224717 seconds
+KÃ¼ssnacht am Rigi, Breitfeld (8577209) processed.
 Merlischachen, Sumpf (8591700) has no transfers
 Merlischachen, Dorf (8587642) has no transfers
-Küssnacht am Rigi, Honegg (8577208) has average buffer time: 429.438202247191 seconds
-Küssnacht am Rigi, Honegg (8577208) processed.
-Küssnacht am Rigi (Talstation) (8530387) has no transfers
-Küssnacht am Rigi, Seilbahn (8505665) has average buffer time: 418.659217877095 seconds
-Küssnacht am Rigi, Seilbahn (8505665) processed.
-Küssnacht am Rigi, Astrid-Kap. (8591699) has no services
-Küssnacht am Rigi, Räbmatt (8592405) has average buffer time: 418.99441340782124 seconds
-Küssnacht am Rigi, Räbmatt (8592405) processed.
-Küssnacht am Rigi (See) (8508488) has no services
-Küssnacht am Rigi, Seeplatz (8505129) has no services
-Küssnacht am Rigi, Hauptplatz (8577206) has average buffer time: 265.82781456953643 seconds
-Küssnacht am Rigi, Hauptplatz (8577206) processed.
-Küssnacht am Rigi, Litzi (8591702) has no transfers
-Küssnacht am Rigi, Plaza (8587582) has average buffer time: 340.0 seconds
-Küssnacht am Rigi, Plaza (8587582) processed.
-Küssnacht am Rigi, Bahnhof (8577205) has average buffer time: 383.49397590361446 seconds
-Küssnacht am Rigi, Bahnhof (8577205) processed.
-Küssnacht am Rigi (8505002) has average buffer time: 1983.9344262295083 seconds
-Küssnacht am Rigi (8505002) processed.
-Küssnacht am Rigi, Oberdorf (8587770) has average buffer time: 426.1855670103093 seconds
-Küssnacht am Rigi, Oberdorf (8587770) processed.
-Küssnacht am Rigi, Gloritobel (8595501) has no transfers
-Küssnacht am Rigi, Ebnet (8587557) has average buffer time: 433.91752577319585 seconds
-Küssnacht am Rigi, Ebnet (8587557) processed.
-Küssnacht am Rigi, Chliarniweg (8591703) has no transfers
-Haltikon, Säge (8591704) has no transfers
+KÃ¼ssnacht am Rigi, Honegg (8577208) has average buffer time: 429.438202247191 seconds
+KÃ¼ssnacht am Rigi, Honegg (8577208) processed.
+KÃ¼ssnacht am Rigi (Talstation) (8530387) has no transfers
+KÃ¼ssnacht am Rigi, Seilbahn (8505665) has average buffer time: 418.659217877095 seconds
+KÃ¼ssnacht am Rigi, Seilbahn (8505665) processed.
+KÃ¼ssnacht am Rigi, Astrid-Kap. (8591699) has no services
+KÃ¼ssnacht am Rigi, RÃ¤bmatt (8592405) has average buffer time: 418.99441340782124 seconds
+KÃ¼ssnacht am Rigi, RÃ¤bmatt (8592405) processed.
+KÃ¼ssnacht am Rigi (See) (8508488) has no services
+KÃ¼ssnacht am Rigi, Seeplatz (8505129) has no services
+KÃ¼ssnacht am Rigi, Hauptplatz (8577206) has average buffer time: 265.82781456953643 seconds
+KÃ¼ssnacht am Rigi, Hauptplatz (8577206) processed.
+KÃ¼ssnacht am Rigi, Litzi (8591702) has no transfers
+KÃ¼ssnacht am Rigi, Plaza (8587582) has average buffer time: 340.0 seconds
+KÃ¼ssnacht am Rigi, Plaza (8587582) processed.
+KÃ¼ssnacht am Rigi, Bahnhof (8577205) has average buffer time: 383.49397590361446 seconds
+KÃ¼ssnacht am Rigi, Bahnhof (8577205) processed.
+KÃ¼ssnacht am Rigi (8505002) has average buffer time: 1983.9344262295083 seconds
+KÃ¼ssnacht am Rigi (8505002) processed.
+KÃ¼ssnacht am Rigi, Oberdorf (8587770) has average buffer time: 426.1855670103093 seconds
+KÃ¼ssnacht am Rigi, Oberdorf (8587770) processed.
+KÃ¼ssnacht am Rigi, Gloritobel (8595501) has no transfers
+KÃ¼ssnacht am Rigi, Ebnet (8587557) has average buffer time: 433.91752577319585 seconds
+KÃ¼ssnacht am Rigi, Ebnet (8587557) processed.
+KÃ¼ssnacht am Rigi, Chliarniweg (8591703) has no transfers
+Haltikon, SÃ¤ge (8591704) has no transfers
 Haltikon, Kapelle (8594722) has no transfers
 Immensee, Hohle Gasse (8505672) has average buffer time: 416.2886597938144 seconds
 Immensee, Hohle Gasse (8505672) processed.
@@ -623,10 +623,10 @@ Immensee, Gymnasium (8588276) has no transfers
 Immensee (See) (8502257) has no transfers
 Immensee, Dorf (8587771) has no transfers
 Immensee, Sunnehof (8587881) has no transfers
-Küssnacht am Rigi, Ellbögli (8587583) has no transfers
-Küssnacht am Rigi, Fänn Süd (8591755) has no transfers
-Küssnacht am Rigi, Fänn Nord (8587519) has no transfers
-Goldau Mühlefluh (Verzw) (8502240) has no services
+KÃ¼ssnacht am Rigi, EllbÃ¶gli (8587583) has no transfers
+KÃ¼ssnacht am Rigi, FÃ¤nn SÃ¼d (8591755) has no transfers
+KÃ¼ssnacht am Rigi, FÃ¤nn Nord (8587519) has no transfers
+Goldau MÃ¼hlefluh (Verzw) (8502240) has no services
 Arth, Feld (8577406) has average buffer time: 942.1374045801526 seconds
 Arth, Feld (8577406) processed.
 Arth, Dorf (8577408) has average buffer time: 1009.1379310344828 seconds
@@ -638,8 +638,8 @@ Arth, Klostermatt (8588906) has average buffer time: 1127.2727272727273 seconds
 Arth, Klostermatt (8588906) processed.
 Arth, Aazopf (8577410) has average buffer time: 1157.7272727272727 seconds
 Arth, Aazopf (8577410) processed.
-Arth, Chäppeli (8577411) has average buffer time: 1172.7272727272727 seconds
-Arth, Chäppeli (8577411) processed.
+Arth, ChÃ¤ppeli (8577411) has average buffer time: 1172.7272727272727 seconds
+Arth, ChÃ¤ppeli (8577411) processed.
 Arth, Tafelstatt (8577412) has average buffer time: 1535.076923076923 seconds
 Arth, Tafelstatt (8577412) processed.
 Goldau, Bischofshusen (8577401) has average buffer time: 480.45112781954884 seconds
@@ -647,6 +647,6 @@ Goldau, Bischofshusen (8577401) processed.
 Steinerberg, St. Anna (8591765) has no transfers
 Steinerberg, Diezigen (8591764) has no transfers
 Eidg. Magazine (8503297) has no services
-Goldau, Neu-Röthen (8591758) has no transfers
+Goldau, Neu-RÃ¶then (8591758) has no transfers
 Steinerberg, Husmatt (8591762) has no transfers
 Steinerberg, Chornacher (8591763) has no transfers

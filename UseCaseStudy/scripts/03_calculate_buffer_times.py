@@ -2,18 +2,22 @@ import geopandas as gpd
 import pandas as pd
 import time
 import json
+from functools import lru_cache
+from pathlib import Path
 from datetime import datetime, timedelta
 from tqdm import tqdm
 from helpers.ojp_arrivals_and_departures import OJPStopDepArrRequest
 from helpers.write_log import initialize_logfile, add_to_log
 
-FILE_PATH = "../data/stop-places-schwyz/stop-places-schwyz.shp" 
-LOG = '03_calculate_buffer_times_LOGFILE.txt'
+SCRIPT_DIR = Path(__file__).resolve().parent
+FILE_PATH = SCRIPT_DIR.parent / "data/stop-places-schwyz/stop-places-schwyz.shp"
+TRANSFER_FILE_PATH = SCRIPT_DIR.parent / "data/transfer-time/transfers.txt"
+LOG = SCRIPT_DIR / "03_calculate_buffer_times_LOGFILE.txt"
 
 
 def inread_data():
     print(f"Loading shapefile: {FILE_PATH}")
-    return gpd.read_file(FILE_PATH)
+    return gpd.read_file(str(FILE_PATH))
 
 def process_all_stops(stops):
     """
@@ -32,19 +36,65 @@ def process_all_stops(stops):
             stops.at[index, 'buffer_timeseries'] = result['buffer_timeseries']
 
     # Export to GeoPackage
-    output_path = FILE_PATH.replace(".shp", "-with-buffers.gpkg")
-    stops.to_file(output_path, driver="GPKG", layer="stop_buffers")
+    output_path = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
+    stops.to_file(str(output_path), driver="GPKG", layer="stop_buffers")
     
     print(f"\nSuccessfully saved {len(stops)} rows to {output_path}")
 
+
+@lru_cache(maxsize=1)
+def load_required_transfer_times_by_stop():
+    """
+    Returns a dict: stop_id (string) -> required transfer timedelta.
+    Uses GTFS transfer_type=2 entries with min_transfer_time (seconds).
+    """
+    transfers_df = pd.read_csv(
+        TRANSFER_FILE_PATH,
+        dtype={"from_stop_id": str, "to_stop_id": str, "transfer_type": str, "min_transfer_time": str},
+        usecols=["from_stop_id", "to_stop_id", "transfer_type", "min_transfer_time"],
+    )
+
+    station_defaults = transfers_df[
+        (transfers_df["transfer_type"] == "2")
+        & (transfers_df["min_transfer_time"].notna())
+        & (transfers_df["min_transfer_time"] != "")
+        & (transfers_df["from_stop_id"] == transfers_df["to_stop_id"])
+    ].copy()
+
+    if station_defaults.empty:
+        return {}
+
+    station_defaults["min_transfer_time"] = pd.to_numeric(station_defaults["min_transfer_time"], errors="coerce")
+    station_defaults = station_defaults.dropna(subset=["min_transfer_time"])
+
+    # If multiple rows exist for the same stop, keep the first (values are typically identical).
+    station_defaults = station_defaults.drop_duplicates(subset=["from_stop_id"], keep="first")
+
+    return {
+        row["from_stop_id"]: timedelta(seconds=int(row["min_transfer_time"]))
+        for _, row in station_defaults.iterrows()
+    }
+
+
+def get_stop_ref_candidates(stop_place_ref):
+    value = str(stop_place_ref).strip()
+    digits_only = "".join(ch for ch in value if ch.isdigit())
+
+    candidates = [value]
+    if digits_only and digits_only != value:
+        candidates.append(digits_only)
+
+    return candidates
+
 def get_required_transfer_time(StopPlaceRef):
-    """
-    # TODO: implement correctly
-    # standard is two minutes https://www.sbb.ch/en/help-and-contact/products-services/timetable.html#anchor3.
-    # what request to get interchange time of a station?
-    """
-    required_transfer_time = timedelta(minutes=2)
-    return required_transfer_time
+    transfer_times_by_stop = load_required_transfer_times_by_stop()
+
+    for candidate in get_stop_ref_candidates(StopPlaceRef):
+        if candidate in transfer_times_by_stop:
+            return transfer_times_by_stop[candidate]
+
+    # Fallback if no explicit entry exists in transfers.txt.
+    return timedelta(minutes=2)
 
 def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 
