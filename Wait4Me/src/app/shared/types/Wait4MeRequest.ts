@@ -1,5 +1,7 @@
 import { Duration } from '../models/duration';
 
+export const BACKEND_URL = 'http://localhost:8000';
+
 export type Wait4MeRequest = {
     requestId: string;
     passengerId: string;
@@ -11,7 +13,17 @@ export type Wait4MeRequest = {
     status: string;
 }
 
-export interface RequestResponse {
-  status: string;
+export interface PostResponse {
+  api_status: string;
   request_id?: string;
+}
+
+export interface GetStatusResponse {
+  api_status: string;
+  request_status:string;
+}
+
+export interface GetRequestResponse {
+  api_status: string;
+  data: Array<JSON>;
 }

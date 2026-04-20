@@ -31,12 +31,16 @@ def post_to_db(command, params):
 def get_from_db(command, params, multiple=False):
 
     conn = psycopg2.connect(**DB_CONFIG)
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute(command, params)
+    
     if multiple:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(command, params)
         result=cur.fetchall()
     else:
-        result = cur.fetchone()
+        cur = conn.cursor()
+        cur.execute(command, params)
+        result=cur.fetchone()[0]
+
     cur.close()
     conn.close()
 
@@ -69,9 +73,9 @@ def create_new_request(data):
     
     db_transaction = post_to_db(command, params)
     if db_transaction=='success':
-        return jsonify({"status": "created", "request_id": request_id}), 201
+        return "created", request_id
     else:
-        return jsonify({"status": db_transaction}), 500
+        return db_transaction, 0
 
 def change_request_status(request_id, data):
 
@@ -85,9 +89,9 @@ def change_request_status(request_id, data):
     db_transaction = post_to_db(command, params)
 
     if db_transaction=='success':
-        return jsonify({"status": "changed", "request_id": request_id}), 201
+        return "changed", request_id
     else:
-        return jsonify({"error": db_transaction}), 500   
+        return db_transaction, 0  
     
 def get_request_status(request_id):
 
@@ -97,13 +101,8 @@ def get_request_status(request_id):
         WHERE request_id = %s
     """
     params = (request_id,)
-
     result = get_from_db(command, params)
-
-    if result == 'Not found':
-        return jsonify({"status": "Not found"}), 404
-
-    return jsonify({"status": result}), 200
+    return result
 
 def get_incoming_requests(stop_ref, service):
 
@@ -116,9 +115,6 @@ def get_incoming_requests(stop_ref, service):
 
     results = get_from_db(command, params, multiple=True)
 
-    if results == 'Not found':
-        return jsonify({"message": "No incoming connections"}), 200
-
-    return jsonify({"data": results}), 200
+    return results
 
     

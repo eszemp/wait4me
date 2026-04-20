@@ -1,16 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
-import { Wait4MeRequest, RequestResponse } from '../shared/types/Wait4MeRequest';
+import { Wait4MeRequest, PostResponse, GetRequestResponse, BACKEND_URL } from '../shared/types/Wait4MeRequest';
 import { HttpClient } from '@angular/common/http';
 import { Duration } from '../shared/models/duration';
 
 
-interface GetRequestResponse {
-  message?: string;
-  data?: JSON;
-}
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
 
 
 @Injectable({ providedIn: 'root' })
@@ -33,20 +28,20 @@ export class W4MDriverService {
     }
     try {
       const response = await lastValueFrom(
-        this.http.post<{ status: string; request_id?: string }>(
+        this.http.post<PostResponse>(
           `${BACKEND_URL}/update-request/${this.request_id}`,
           { status: 'accepted' }
         )
       );
 
-      console.log(response.status);
+      console.log(response.api_status);
 
-      if (response.status === 'changed') {
+      if (response.api_status === 'changed') {
         this.request_id = ' ';
         this.edit_mode = false;
         return;
       }
-      console.error('Accepting request failed, backend did not confirm change:', response);
+      console.error('Accepting request failed, backend did not confirm change:', response.api_status);
     } catch (error) {
       console.error('Accepting request failed:', error);
     }
@@ -59,18 +54,18 @@ export class W4MDriverService {
     }
     try {
       const response = await lastValueFrom(
-        this.http.post<{ status: string; request_id?: string }>(
+        this.http.post<PostResponse>(
           `${BACKEND_URL}/update-request/${this.request_id}`,
           { status: 'declined' }
         )
       );
 
-      if (response.status === 'changed') {
+      if (response.api_status === 'changed') {
         this.request_id = ' ';
         this.edit_mode = false;
         return;
       }
-      console.error('Declining request failed, backend did not confirm change:', response);
+      console.error('Declining request failed, backend did not confirm change:', response.api_status);
     } catch (error) {
       console.error('Declining request failed:', error);
     }
@@ -86,26 +81,17 @@ export class W4MDriverService {
   async query_all_requests(): Promise<Wait4MeRequest[]> {
     try {
       const response = await lastValueFrom(
-        this.http.get<any>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${this.stop_ref}&outgoing_service=${this.journey_ref}`)
+        this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${this.stop_ref}&outgoing_service=${this.journey_ref}`)
       );
 
       console.log('API Response:', response);
 
       // Check for the "No incoming connections" message inside the object
-      if (response?.message === "No incoming connections") {
+      if (response.api_status === "No incoming connections") {
         return [];
       }
 
-      const rawArray = Array.isArray(response) ? response : response?.data;
-
-      console.log('Raw Array:', rawArray);
-
-      if (!Array.isArray(rawArray)) {
-        console.warn('Response format not recognized as an array:', response);
-        return [];
-      }
-
-      const W4M_Array = rawArray.map((data: any) => {
+      const array_of_requests = response.data.map((data: any) => {
         return {
           requestId: data.request_id,
           passengerId: data.passenger_id,
@@ -118,8 +104,8 @@ export class W4MDriverService {
         } satisfies Wait4MeRequest;
       });
 
-      console.log(W4M_Array);
-      return W4M_Array;
+      console.log(array_of_requests);
+      return array_of_requests;
 
     } catch (error) {
       console.error('DB Query of all requests failed:', error);

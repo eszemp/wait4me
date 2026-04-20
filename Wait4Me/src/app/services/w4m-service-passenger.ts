@@ -4,10 +4,10 @@ import { CriticalTransfer } from '../shared/types/PassengerTripTypes';
 import { PassengerTrip } from '../shared/types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
-import { RequestResponse } from '../shared/types/Wait4MeRequest';
+import { GetStatusResponse, PostResponse, BACKEND_URL } from '../shared/types/Wait4MeRequest';
 
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+
 
 
 @Injectable({ providedIn: 'root' })
@@ -94,12 +94,12 @@ export class W4MPassengerService {
       requested_delay: this.transfer?.requestedDelay.totalMinutes,
     }
     const response = await lastValueFrom(
-      this.http.post<RequestResponse>(`${BACKEND_URL}/create-request`, request)
+      this.http.post<PostResponse>(`${BACKEND_URL}/create-request`, request)
     );
 
     console.log('Script Output:', response);
 
-    if (response.status === "created") {
+    if (response.api_status === "created") {
       this.request_id = response.request_id ?? null;
       this.status.set('pending');
       this.startStatusPolling();
@@ -115,13 +115,13 @@ export class W4MPassengerService {
 
     try {
       const response = await lastValueFrom(
-        this.http.post<{ status: string; request_id?: string }>(
+        this.http.post<PostResponse>(
           `${BACKEND_URL}/update-request/${this.request_id}`,
           { status: 'cancelled' }
         )
       );
 
-      if (response.status === 'changed') {
+      if (response.api_status === 'changed') {
         this.stopStatusPolling();
         this.request_id = null;
         this.status.set('enabled');
@@ -149,23 +149,17 @@ export class W4MPassengerService {
 
     this.pollingSubscription = timer(0, 5000)
       .pipe(
-        switchMap(() => this.http.get<RequestResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
+        switchMap(() => this.http.get<GetStatusResponse>(`${BACKEND_URL}/get-status/${this.request_id}`)),
         tap(response => {
 
-          //TODO: handle in backend
-          let currentStatus = response.status;
-          if (typeof currentStatus === 'object' && currentStatus !== null) {
-              currentStatus = (currentStatus as any).status;
-          }
-
-          if (currentStatus=== 'pending') {
+          if (response.request_status=== 'pending') {
             this.status.set('pending');
             console.log('request still pending')
             return;
           }
 
-          if (currentStatus === 'accepted' || currentStatus === 'declined') {
-            this.status.set(currentStatus as 'accepted' | 'declined');
+          if (response.request_status === 'accepted' || response.request_status === 'declined') {
+            this.status.set(response.request_status as 'accepted' | 'declined');
             console.log('request status changed from pending to ', this.status());
             this.stopStatusPolling();
           }
