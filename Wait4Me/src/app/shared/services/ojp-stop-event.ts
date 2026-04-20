@@ -56,6 +56,7 @@ export class OJPStopEvent extends OJPBase {
             );
             const course = this.extractCourseNumber(this.asString(service?.journeyRef));
             const direction = this.asString(this.readTextValue(service?.destinationText));
+            const destinationStopPointRef = this.asNullableString(service?.destinationStopPointRef);
             //const departure = this.asString(
             //  callAtStop?.serviceDeparture?.estimatedTime ??
             //    callAtStop?.serviceDeparture?.timetabledTime,
@@ -132,6 +133,7 @@ export class OJPStopEvent extends OJPBase {
               course,
               journeyRef,
               direction,
+              destinationStopPointRef,
               departureTimetable,
               departureEstimated,
               departureDelay,

@@ -1,0 +1,122 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.monitoring-map {
+  border: 2px solid var(--fir-green);
+  width: 100%;
+  height: calc(100vh - 70px);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.legend-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fir-green);
+  margin-bottom: 8px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-size: 13px;
+  color: var(--grey);
+}
+
+:host ::ng-deep .station-statistics-popup .maplibregl-popup-content {
+  font-family: inherit;
+  color: var(--fir-green);
+  min-width: 320px;
+  max-width: 360px;
+  padding: 16px;
+  border-radius: 5px;
+}
+
+:host ::ng-deep .station-statistics-popup .maplibregl-popup-close-button {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  line-height: 24px;
+  color: var(--fir-green);
+}
+
+:host ::ng-deep .histogram-popup-content {
+  width: 100%;
+}
+
+:host ::ng-deep .histogram-title {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--fir-green);
+}
+
+:host ::ng-deep .histogram-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 36px;
+  column-gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+:host ::ng-deep .histogram-label {
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .histogram-bar-track {
+  height: 22px;
+  width: 100%;
+  background: #d8dde1;
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .histogram-bar-fill {
+  height: 100%;
+  background: #177d8c;
+  border-radius: 11px;
+}
+
+:host ::ng-deep .histogram-value {
+  text-align: right;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
