@@ -1,5 +1,4 @@
 import { Component, EventEmitter, inject, OnDestroy, Output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OJPStopEvent } from '../../../shared/services/ojp-stop-event';
 import type { StopLookupResult, DepartureLine } from '../../../shared/types/DriverDeparturesTypes';
@@ -16,7 +15,7 @@ export type SelectedConnectionPayload = {
 @Component({
   selector: 'app-line-search',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './line-search.component.html',
   styleUrl: './line-search.component.css',
 })
@@ -24,22 +23,22 @@ export type SelectedConnectionPayload = {
  * Provides station lookup and departure-line selection for the monitoring map.
  */
 export class LineSearchComponent implements OnDestroy {
-  private ojpStopEvent = inject(OJPStopEvent);
+  private readonly ojpStopEvent = inject(OJPStopEvent);
 
   stationQuery = '';
   stationSuggestions = signal<StopLookupResult[]>([]);
   showStationSuggestions = false;
-  
+
   selectedStation = signal<StopLookupResult | null>(null);
   selectedTime = signal('12:00');
   selectedLine = signal<DepartureLine | null>(null);
-  
+
   departingLines = signal<DepartureLine[]>([]);
   showDepartureDropdown = signal(false);
   error = signal<string | null>(null);
 
-  private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
+  private readonly searchSubject = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
 
   @Output() lineSelected = new EventEmitter<SelectedConnectionPayload | null>();
 
@@ -63,18 +62,23 @@ export class LineSearchComponent implements OnDestroy {
   onStationQueryChange(query: string): void {
     this.stationQuery = query;
     this.showStationSuggestions = query.length >= 2;
+    this.error.set(null);
     this.searchSubject.next(query);
   }
 
+  /** Queries stop suggestions for the search input. */
   private searchStations(query: string): void {
-    this.ojpStopEvent.searchStopsByName(query).subscribe({
-      next: (stops) => {
-        this.stationSuggestions.set(stops);
-      },
-      error: () => {
-        this.error.set('Error searching stations');
-      },
-    });
+    this.ojpStopEvent
+      .searchStopsByName(query)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stops) => {
+          this.stationSuggestions.set(stops);
+        },
+        error: () => {
+          this.error.set('Error searching stations');
+        },
+      });
   }
 
   /** Selects a station and loads departures for the chosen time. */
@@ -85,7 +89,7 @@ export class LineSearchComponent implements OnDestroy {
     this.stationQuery = station.stopPlaceName;
     this.showStationSuggestions = false;
     this.error.set(null);
-    
+
     this.fetchDepartures();
   }
 
@@ -101,6 +105,7 @@ export class LineSearchComponent implements OnDestroy {
     }
   }
 
+  /** Loads departure candidates for the selected station and requested time. */
   private fetchDepartures(): void {
     const station = this.selectedStation();
     if (!station || !this.selectedTime()) {
@@ -109,15 +114,18 @@ export class LineSearchComponent implements OnDestroy {
 
     const searchDate = this.parseDateTime(this.selectedTime());
 
-    this.ojpStopEvent.getDepartingLines(station.stopPlaceRef, searchDate).subscribe({
-      next: (lines) => {
-        this.departingLines.set(lines);
-        this.showDepartureDropdown.set(lines.length > 0);
-      },
-      error: () => {
-        this.error.set('Error fetching connections');
-      },
-    });
+    this.ojpStopEvent
+      .getDepartingLines(station.stopPlaceRef, searchDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (lines) => {
+          this.departingLines.set(lines);
+          this.showDepartureDropdown.set(lines.length > 0);
+        },
+        error: () => {
+          this.error.set('Error fetching connections');
+        },
+      });
   }
 
   private parseDateTime(time: string): Date {
@@ -179,8 +187,10 @@ export class LineSearchComponent implements OnDestroy {
     }, 120);
   }
 
+  /** Completes all streams used by this component. */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.searchSubject.complete();
   }
 }

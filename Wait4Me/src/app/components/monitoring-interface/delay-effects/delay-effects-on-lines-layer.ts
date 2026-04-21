@@ -111,12 +111,17 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       });
   }
 
+  /** Updates the simulated delay and recomputes remaining transfer buffers for visible stations. */
   onDelaySliderInput(event: Event): void {
     const target = event.target as HTMLInputElement | null;
     const value = Number(target?.value ?? 0);
     this.selectedDelayMinutes = Number.isFinite(value)
       ? Math.min(30, Math.max(0, Math.round(value)))
       : 0;
+
+    if (this.latestTrackGeojson.features.length > 0) {
+      this.updateTrackSource(this.latestTrackGeojson);
+    }
   }
 
   /** Ensures the dedicated source/layer pair for the selected connection track exists. */
@@ -158,7 +163,16 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         source: this.trackSourceId,
         filter: ['==', ['geometry-type'], 'Point'],
         paint: {
-          'circle-color': '#ffffff',
+          'circle-color': [
+            'case',
+            ['==', ['get', 'remainingBufferMinutes'], null],
+            '#ffffff',
+            ['<', ['get', 'remainingBufferMinutes'], 0],
+            '#ff0000',
+            ['==', ['get', 'remainingBufferMinutes'], 0],
+            '#ffd1d1',
+            '#d1ffed',
+          ],
           'circle-stroke-color': '#395148',
           'circle-stroke-width': 2,
           'circle-radius': 5,
@@ -201,6 +215,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     this.fitToTrack(enrichedGeojson);
   }
 
+  /** Lazily loads the station transfer-time dataset and builds ref/name lookup indexes. */
   private async loadStationTransferDataset(): Promise<void> {
     if (this.stationTransferDatasetPromise) {
       return this.stationTransferDatasetPromise;
@@ -273,6 +288,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return this.stationTransferDatasetPromise;
   }
 
+  /** Enriches connection features with station transfer metrics used for styling and popup details. */
   private enrichStationFeatures(geojson: { type: 'FeatureCollection'; features: unknown[] }): { type: 'FeatureCollection'; features: unknown[] } {
     const generatedStationFeatures: unknown[] = [];
     const generatedFeatureKeys = new Set<string>();
@@ -297,6 +313,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         }
 
         const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, stationStop.arrivalTime);
+        const remainingBufferMinutes = selectedTransfer ? selectedTransfer.minutes - this.selectedDelayMinutes : null;
         const featureKey = `${stationStop.stopRef}__${stationStop.arrivalTime}`;
         if (generatedFeatureKeys.has(featureKey)) {
           continue;
@@ -319,6 +336,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
             transferSeries: dataset.transferSeries,
             transferTimeMinutes: selectedTransfer?.minutes ?? null,
             transferTimeMatchedAt: selectedTransfer?.time ?? null,
+            remainingBufferMinutes,
           },
         });
       }
@@ -328,37 +346,39 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       ...geojson,
       features: [
         ...geojson.features.map((feature) => {
-        const typedFeature = feature as { geometry?: { type?: string }; properties?: Record<string, unknown> };
-        if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
-          return feature;
-        }
+          const typedFeature = feature as { geometry?: { type?: string }; properties?: Record<string, unknown> };
+          if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
+            return feature;
+          }
 
-        const stopRef = this.normalizeStopRef(typedFeature.properties['stopRef']);
-        const stopName = this.toSafeString(typedFeature.properties['stopName']) ?? '';
-        const arrivalTime = this.toSafeString(typedFeature.properties['arrivalTime']) ?? '';
+          const stopRef = this.normalizeStopRef(typedFeature.properties['stopRef']);
+          const stopName = this.toSafeString(typedFeature.properties['stopName']) ?? '';
+          const arrivalTime = this.toSafeString(typedFeature.properties['arrivalTime']) ?? '';
 
-        if (!stopRef && !stopName) {
-          return feature;
-        }
+          if (!stopRef && !stopName) {
+            return feature;
+          }
 
-        const dataset = this.findDatasetForStation(stopRef, stopName);
-        if (!dataset) {
-          return feature;
-        }
+          const dataset = this.findDatasetForStation(stopRef, stopName);
+          if (!dataset) {
+            return feature;
+          }
 
-        const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
+          const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
+          const remainingBufferMinutes = selectedTransfer ? selectedTransfer.minutes - this.selectedDelayMinutes : null;
 
-        return {
-          ...typedFeature,
-          properties: {
-            ...typedFeature.properties,
-            stopName: typedFeature.properties['stopName'] ?? dataset.stopName,
-            transferSeries: dataset.transferSeries,
-            transferTimeMinutes: selectedTransfer?.minutes ?? null,
-            transferTimeMatchedAt: selectedTransfer?.time ?? null,
-          },
-        };
-      }),
+          return {
+            ...typedFeature,
+            properties: {
+              ...typedFeature.properties,
+              stopName: typedFeature.properties['stopName'] ?? dataset.stopName,
+              transferSeries: dataset.transferSeries,
+              transferTimeMinutes: selectedTransfer?.minutes ?? null,
+              transferTimeMatchedAt: selectedTransfer?.time ?? null,
+              remainingBufferMinutes,
+            },
+          };
+        }),
         ...generatedStationFeatures,
       ],
     };
@@ -377,18 +397,29 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const arrivalTimeText = this.escapeHtml(this.formatIsoForPopup(arrivalTimeIso));
     const transferMinutesValue = properties['transferTimeMinutes'];
     const transferMinutes = transferMinutesValue == null ? null : this.toSafeNumber(transferMinutesValue);
+    const remainingBufferValue = properties['remainingBufferMinutes'];
+    const remainingBufferMinutes =
+      remainingBufferValue == null || Number.isNaN(Number(remainingBufferValue))
+        ? null
+        : Number(remainingBufferValue);
     const transferTimeText = transferMinutes === null ? 'n/a' : `${transferMinutes} min`;
+    const remainingBufferText = remainingBufferMinutes === null ? 'n/a' : `${remainingBufferMinutes} min`;
 
     const content = `
       <div class="station-series-popup">
         <div class="station-series-title" style="font-weight: bold;">${stopName}</div>
         <div class="station-series-list" style="min-width: 260px;">
           <div class="station-series-row">
+            <div class="station-series-time">Arrival</div>
             <div class="station-series-value">${arrivalTimeText || 'n/a'}</div>
           </div>
           <div class="station-series-row">
             <div class="station-series-time">Available transfer time</div>
             <div class="station-series-value">${transferTimeText}</div>
+          </div>
+          <div class="station-series-row">
+            <div class="station-series-time">Remaining time buffer</div>
+            <div class="station-series-value">${remainingBufferText}</div>
           </div>
         </div>
       </div>
@@ -601,6 +632,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
+      // Keep popup timestamps aligned with Swiss timetable semantics.
       timeZone: 'Europe/Zurich',
     });
   }

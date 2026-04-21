@@ -1,6 +1,18 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import maplibregl from 'maplibre-gl';
+import type * as GeoJSON from 'geojson';
+
+type HistogramFeature = {
+  type: 'Feature';
+  geometry: GeoJSON.Geometry;
+  properties: GeoJSON.GeoJsonProperties;
+};
+
+type HistogramFeatureCollection = {
+  type: 'FeatureCollection';
+  features: HistogramFeature[];
+};
 
 @Component({
   selector: 'app-station-statistics-layer',
@@ -17,6 +29,8 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
 
   private readonly histogramBuckets = ['<1m', '1-3m', '3-5m', '5-10m', '10-20m', '20m+'] as const;
   private readonly binColors = ['#b2182b', '#ef8a62', '#fddbc7', '#d1e5f0', '#67a9cf', '#2166ac'];
+  private readonly sourceId = 'station-statistics-source';
+  private readonly pointsLayerId = 'station-statistics-points';
   private map: maplibregl.Map | null = null;
 
   readonly legendItems = this.histogramBuckets.map((bucket, index) => ({
@@ -54,6 +68,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     this.map = null;
   }
 
+  /** Loads station histogram GeoJSON and adds styled point features with popups. */
   private async addLayer(): Promise<void> {
     const map = this.map;
     if (!map) {
@@ -67,15 +82,15 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
 
     const geojson = this.colorizeByMaxBin(await response.json());
 
-    map.addSource('station-statistics-source', {
+    map.addSource(this.sourceId, {
       type: 'geojson',
       data: geojson,
     });
 
     map.addLayer({
-      id: 'station-statistics-points',
+      id: this.pointsLayerId,
       type: 'circle',
-      source: 'station-statistics-source',
+      source: this.sourceId,
       paint: {
         'circle-radius': 7,
         'circle-color': ['get', 'color'],
@@ -85,15 +100,15 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
       },
     });
 
-    map.on('mouseenter', 'station-statistics-points', () => {
+    map.on('mouseenter', this.pointsLayerId, () => {
       map.getCanvas().style.cursor = 'pointer';
     });
 
-    map.on('mouseleave', 'station-statistics-points', () => {
+    map.on('mouseleave', this.pointsLayerId, () => {
       map.getCanvas().style.cursor = '';
     });
 
-    map.on('click', 'station-statistics-points', (event) => {
+    map.on('click', this.pointsLayerId, (event) => {
       const feature = event.features?.[0];
       if (!feature || feature.geometry.type !== 'Point') {
         return;
@@ -143,15 +158,19 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
   }
 
-  private colorizeByMaxBin(geojson: any): any {
-    const features = Array.isArray(geojson?.features) ? geojson.features : [];
+  /** Adds a precomputed color property based on the dominant wait-time bucket. */
+  private colorizeByMaxBin(geojson: unknown): HistogramFeatureCollection {
+    const root = geojson as { features?: unknown };
+    const features = Array.isArray(root?.features) ? root.features : [];
 
     return {
-      ...geojson,
-      features: features.map((feature: any) => {
-        const properties = (feature?.properties ?? {}) as Record<string, unknown>;
+      type: 'FeatureCollection',
+      features: features.map((feature) => {
+        const typedFeature = feature as HistogramFeature;
+        const properties = (typedFeature.properties ?? {}) as Record<string, unknown>;
         return {
-          ...feature,
+          ...typedFeature,
+          type: 'Feature',
           properties: {
             ...properties,
             color: this.getColorForMaxBin(properties),
