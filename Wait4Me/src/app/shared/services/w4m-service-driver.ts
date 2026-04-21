@@ -14,46 +14,33 @@ export class W4MDriverService {
   public requestIds : WritableSignal<IncomingRequestState> = signal({});
   public activeStopRef : WritableSignal<string | null> = signal(null);
   public editMode : WritableSignal<Boolean> = signal(false);
+  public hideEditMode : WritableSignal<Boolean> = signal(false);
   public busy : WritableSignal<Boolean> = signal(false);
+  public smallestRequestedDelays : WritableSignal<{ [stopRef: string]: number }> = signal({});
+  public acceptedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
 
   public activeRequestIds = computed(() => {
-    console.log("active request ids updated");
     const stopRef = this.activeStopRef();
-    console.log("stopRef", stopRef);
-    console.log("request ids", this.requestIds());
-    console.log(this.requestIds()[stopRef!]);
     return stopRef ? this.requestIds()[stopRef] ?? {} : {};
   });
   public numberOfStacks = computed(() => Object.keys(this.activeRequestIds()).length);
-  public smallestRequestedDelay = computed(() => {
-    if (Object.keys(this.activeRequestIds()).length===0) {
-      return 0;
-    }
-    else {
-      const delays = Object.keys(this.activeRequestIds()).map(Number).sort((a, b) => a - b);
-      return delays[0];
-    }
-  });
-
+  
 
   constructor(private http: HttpClient) {}
 
-  async query_all_requests(journey_ref: string, stop_ref: string): Promise<number> {
+  async query_all_requests(journey_ref: string, stop_ref: string): Promise<void> {
     this.busy.set(true);
     this.activeStopRef.set(stop_ref);
-    console.log("Check incoming requests for: ");
-    console.log("Jouney Ref:", journey_ref);
-    console.log("Stop Ref: ", stop_ref);
     try {
       const response = await lastValueFrom(
         this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${stop_ref}&outgoing_service=${journey_ref}`)
       );
 
-      console.log('API Response:', response);
+      // console.log('API Response:', response);
 
       if (response.api_status === "No incoming connections" || !response.data) {
         this.busy.set(false);
-        return 0;
+        return;
       }
 
       const requestsByDelay = response.data.reduce((acc: { [key: number]: string[] }, data: any) => {
@@ -67,21 +54,19 @@ export class W4MDriverService {
 
       }, {});
 
-      console.log('Grouped Requests:', requestsByDelay);
+      // console.log('Grouped Requests:', requestsByDelay);
   
 
       // update requestIds signal for this stop    
       this.requestIds.update(state => {
-        const newState = { ...state };
+        let newState = { ...state };
         
         if (newState[stop_ref]) {
           // MERGE: Stop exists, merge delay bundles
           const existingStopData = { ...newState[stop_ref] };
-          
           Object.keys(requestsByDelay).forEach(delay => {
             const delayNum = Number(delay);
             if (existingStopData[delayNum]) {
-              // combine arrays and remove duplicates
               existingStopData[delayNum] = [...new Set([...existingStopData[delayNum], ...requestsByDelay[delayNum]])];
             } else {
               existingStopData[delayNum] = requestsByDelay[delayNum];
@@ -94,24 +79,32 @@ export class W4MDriverService {
         }
         return newState;
       });
-
+      this.smallestRequestedDelays.update(state => {
+        let newState = { ...state };
+        if (Object.keys(this.activeRequestIds()).length!=0) {
+          const delays = Object.keys(this.activeRequestIds()).map(Number).sort((a, b) => a - b);
+          newState[stop_ref] = delays[0];
+        }
+        return newState;
+      });
     } catch (error) {
       console.error('DB Query of all requests failed:', error);
       this.busy.set(false);
-      return 0;
+      return;
     }
     this.busy.set(false);
-    return this.smallestRequestedDelay()!;
+    return;
   }
 
-
-  public openEditMode(stopRef: string) {
+  public async openEditMode(stopRef: string) {
+    while(this.busy()) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
     this.activeStopRef.set(stopRef);
     this.editMode.set(true);
   }
 
   public async closeEditMode() : Promise<void> {
-    this.activeStopRef.set(null);
     this.editMode.set(false);
     return;
   };
@@ -119,9 +112,8 @@ export class W4MDriverService {
 
   async change_request_status(new_status: string) : Promise<void> {
 
-
-    const stopRef = this.activeStopRef();
-    const delay = this.smallestRequestedDelay();
+    const stopRef = this.activeStopRef()!;
+    const delay = this.smallestRequestedDelays()[stopRef];
     if (!stopRef || delay === null) return;
 
     for (const id of this.activeRequestIds()[delay]) {
@@ -130,13 +122,11 @@ export class W4MDriverService {
         if (response.api_status === 'changed') {
           console.log(`successfully ${new_status} request with id ${id}`);
         }
-        console.error(`request not ${new_status}, backend did not confirm change:`, response.api_status);
       } catch (error) {
         console.error(`request not ${new_status}:`, error);
       }
     }
 
-    // UPDATE STATE: Remove the processed delay bundle from this specific stop
     this.requestIds.update(state => {
       const newState = { ...state };
       const newStopMap = { ...newState[stopRef] };
@@ -144,27 +134,53 @@ export class W4MDriverService {
       newState[stopRef] = newStopMap;
       return newState;
     });
+    //console.log("updated signal requestIDs", this.requestIds());
+
+    this.smallestRequestedDelays.update(state => {
+        let newState = { ...state };
+        if (Object.keys(this.activeRequestIds()).length!=0) {
+          const delays = Object.keys(this.activeRequestIds()).map(Number).sort((a, b) => a - b);
+          newState[stopRef] = delays[0];
+        }
+        else {
+          delete newState[stopRef];
+        }
+        return newState;
+    });
+    //console.log("updated signal smallestRequestedDelays", this.smallestRequestedDelays());
+
+    if (new_status=='accepted') {
+      this.acceptedDelays.update(state => {
+          let newState = { ...state };
+          newState[stopRef] = delay;
+          return newState;
+      });
+      //console.log("updated signal acceptedDelays", this.acceptedDelays());
+    }
 
   }
 
   public async accept_request() : Promise<void> {
     await this.change_request_status('accepted');
-    this.closeEditMode();
-
+    this.hideEditMode.set(true);
     if (this.numberOfStacks() > 0) {
-      // Re-open for next bundle after short delay
-      setTimeout(() => this.openEditMode(this.activeStopRef()!), 500);
+      // edit bar reappears for next bundle after short delay
+      setTimeout(() => this.hideEditMode.set(false), 100);
+      return;
     }
+    await this.closeEditMode();
+    return;
   }
 
   public async decline_request() : Promise<void> {
     await this.change_request_status('declined');
-    await this.closeEditMode();
-    
-    // If decline is clicked, we usually flush all remaining stacks for this stop
     while (this.numberOfStacks() > 0) {
+      console.log("declining bigger open requests");
       await this.change_request_status('declined');
+      console.log("successfully declined bigger open requests");
     }
+    await this.closeEditMode();
+    return;
   }
   
 }

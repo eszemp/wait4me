@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environments';
 })
 
 export abstract class OJPBase {
-  protected apiUrl = 'https://api.opentransportdata.swiss/ojp20';
+  protected apiUrl = 'https://odpch-api.clients.liip.ch/ojp20-beta';
   protected requestorRef = 'Wait4Me';
   protected apiKey = environment.apiKey;
 

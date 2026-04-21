@@ -1,10 +1,8 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, computed, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { OJPLocation } from '../../../shared/services/ojp-location';
-import { Wait4MeRequest } from '../../../shared/types/Wait4MeRequest';
-
 
 
 @Component({
@@ -21,7 +19,6 @@ export class Wait4MeDisplay {
 
     stopRef: string = '';
     state: string = 'Loading...';
-    currentlyRequestedDelay : number = 0;
 
     public w4mService = inject(W4MDriverService);
     locationService = inject(OJPLocation);
@@ -30,40 +27,41 @@ export class Wait4MeDisplay {
         await this.get_stop_ref();
         console.log(this.w4mService.busy());
         while(this.w4mService.busy()) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
-        this.currentlyRequestedDelay = await this.query_db();
+        await this.query_db();
     }
 
     private async get_stop_ref(): Promise<void> {
         const suggestions = await firstValueFrom(
         this.locationService.getLocationInformation(this.stopName, 1)
         );
-
         this.stopRef = suggestions[0]?.stopPlaceRef ?? '';
-
         await new Promise(resolve => setTimeout(resolve, 1200));
-        console.log('Stop Ref initialized:', this.stopRef);
     }
 
-    private async query_db(): Promise<number> {
-        const smallestDelay = await this.w4mService.query_all_requests(this.serviceJourneyRef, this.stopRef);
-        console.log("Request IDs", this.w4mService.requestIds());
-        console.log("Active Stop Ref", this.w4mService.activeStopRef());
-        console.log("Active Request IDs", this.w4mService.activeRequestIds());
-        console.log("Number of Stacks", this.w4mService.numberOfStacks());
+    private async query_db(): Promise<void> {
+        await this.w4mService.query_all_requests(this.serviceJourneyRef, this.stopRef);
         if (this.w4mService.numberOfStacks()===0) {
             this.state = 'No requests';
         }
         else {
             this.state = 'open';
         }
-        return smallestDelay;
+        return;
         // TODO: visualize request stack based on w4mService.numberOfStacks()
     }
-    process_requests_for_this_stop(): void {
+    async process_requests_for_this_stop(): Promise<void> {
         this.w4mService.openEditMode(this.stopRef);
         console.log("enabled edit mode for requests at stop", this.stopName );
+        while(this.w4mService.editMode()) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            console.log("still in edit mode");
+        }
+        if (this.w4mService.numberOfStacks()===0) {
+            this.state = 'No requests';
+            console.log("no longer in edit mode, new_state: ", this.state);
+        }
         return;
     }
 }
