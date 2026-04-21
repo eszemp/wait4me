@@ -18,6 +18,8 @@ export class DriverConnectionDetails {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
+  w4mService = inject(W4MDriverService);
+
   readonly currentTime = signal(new Date());
 
   readonly departure: DepartureLine | null;
@@ -109,5 +111,13 @@ export class DriverConnectionDetails {
 
   backToDriver(): void {
     this.router.navigate(['/driver']);
+  }
+
+  disable_edit_mode_when_active(): void {
+    // TODO: implement correctly
+    if (this.w4mService.editMode() && false) {
+      this.w4mService.closeEditMode();
+    }
+    console.log("disabled edit mode");
   }
 }

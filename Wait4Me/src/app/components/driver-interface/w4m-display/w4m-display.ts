@@ -21,16 +21,18 @@ export class Wait4MeDisplay {
 
     stopRef: string = '';
     state: string = 'Loading...';
-    open_requests: Wait4MeRequest[] | null = null;
-    current_request: Wait4MeRequest | null = null;
+    currentlyRequestedDelay : number = 0;
 
     public w4mService = inject(W4MDriverService);
     locationService = inject(OJPLocation);
 
     async ngOnInit() {
-
         await this.get_stop_ref();
-        this.query_db();
+        console.log(this.w4mService.busy());
+        while(this.w4mService.busy()) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        this.currentlyRequestedDelay = await this.query_db();
     }
 
     private async get_stop_ref(): Promise<void> {
@@ -44,24 +46,24 @@ export class Wait4MeDisplay {
         console.log('Stop Ref initialized:', this.stopRef);
     }
 
-    private async query_db(): Promise<void> {
-        this.w4mService.set_params_query(this.serviceJourneyRef, Number(this.stopRef));
-        this.open_requests = await this.w4mService.query_all_requests();
-        if (this.open_requests.length===0) {
+    private async query_db(): Promise<number> {
+        const smallestDelay = await this.w4mService.query_all_requests(this.serviceJourneyRef, this.stopRef);
+        console.log("Request IDs", this.w4mService.requestIds());
+        console.log("Active Stop Ref", this.w4mService.activeStopRef());
+        console.log("Active Request IDs", this.w4mService.activeRequestIds());
+        console.log("Number of Stacks", this.w4mService.numberOfStacks());
+        if (this.w4mService.numberOfStacks()===0) {
             this.state = 'No requests';
         }
         else {
             this.state = 'open';
-            this.current_request = this.open_requests[0]
         }
+        return smallestDelay;
+        // TODO: visualize request stack based on w4mService.numberOfStacks()
     }
-    process_request(): void {
-        console.log("clicked on request")
-        if(this.current_request) {
-            this.w4mService.edit_mode = true;
-            this.w4mService.request_id = this.current_request.requestId;
-            console.log("communicated to service to enable edit mode for request", this.w4mService.request_id );
-        }
+    process_requests_for_this_stop(): void {
+        this.w4mService.openEditMode(this.stopRef);
+        console.log("enabled edit mode for requests at stop", this.stopName );
         return;
     }
 }
