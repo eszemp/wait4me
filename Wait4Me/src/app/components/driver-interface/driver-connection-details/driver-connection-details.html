@@ -34,9 +34,9 @@
 
           <span class="time">
             {{ stop.timeTimetable | date: 'HH:mm:ss' }}
-            @if (false) {
+            @if (this.w4mService.acceptedDelays()[stop.id]) {
               <span class="time-delay">
-                +{{ stop.delay.format()}}
+                +{{ this.calculate_new_delay(stop)}}
               </span>
             }
             @else {

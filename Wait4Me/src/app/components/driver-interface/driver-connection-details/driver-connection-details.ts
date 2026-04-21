@@ -5,6 +5,7 @@ import { DepartureLine, DepartureStop, DriverStopRow } from '../../../shared/typ
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { Wait4MeDisplay } from '../w4m-display/w4m-display';
 import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
+import { Duration } from '../../../shared/models/duration';
 
 
 
@@ -117,7 +118,11 @@ export class DriverConnectionDetails {
     // TODO: implement correctly
     if (this.w4mService.editMode() && false) {
       this.w4mService.closeEditMode();
+      console.log("disabled edit mode");
     }
-    console.log("disabled edit mode");
+  }
+
+  calculate_new_delay(stop : DepartureStop): string {
+    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id])).format();
   }
 }
