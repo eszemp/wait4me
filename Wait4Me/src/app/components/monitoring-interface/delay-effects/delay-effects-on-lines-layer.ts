@@ -39,6 +39,8 @@ type TrackStationStop = {
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
+  selectedDelayMinutes = 0;
+
   private readonly ojpTrip = inject(OJPTrip);
   private readonly destroy$ = new Subject<void>();
 
@@ -109,6 +111,14 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       });
   }
 
+  onDelaySliderInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    const value = Number(target?.value ?? 0);
+    this.selectedDelayMinutes = Number.isFinite(value)
+      ? Math.min(30, Math.max(0, Math.round(value)))
+      : 0;
+  }
+
   /** Ensures the dedicated source/layer pair for the selected connection track exists. */
   private ensureTrackLayer(): void {
     const map = this.map;
@@ -130,7 +140,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         source: this.trackSourceId,
         filter: ['==', ['geometry-type'], 'LineString'],
         paint: {
-          'line-color': '#0f6455',
+          'line-color': '#395148',
           'line-width': 5,
           'line-opacity': 0.9,
         },
@@ -149,7 +159,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         filter: ['==', ['geometry-type'], 'Point'],
         paint: {
           'circle-color': '#ffffff',
-          'circle-stroke-color': '#0f6455',
+          'circle-stroke-color': '#395148',
           'circle-stroke-width': 2,
           'circle-radius': 5,
         },

@@ -1,4 +1,19 @@
 <div class="map-wrapper">
   <div #mapContainer class="monitoring-map"></div>
   <app-line-search (lineSelected)="onLineSelected($event)"></app-line-search>
+  <div class="delay-slider-panel" aria-label="Delay selection">
+    <div class="delay-slider-header">
+      <span>Delay</span>
+      <strong>{{ selectedDelayMinutes }} min</strong>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="30"
+      step="1"
+      [value]="selectedDelayMinutes"
+      (input)="onDelaySliderInput($event)"
+      aria-label="Delay in minutes"
+    />
+  </div>
 </div>
