@@ -1,7 +1,7 @@
 import { Injectable, signal, effect, inject } from '@angular/core';
 import { from, Observable, firstValueFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { LocationInformationRequest, SDK, TripRequest } from 'ojp-sdk';
+import { SDK, TripRequest } from 'ojp-sdk';
 import type {
   InternationalTextSchema,
   LegSchema,
@@ -17,7 +17,11 @@ import { Duration } from '../models/duration';
 type ConnectionLineFeature = {
   type: 'Feature';
   geometry: { type: 'LineString'; coordinates: number[][] };
-  properties: { line: string; featureType: 'track' };
+  properties: {
+    line: string;
+    featureType: 'track';
+    stationStops: TimedLegStop[];
+  };
 };
 
 type ConnectionStationFeature = {
@@ -29,6 +33,7 @@ type ConnectionStationFeature = {
     stopRef: string;
     stopName: string;
     stopRole: 'board' | 'intermediate' | 'alight';
+    arrivalTime: string;
   };
 };
 
@@ -38,6 +43,7 @@ type TimedLegStop = {
   stopRef: string;
   stopName: string;
   stopRole: 'board' | 'intermediate' | 'alight';
+  arrivalTime: string;
 };
 
 @Injectable({
@@ -54,7 +60,6 @@ export class OJPTrip extends OJPBase{
   );
 
   private locationService = inject(OJPLocation);
-  private readonly stopCoordinateCache = new Map<string, number[] | null>();
 
   originId = signal<string | null>(null);
   originName = signal<string | null>(null);
@@ -207,11 +212,24 @@ export class OJPTrip extends OJPBase{
           }
         }
 
-        const stationFeatures = await this.resolveStopFeatures(bestStops, bestLineCode);
+        const serializedStops = bestStops.map((stop) => ({
+          stopRef: stop.stopRef,
+          stopName: stop.stopName,
+          stopRole: stop.stopRole,
+          arrivalTime: stop.arrivalTime,
+        }));
+
+        const trackFeaturesWithStops = bestTrackFeatures.map((feature) => ({
+          ...feature,
+          properties: {
+            ...feature.properties,
+            stationStops: serializedStops,
+          },
+        }));
 
         return {
           type: 'FeatureCollection' as const,
-          features: [...bestTrackFeatures, ...stationFeatures],
+          features: trackFeaturesWithStops,
         };
       }),
     );
@@ -222,10 +240,14 @@ export class OJPTrip extends OJPBase{
 
     const boardRef = this.asString(timedLeg.legBoard?.stopPointRef).trim();
     if (boardRef.length > 0) {
+      const boardArrivalTime = this.asString(
+        timedLeg.legBoard?.serviceDeparture?.estimatedTime ?? timedLeg.legBoard?.serviceDeparture?.timetabledTime,
+      ).trim();
       stops.push({
         stopRef: boardRef,
         stopName: this.readTextValue(timedLeg.legBoard?.stopPointName) ?? boardRef,
         stopRole: 'board',
+        arrivalTime: boardArrivalTime,
       });
     }
 
@@ -235,111 +257,32 @@ export class OJPTrip extends OJPBase{
         continue;
       }
 
+      const intermediateArrivalTime = this.asString(
+        intermediate.serviceArrival?.estimatedTime ?? intermediate.serviceArrival?.timetabledTime,
+      ).trim();
+
       stops.push({
         stopRef,
         stopName: this.readTextValue(intermediate.stopPointName) ?? stopRef,
         stopRole: 'intermediate',
+        arrivalTime: intermediateArrivalTime,
       });
     }
 
     const alightRef = this.asString(timedLeg.legAlight?.stopPointRef).trim();
     if (alightRef.length > 0) {
+      const alightArrivalTime = this.asString(
+        timedLeg.legAlight?.serviceArrival?.estimatedTime ?? timedLeg.legAlight?.serviceArrival?.timetabledTime,
+      ).trim();
       stops.push({
         stopRef: alightRef,
         stopName: this.readTextValue(timedLeg.legAlight?.stopPointName) ?? alightRef,
         stopRole: 'alight',
+        arrivalTime: alightArrivalTime,
       });
     }
 
     return stops;
-  }
-
-  private async resolveStopFeatures(stops: TimedLegStop[], lineCode: string): Promise<ConnectionStationFeature[]> {
-    if (stops.length === 0) {
-      return [];
-    }
-
-    const uniqueStops = new Map<string, TimedLegStop>();
-    for (const stop of stops) {
-      if (!uniqueStops.has(stop.stopRef)) {
-        uniqueStops.set(stop.stopRef, stop);
-      }
-    }
-
-    const features = await Promise.all(
-      Array.from(uniqueStops.values()).map(async (stop) => {
-        const coordinates = await this.getCoordinatesForStop(stop.stopRef);
-        if (!coordinates) {
-          return null;
-        }
-
-        return {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates,
-          },
-          properties: {
-            line: lineCode,
-            featureType: 'station' as const,
-            stopRef: stop.stopRef,
-            stopName: stop.stopName,
-            stopRole: stop.stopRole,
-          },
-        };
-      }),
-    );
-
-    return features.filter((feature): feature is ConnectionStationFeature => feature !== null);
-  }
-
-  private async getCoordinatesForStop(stopRef: string): Promise<number[] | null> {
-    const normalizedStopRef = stopRef.trim();
-    if (normalizedStopRef.length === 0) {
-      return null;
-    }
-
-    if (this.stopCoordinateCache.has(normalizedStopRef)) {
-      return this.stopCoordinateCache.get(normalizedStopRef) ?? null;
-    }
-
-    const request = LocationInformationRequest.initWithPlaceRef(normalizedStopRef, 1);
-    const response = await request.fetchResponse(this.sdk);
-
-    if (!response.ok) {
-      this.stopCoordinateCache.set(normalizedStopRef, null);
-      return null;
-    }
-
-    const place = response.value.placeResult?.[0]?.place as {
-      geoPosition?: { longitude?: unknown; latitude?: unknown };
-      stopPlace?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
-      stopPoint?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
-      placeRef?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
-    } | undefined;
-
-    const resolvedPosition =
-      place?.stopPlace?.geoPosition ??
-      place?.stopPoint?.geoPosition ??
-      place?.geoPosition ??
-      place?.placeRef?.geoPosition ??
-      null;
-
-    if (!resolvedPosition) {
-      this.stopCoordinateCache.set(normalizedStopRef, null);
-      return null;
-    }
-
-    const longitude = resolvedPosition.longitude;
-    const latitude = resolvedPosition.latitude;
-    if (typeof longitude !== 'number' || typeof latitude !== 'number') {
-      this.stopCoordinateCache.set(normalizedStopRef, null);
-      return null;
-    }
-
-    const coordinates = [longitude, latitude];
-    this.stopCoordinateCache.set(normalizedStopRef, coordinates);
-    return coordinates;
   }
 
 
