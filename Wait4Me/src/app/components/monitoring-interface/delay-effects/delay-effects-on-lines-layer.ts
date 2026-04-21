@@ -23,6 +23,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
   private readonly trackSourceId = 'selected-connection-track-source';
   private readonly trackLayerId = 'selected-connection-track-layer';
+  private readonly trackStationsLayerId = 'selected-connection-track-stations-layer';
 
   private map: maplibregl.Map | null = null;
 
@@ -95,6 +96,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         id: this.trackLayerId,
         type: 'line',
         source: this.trackSourceId,
+        filter: ['==', ['geometry-type'], 'LineString'],
         paint: {
           'line-color': '#0f6455',
           'line-width': 5,
@@ -103,6 +105,21 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         layout: {
           'line-cap': 'round',
           'line-join': 'round',
+        },
+      });
+    }
+
+    if (!map.getLayer(this.trackStationsLayerId)) {
+      map.addLayer({
+        id: this.trackStationsLayerId,
+        type: 'circle',
+        source: this.trackSourceId,
+        filter: ['==', ['geometry-type'], 'Point'],
+        paint: {
+          'circle-color': '#ffffff',
+          'circle-stroke-color': '#0f6455',
+          'circle-stroke-width': 2,
+          'circle-radius': 5,
         },
       });
     }
@@ -133,24 +150,39 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const bounds = new maplibregl.LngLatBounds();
     let hasPoints = false;
 
-    for (const feature of geojson.features as Array<{ geometry?: { type?: string; coordinates?: number[][] } }>) {
-      if (feature.geometry?.type !== 'LineString' || !Array.isArray(feature.geometry.coordinates)) {
+    for (const feature of geojson.features as Array<{ geometry?: { type?: string; coordinates?: number[][] | number[] } }>) {
+      if (!feature.geometry || !Array.isArray(feature.geometry.coordinates)) {
         continue;
       }
 
-      for (const coordinate of feature.geometry.coordinates) {
-        if (!Array.isArray(coordinate) || coordinate.length < 2) {
-          continue;
-        }
+      if (feature.geometry.type === 'LineString') {
+        for (const coordinate of feature.geometry.coordinates as number[][]) {
+          if (!Array.isArray(coordinate) || coordinate.length < 2) {
+            continue;
+          }
 
-        const [lng, lat] = coordinate;
-        if (typeof lng !== 'number' || typeof lat !== 'number') {
-          continue;
-        }
+          const [lng, lat] = coordinate;
+          if (typeof lng !== 'number' || typeof lat !== 'number') {
+            continue;
+          }
 
-        bounds.extend([lng, lat]);
-        hasPoints = true;
+          bounds.extend([lng, lat]);
+          hasPoints = true;
+        }
+        continue;
       }
+
+      if (feature.geometry.type !== 'Point') {
+        continue;
+      }
+
+      const [lng, lat] = feature.geometry.coordinates as number[];
+      if (typeof lng !== 'number' || typeof lat !== 'number') {
+        continue;
+      }
+
+      bounds.extend([lng, lat]);
+      hasPoints = true;
     }
 
     if (!hasPoints) {
