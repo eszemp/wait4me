@@ -55,8 +55,8 @@ export class Wait4MeDisplay {
         this.w4mService.openEditMode(this.stopRef);
         console.log("enabled edit mode for requests at stop", this.stopName );
         while(this.w4mService.editMode()) {
-            await new Promise(resolve => setTimeout(resolve, 100));
             console.log("still in edit mode");
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
         if (this.w4mService.numberOfStacks()===0) {
             this.state = 'No requests';

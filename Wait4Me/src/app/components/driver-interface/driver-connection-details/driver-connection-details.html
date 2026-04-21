@@ -20,7 +20,7 @@
   </section>
 
   @if (departure) {
-    <section class="stops-card" (click)="disable_edit_mode_when_active()">
+    <section class="stops-card" (click)="disable_edit_mode_when_active($event)">
       @for (stop of visibleStops; track stop.id; let isLast = $last; let isFirst = $first) {
         <div class="stop-row" [class.last]="isLast" [class.first]="isFirst">
           <div class="timeline-column">

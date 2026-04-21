@@ -114,12 +114,18 @@ export class DriverConnectionDetails {
     this.router.navigate(['/driver']);
   }
 
-  disable_edit_mode_when_active(): void {
-    // TODO: implement correctly
-    if (this.w4mService.editMode() && false) {
+  disable_edit_mode_when_active(event: Event): void {
+    const target = event.target as HTMLElement;
+  
+    // check if the click was inside a w4m-display component
+    if (target.closest('w4m-display')) {
+      return;
+    }
+    if (this.w4mService.editMode()) {
       this.w4mService.closeEditMode();
       console.log("disabled edit mode");
     }
+    return;
   }
 
   calculate_new_delay(stop : DepartureStop): string {
