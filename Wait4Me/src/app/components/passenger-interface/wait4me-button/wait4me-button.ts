@@ -31,7 +31,9 @@ export class Wait4MeButton {
         const last_leg = timedLegs[timedLegs.length - 1];
 
         this.tripService.originName.set(next_leg!.boardStopName);
+        this.tripService.originId.set(null);
         this.tripService.destinationName.set(last_leg!.alightStopName);
+        this.tripService.destinationId.set(null);
 
         const rawDuration = this.w4mService.trip!.criticalTransfer?.requestedDelay;
         const requestedDelay = Duration.initFromTotalMinutes(rawDuration!.totalMinutes);
