@@ -75,7 +75,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
       return;
     }
 
-    const response = await fetch('/map-data/stop_histogram_schwyz.geojson');
+    const response = await fetch('/map-data/stop_histogram_schweiz.geojson');
     if (!response.ok) {
       return;
     }

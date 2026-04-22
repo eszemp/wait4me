@@ -47,7 +47,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   private readonly trackSourceId = 'selected-connection-track-source';
   private readonly trackLayerId = 'selected-connection-track-layer';
   private readonly trackStationsLayerId = 'selected-connection-track-stations-layer';
-  private readonly stationTransferDatasetUrl = '/map-data/stop_histogram_schwyz.geojson';
+  private readonly stationTransferDatasetUrl = '/map-data/stop_histogram_schweiz.geojson';
 
   private map: maplibregl.Map | null = null;
   private readonly stationTransferByRef = new Map<string, StationTransferDataset>();

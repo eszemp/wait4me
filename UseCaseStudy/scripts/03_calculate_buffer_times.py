@@ -6,7 +6,11 @@ from functools import lru_cache
 from pathlib import Path
 from datetime import datetime, timedelta
 from tqdm import tqdm
-from helpers.ojp_arrivals_and_departures import OJPStopDepArrRequest
+from helpers.ojp_arrivals_and_departures import (
+    OJPStopDepArrRequest,
+    AuthAccessDeniedError,
+    MissingTokenError,
+)
 from helpers.write_log import initialize_logfile, add_to_log
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -19,7 +23,7 @@ PARTIAL_OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.partia
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2
-REQUEST_RATE_LIMIT = 0.2
+REQUEST_RATE_LIMIT = 0.02
 CHECKPOINT_SAVE_EVERY = 25
 
 
@@ -105,7 +109,14 @@ def process_all_stops(stops):
         None. Results are written to disk and stored in the buffer_timeseries column.
     """
 
-    OJPDepArr = OJPStopDepArrRequest()
+    try:
+        OJPDepArr = OJPStopDepArrRequest()
+    except MissingTokenError as e:
+        print(f"Configuration error: {e}")
+        initialize_logfile(LOG)
+        add_to_log(LOG, f"AUTH CONFIG ERROR: {e}")
+        return
+
     stops["buffer_timeseries"] = None
 
     # Restore persisted progress and skip already-processed stops.
@@ -115,6 +126,7 @@ def process_all_stops(stops):
 
     initialize_logfile(LOG)
     print(f"Processing entries... ({remaining_stops} remaining of {total_stops} total)")
+    auth_denied_logged = False
     
     try:
         for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
@@ -122,7 +134,17 @@ def process_all_stops(stops):
             if index in processed_indices:
                 continue
 
-            result = get_buffer_timeseries(row, OJPDepArr)
+            try:
+                result = get_buffer_timeseries(row, OJPDepArr)
+            except AuthAccessDeniedError as e:
+                if not auth_denied_logged:
+                    message = f"AUTH ACCESS DENIED: {e}. Stopping processing cleanly."
+                    print(f"\n{message}")
+                    add_to_log(LOG, message)
+                    auth_denied_logged = True
+                save_progress(stops, processed_indices)
+                return
+
             if result:
                 stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
 
@@ -265,6 +287,9 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
                     stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time
                 )
                 break  # Success, exit retry loop
+            except AuthAccessDeniedError:
+                # Do not retry auth/access-denied responses.
+                raise
             except Exception as e:
                 if attempt < MAX_RETRIES - 1:
                     wait_time = RETRY_DELAY * (2 ** attempt)  # Exponential backoff
@@ -325,6 +350,9 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
         if all_arrivals.empty or all_departures.empty:
             add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no services")
             return {"buffer_timeseries": "NO SERVICE"}
+    except AuthAccessDeniedError:
+        # Bubble up so the caller can log once and terminate cleanly.
+        raise
     except Exception as e:
         add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) API error: {str(e)}")
         return {"buffer_timeseries": "API_ERROR"}
