@@ -1,6 +1,6 @@
 import { Injectable, signal, effect, inject } from '@angular/core';
 import { from, Observable, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { SDK, TripRequest } from 'ojp-sdk';
 import type {
   InternationalTextSchema,
@@ -13,6 +13,38 @@ import type { PassengerTrip, PassengerLeg, PassengerTimedLeg, PassengerTransferL
 import { OJPBase } from './ojp-base';
 import { OJPLocation } from './ojp-location';
 import { Duration } from '../models/duration';
+
+type ConnectionLineFeature = {
+  type: 'Feature';
+  geometry: { type: 'LineString'; coordinates: number[][] };
+  properties: {
+    line: string;
+    featureType: 'track';
+    stationStops: TimedLegStop[];
+  };
+};
+
+type ConnectionStationFeature = {
+  type: 'Feature';
+  geometry: { type: 'Point'; coordinates: number[] };
+  properties: {
+    line: string;
+    featureType: 'station';
+    stopRef: string;
+    stopName: string;
+    stopRole: 'board' | 'intermediate' | 'alight';
+    arrivalTime: string;
+  };
+};
+
+type ConnectionTrackFeature = ConnectionLineFeature | ConnectionStationFeature;
+
+type TimedLegStop = {
+  stopRef: string;
+  stopName: string;
+  stopRole: 'board' | 'intermediate' | 'alight';
+  arrivalTime: string;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -97,7 +129,7 @@ export class OJPTrip extends OJPBase{
     destinationStopPlaceRef: string,
     departureDate: Date,
     selectedLineCode?: string,
-  ): Observable<{ type: 'FeatureCollection'; features: Array<{ type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } }> }> {
+  ): Observable<{ type: 'FeatureCollection'; features: ConnectionTrackFeature[] }> {
     const request = TripRequest.initWithPlaceRefsOrCoords(originStopPlaceRef, destinationStopPlaceRef);
 
     request.setDepartureDatetime(departureDate);
@@ -110,7 +142,7 @@ export class OJPTrip extends OJPBase{
     }
 
     return from(request.fetchResponse(this.sdk)).pipe(
-      map((response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           throw response.error;
         }
@@ -118,7 +150,9 @@ export class OJPTrip extends OJPBase{
         const targetDepartureTs = departureDate.getTime();
         const normalizedLineCode = (selectedLineCode ?? '').trim().toLowerCase();
         let bestScore = Number.POSITIVE_INFINITY;
-        let bestFeatures: Array<{ type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } }> = [];
+        let bestLineCode = '';
+        let bestTrackFeatures: ConnectionLineFeature[] = [];
+        let bestStops: TimedLegStop[] = [];
 
         for (const result of response.value.tripResult ?? []) {
           for (const leg of result.trip?.leg ?? []) {
@@ -141,7 +175,7 @@ export class OJPTrip extends OJPBase{
               ? Math.abs(departureTs - targetDepartureTs)
               : Number.POSITIVE_INFINITY;
 
-            const features = trackSections
+            const trackFeatures = trackSections
               .map((section) => {
                 const coordinates = (section.linkProjection?.position ?? [])
                   .map((position) => [position.longitude, position.latitude] as number[])
@@ -159,28 +193,96 @@ export class OJPTrip extends OJPBase{
                   },
                   properties: {
                     line: legLineCode,
+                    featureType: 'track' as const,
                   },
                 };
               })
-              .filter((feature): feature is { type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] }; properties: { line: string } } => feature !== null);
+              .filter((feature): feature is ConnectionLineFeature => feature !== null);
 
-            if (features.length === 0) {
+            if (trackFeatures.length === 0) {
               continue;
             }
 
             if (departureDistance < bestScore) {
               bestScore = departureDistance;
-              bestFeatures = features;
+              bestLineCode = legLineCode;
+              bestTrackFeatures = trackFeatures;
+              bestStops = this.collectTimedLegStops(timedLeg);
             }
           }
         }
 
+        const serializedStops = bestStops.map((stop) => ({
+          stopRef: stop.stopRef,
+          stopName: stop.stopName,
+          stopRole: stop.stopRole,
+          arrivalTime: stop.arrivalTime,
+        }));
+
+        const trackFeaturesWithStops = bestTrackFeatures.map((feature) => ({
+          ...feature,
+          properties: {
+            ...feature.properties,
+            stationStops: serializedStops,
+          },
+        }));
+
         return {
           type: 'FeatureCollection' as const,
-          features: bestFeatures,
+          features: trackFeaturesWithStops,
         };
       }),
     );
+  }
+
+  private collectTimedLegStops(timedLeg: TimedLegSchema): TimedLegStop[] {
+    const stops: TimedLegStop[] = [];
+
+    const boardRef = this.asString(timedLeg.legBoard?.stopPointRef).trim();
+    if (boardRef.length > 0) {
+      const boardArrivalTime = this.asString(
+        timedLeg.legBoard?.serviceDeparture?.estimatedTime ?? timedLeg.legBoard?.serviceDeparture?.timetabledTime,
+      ).trim();
+      stops.push({
+        stopRef: boardRef,
+        stopName: this.readTextValue(timedLeg.legBoard?.stopPointName) ?? boardRef,
+        stopRole: 'board',
+        arrivalTime: boardArrivalTime,
+      });
+    }
+
+    for (const intermediate of timedLeg.legIntermediate ?? []) {
+      const stopRef = this.asString(intermediate.stopPointRef).trim();
+      if (stopRef.length === 0) {
+        continue;
+      }
+
+      const intermediateArrivalTime = this.asString(
+        intermediate.serviceArrival?.estimatedTime ?? intermediate.serviceArrival?.timetabledTime,
+      ).trim();
+
+      stops.push({
+        stopRef,
+        stopName: this.readTextValue(intermediate.stopPointName) ?? stopRef,
+        stopRole: 'intermediate',
+        arrivalTime: intermediateArrivalTime,
+      });
+    }
+
+    const alightRef = this.asString(timedLeg.legAlight?.stopPointRef).trim();
+    if (alightRef.length > 0) {
+      const alightArrivalTime = this.asString(
+        timedLeg.legAlight?.serviceArrival?.estimatedTime ?? timedLeg.legAlight?.serviceArrival?.timetabledTime,
+      ).trim();
+      stops.push({
+        stopRef: alightRef,
+        stopName: this.readTextValue(timedLeg.legAlight?.stopPointName) ?? alightRef,
+        stopRole: 'alight',
+        arrivalTime: alightArrivalTime,
+      });
+    }
+
+    return stops;
   }
 
 

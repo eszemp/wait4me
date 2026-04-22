@@ -6,13 +6,89 @@ from functools import lru_cache
 from pathlib import Path
 from datetime import datetime, timedelta
 from tqdm import tqdm
-from helpers.ojp_arrivals_and_departures import OJPStopDepArrRequest
+from helpers.ojp_arrivals_and_departures import (
+    OJPStopDepArrRequest,
+    AuthAccessDeniedError,
+    MissingTokenError,
+)
 from helpers.write_log import initialize_logfile, add_to_log
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-FILE_PATH = SCRIPT_DIR.parent / "data/stop-places-schwyz/stop-places-schwyz.shp"
+FILE_PATH = SCRIPT_DIR.parent / "data/stop-places-schweiz/stop-places-schweiz.shp"
 TRANSFER_FILE_PATH = SCRIPT_DIR.parent / "data/transfer-time/transfers.txt"
 LOG = SCRIPT_DIR / "03_calculate_buffer_times_LOGFILE.txt"
+CHECKPOINT_PATH = SCRIPT_DIR / "03_calculate_buffer_times_checkpoint.json"
+OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
+PARTIAL_OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.partial.gpkg")
+
+MAX_RETRIES = 3
+RETRY_DELAY = 2
+REQUEST_RATE_LIMIT = 0.02
+CHECKPOINT_SAVE_EVERY = 25
+
+
+def load_checkpoint():
+    """Load processed stop indices from checkpoint file."""
+    if CHECKPOINT_PATH.exists():
+        try:
+            with open(CHECKPOINT_PATH, "r") as f:
+                data = json.load(f)
+                processed = set(data.get("processed_indices", []))
+                print(f"Resuming from checkpoint: {len(processed)} stops already processed.")
+                return processed
+        except Exception as e:
+            print(f"Warning: Could not load checkpoint: {e}")
+            return set()
+    return set()
+
+
+def save_checkpoint(processed_indices):
+    """Save processed stop indices to checkpoint file."""
+    try:
+        with open(CHECKPOINT_PATH, "w") as f:
+            json.dump({"processed_indices": list(processed_indices)}, f)
+    except Exception as e:
+        print(f"Warning: Could not save checkpoint: {e}")
+
+
+def save_progress(stops, processed_indices):
+    """Persist checkpoint metadata and partial computed results to disk."""
+    save_checkpoint(processed_indices)
+    try:
+        partial_stops = stops[stops["buffer_timeseries"].notna()].copy()
+        partial_stops.to_file(str(PARTIAL_OUTPUT_PATH), driver="GPKG", layer="stop_buffers")
+    except Exception as e:
+        print(f"Warning: Could not save partial output: {e}")
+
+
+def restore_progress(stops):
+    """Restore already-computed buffer_timeseries values from partial output."""
+    processed_indices = load_checkpoint()
+    if processed_indices and not PARTIAL_OUTPUT_PATH.exists():
+        print("Warning: checkpoint exists but partial output is missing. Restarting from scratch.")
+        return set()
+
+    if not PARTIAL_OUTPUT_PATH.exists():
+        return processed_indices
+
+    try:
+        partial_stops = gpd.read_file(str(PARTIAL_OUTPUT_PATH), layer="stop_buffers")
+        if "Nummer" not in partial_stops.columns or "buffer_timeseries" not in partial_stops.columns:
+            print("Warning: partial output is missing required columns. Ignoring partial output.")
+            return set()
+
+        buffer_by_nummer = partial_stops.set_index("Nummer")["buffer_timeseries"].to_dict()
+        stops["buffer_timeseries"] = stops["Nummer"].map(buffer_by_nummer)
+        restored_indices = set(stops.index[stops["buffer_timeseries"].notna()].tolist())
+
+        if processed_indices:
+            restored_indices = processed_indices.intersection(restored_indices)
+
+        print(f"Restored {len(restored_indices)} processed rows from partial output.")
+        return restored_indices
+    except Exception as e:
+        print(f"Warning: Could not load partial output: {e}")
+        return set()
 
 
 def inread_data():
@@ -24,6 +100,7 @@ def inread_data():
 def process_all_stops(stops):
     """
     Compute transfer-buffer timeseries for each stop and write results to GeoPackage.
+    Supports resume from checkpoint if processing was interrupted.
 
     Args:
         stops: GeoDataFrame containing stop metadata including Nummer and Name.
@@ -32,22 +109,73 @@ def process_all_stops(stops):
         None. Results are written to disk and stored in the buffer_timeseries column.
     """
 
-    OJPDepArr = OJPStopDepArrRequest()
+    try:
+        OJPDepArr = OJPStopDepArrRequest()
+    except MissingTokenError as e:
+        print(f"Configuration error: {e}")
+        initialize_logfile(LOG)
+        add_to_log(LOG, f"AUTH CONFIG ERROR: {e}")
+        return
 
     stops["buffer_timeseries"] = None
 
+    # Restore persisted progress and skip already-processed stops.
+    processed_indices = restore_progress(stops)
+    total_stops = stops.shape[0]
+    remaining_stops = total_stops - len(processed_indices)
+
     initialize_logfile(LOG)
-    print("Processing entries...")
-    for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
-        result = get_buffer_timeseries(row, OJPDepArr)
-        if result:
-            stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
+    print(f"Processing entries... ({remaining_stops} remaining of {total_stops} total)")
+    auth_denied_logged = False
+    
+    try:
+        for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
+            # Skip if already processed
+            if index in processed_indices:
+                continue
+
+            try:
+                result = get_buffer_timeseries(row, OJPDepArr)
+            except AuthAccessDeniedError as e:
+                if not auth_denied_logged:
+                    message = f"AUTH ACCESS DENIED: {e}. Stopping processing cleanly."
+                    print(f"\n{message}")
+                    add_to_log(LOG, message)
+                    auth_denied_logged = True
+                save_progress(stops, processed_indices)
+                return
+
+            if result:
+                stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
+
+            # Persist progress regularly to support crash-safe resume.
+            processed_indices.add(index)
+            if len(processed_indices) % CHECKPOINT_SAVE_EVERY == 0:
+                save_progress(stops, processed_indices)
+    except KeyboardInterrupt:
+        print("\nProcessing interrupted. Checkpoint saved. Run again to resume.")
+        save_progress(stops, processed_indices)
+        return
+    except Exception as e:
+        print(f"\nError during processing: {e}")
+        print("Checkpoint saved. Run again to resume.")
+        save_progress(stops, processed_indices)
+        raise
+
+    save_progress(stops, processed_indices)
 
     # Export to GeoPackage
-    output_path = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
-    stops.to_file(str(output_path), driver="GPKG", layer="stop_buffers")
+    stops.to_file(str(OUTPUT_PATH), driver="GPKG", layer="stop_buffers")
 
-    print(f"\nSuccessfully saved {len(stops)} rows to {output_path}")
+    print(f"\nSuccessfully saved {len(stops)} rows to {OUTPUT_PATH}")
+    
+    # Clean up checkpoint on successful completion
+    if CHECKPOINT_PATH.exists():
+        CHECKPOINT_PATH.unlink()
+        print("Checkpoint cleared.")
+    if PARTIAL_OUTPUT_PATH.exists():
+        PARTIAL_OUTPUT_PATH.unlink()
+        print("Partial output cleared.")
 
 
 @lru_cache(maxsize=1)
@@ -131,6 +259,7 @@ def get_required_transfer_time(StopPlaceRef):
 def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
     """
     Fetch all arrivals or departures for a stop in the configured analysis window.
+    Includes retry logic for transient API failures and rate limiting.
 
     Args:
         OJPDepArr: OJPStopDepArrRequest client instance.
@@ -139,6 +268,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 
     Returns:
         DataFrame with fetched records, truncated to the end of the time window.
+        Returns empty DataFrame on persistent API failure.
     """
 
     # look at 15th April (typical weekday)
@@ -149,9 +279,25 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
     results = []
 
     while current_time < end_time:
-        new_batch = OJPDepArr.fetch_departures_or_arrivals(
-            stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time
-        )
+        # Retry logic for API calls
+        new_batch = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                new_batch = OJPDepArr.fetch_departures_or_arrivals(
+                    stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time
+                )
+                break  # Success, exit retry loop
+            except AuthAccessDeniedError:
+                # Do not retry auth/access-denied responses.
+                raise
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait_time = RETRY_DELAY * (2 ** attempt)  # Exponential backoff
+                    print(f"API call failed (attempt {attempt + 1}/{MAX_RETRIES}): {e}. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"API call failed after {MAX_RETRIES} attempts. Returning partial results.")
+                    return pd.DataFrame(results)
 
         if not new_batch:
             # print("No more results returned from API.")
@@ -165,7 +311,9 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 
         last_result = results[-1]["time"]
         current_time = last_result
-        # time.sleep(1.3)
+        
+        # Rate limiting to avoid overwhelming the API
+        time.sleep(REQUEST_RATE_LIMIT)
 
     # delete all entries where time > end_time
     results = [r for r in results if r["time"] <= end_time]
@@ -176,6 +324,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 def get_buffer_timeseries(row, OJPDepArr, debug=False):
     """
     Calculate the transfer-buffer timeseries for a single stop.
+    Handles API errors gracefully and logs them.
 
     Args:
         row: Row from the stop GeoDataFrame (must contain Nummer and Name).
@@ -184,22 +333,29 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
 
     Returns:
         Dict with key buffer_timeseries containing a JSON string, or status strings
-        "NO SERVICE" / "NO TRANSFERS" when no valid result can be computed.
+        "NO SERVICE" / "NO TRANSFERS" / "API_ERROR" when errors occur.
     """
     StopPlaceRef = row["Nummer"]
     if debug:
         StopPlaceRef = 8505084
 
-    req_transfer_time = get_required_transfer_time(StopPlaceRef)
-    all_arrivals = get_all_for_day(OJPDepArr, StopPlaceRef, "arrival")
-    all_departures = get_all_for_day(OJPDepArr, StopPlaceRef, "departure")
-    if debug:
-        print("arrivals:", all_arrivals)
-        print("departures:", all_departures)
+    try:
+        req_transfer_time = get_required_transfer_time(StopPlaceRef)
+        all_arrivals = get_all_for_day(OJPDepArr, StopPlaceRef, "arrival")
+        all_departures = get_all_for_day(OJPDepArr, StopPlaceRef, "departure")
+        if debug:
+            print("arrivals:", all_arrivals)
+            print("departures:", all_departures)
 
-    if all_arrivals.empty or all_departures.empty:
-        add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no services")
-        return {"buffer_timeseries": "NO SERVICE"}
+        if all_arrivals.empty or all_departures.empty:
+            add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) has no services")
+            return {"buffer_timeseries": "NO SERVICE"}
+    except AuthAccessDeniedError:
+        # Bubble up so the caller can log once and terminate cleanly.
+        raise
+    except Exception as e:
+        add_to_log(LOG, f"{row['Name']} ({row['Nummer']}) API error: {str(e)}")
+        return {"buffer_timeseries": "API_ERROR"}
 
     combined = pd.merge(
         all_arrivals, all_departures, how="cross", suffixes=("_arr", "_dep")

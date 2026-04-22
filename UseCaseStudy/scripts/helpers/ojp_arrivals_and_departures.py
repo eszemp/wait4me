@@ -21,10 +21,22 @@ def _load_env_file(env_path: Path) -> None:
 
 _load_env_file(Path(__file__).resolve().parents[2] / ".env")
 
+
+class MissingTokenError(Exception):
+    """Raised when no OJP access token is configured."""
+
+
+class AuthAccessDeniedError(Exception):
+    """Raised when API access is denied (HTTP 403)."""
+
 class OJPStopDepArrRequest:
     
     def __init__(self):
         self.api_key = os.environ.get('OJP_ACCESS_TOKEN')
+        if not self.api_key:
+            raise MissingTokenError(
+                "Missing OJP_ACCESS_TOKEN. Set it in environment or UseCaseStudy/.env before running."
+            )
         self.endpoint = "https://odpch-api.clients.liip.ch/ojp20-beta"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -83,10 +95,16 @@ class OJPStopDepArrRequest:
         
         response = requests.post(self.endpoint, data=payload, headers=self.headers)
 
+        if response.status_code == 403:
+            raise AuthAccessDeniedError(f"API Error: {response.status_code} - {response.text}")
+
         if response.status_code == 429:
             print(f"\nAPI Error: {response.status_code} - {response.text}\nWaiting for 30 seconds")
             time.sleep(30)
             response = requests.post(self.endpoint, data=payload, headers=self.headers)
+
+            if response.status_code == 403:
+                raise AuthAccessDeniedError(f"API Error: {response.status_code} - {response.text}")
 
             if response.status_code != 200:
                 raise Exception(f"API Error: {response.status_code} - {response.text}")
