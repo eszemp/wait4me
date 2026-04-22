@@ -29,7 +29,6 @@ export class ConnectionDetails {
     }
   }
 
-
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
     // TODO display walking route
     console.log("see detailed walking route for transfer");
@@ -38,5 +37,6 @@ export class ConnectionDetails {
 
   backToPassenger(): void {
     this.router.navigate(['/passenger']);
+    this.w4mService.disable_if_not_active();
   }
 }

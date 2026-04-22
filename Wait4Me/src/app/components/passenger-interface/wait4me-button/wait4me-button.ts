@@ -4,6 +4,7 @@ import { W4MPassengerService } from '../../../shared/services/w4m-service-passen
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { Router } from '@angular/router';
 import { PassengerTimedLeg, PassengerTransferLeg } from '../../../shared/types/PassengerTripTypes';
+import { Duration } from '../../../shared/models/duration';
 
 @Component({
     selector: 'w4m-button',
@@ -32,8 +33,11 @@ export class Wait4MeButton {
         this.tripService.originName.set(next_leg!.boardStopName);
         this.tripService.destinationName.set(last_leg!.alightStopName);
 
-        const new_departure = this.w4mService.trip!.criticalTransfer?.requestedDelay.addToDate(
-            this.w4mService.trip!.criticalTransfer?.scheduledOutgoingDeparture
+        const rawDuration = this.w4mService.trip!.criticalTransfer?.requestedDelay;
+        const requestedDelay = Duration.initFromTotalMinutes(rawDuration!.totalMinutes);
+
+        const new_departure = requestedDelay.addToDate(
+            this.w4mService.trip!.criticalTransfer!.scheduledOutgoingDeparture
         );
         if (new_departure) {
             const day = new_departure.toISOString().split('T')[0]; 
@@ -44,7 +48,7 @@ export class Wait4MeButton {
             this.tripService.departureDay.set(day);         // YYYY-MM-DD
             this.tripService.departureTimeOfDay.set(time);  // HH:MM
         }
-        this.w4mService.status.set('inactive');
+        this.w4mService.disable_if_not_active();
         this.router.navigate(['/passenger']);
     }
 }
