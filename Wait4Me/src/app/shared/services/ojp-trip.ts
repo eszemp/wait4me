@@ -40,20 +40,18 @@ export class OJPTrip extends OJPBase{
 
   constructor() {
     super();
-
     // trigger search automatically
     effect(() => {
-      const from = this.originId();
-      const to = this.destinationId();
-
-      if (from && to) {
-        this.getTripInformation(from, to, this.departureDay() || "", this.departureTimeOfDay() || "")
+      if (this.originId() && this.destinationId()) {
+        console.log(this.originId());
+        console.log(this.destinationId());
+        console.log(this.departureDay());
+        console.log(this.departureTimeOfDay());
+        this.getTripInformation(this.originId()!, this.destinationId()!, this.departureDay() || "", this.departureTimeOfDay() || "")
         .subscribe(async (results) => {
           const resolvedResults = await Promise.all(results); 
           this.tripResults.set(resolvedResults);
         });
-        this.originName.set(sessionStorage.getItem("origin_name"));
-        this.destinationName.set(sessionStorage.getItem("destination_name"));
       }
     });
   }
@@ -63,6 +61,8 @@ export class OJPTrip extends OJPBase{
     this.originName.set(null);
     this.destinationId.set(null);
     this.destinationName.set(null);
+    this.departureDay.set(null);
+    this.departureTimeOfDay.set(null);
     this.tripResults.set([]);
   }
 
@@ -218,14 +218,14 @@ export class OJPTrip extends OJPBase{
     return {
       id: this.asString(trip.id) || this.asString(result.id),
       startTime: new Date(this.asString(trip.startTime)),
-      scheduledStart: initialWalkTime.subtractFromDate(firstTimedLeg?.boardTimeTimetable),
-      startDelay: firstTimedLeg.boardDelay,
+      scheduledStart: initialWalkTime.subtractFromDate(firstTimedLeg!.boardTimeTimetable),
+      startDelay: firstTimedLeg!.boardDelay,
       endTime: new Date(this.asString(trip.endTime)),
-      scheduledEnd: finalWalkTime.addToDate(lastTimedLeg?.alightTimeTimetable),
-      endDelay: lastTimedLeg.alightDelay,
+      scheduledEnd: finalWalkTime.addToDate(lastTimedLeg!.alightTimeTimetable),
+      endDelay: lastTimedLeg!.alightDelay,
       duration: Duration.initWithDurationSchema(trip.duration),
       transfers: typeof trip.transfers === 'number' ? trip.transfers : 0,
-      departurePlatform: firstTimedLeg.boardPlatform,
+      departurePlatform: firstTimedLeg!.boardPlatform,
       legs,
       criticalTransferId: criticalTransferId,
       criticalTransfer: criticalTransfer,
@@ -398,7 +398,7 @@ export class OJPTrip extends OJPBase{
   }
 
   private parseDepartureDate(day: string, time_of_day: string): Date {
-         // departure_time requires format:  "2026-03-23T07:49:30.519Z"
+    // departure_time requires format:  "2026-03-23T07:49:30.519Z"
     // day has format                   "2026-03-23" (YYYY-MM-DD from date input)
     // time of day has format           "08:59" (HH:MM from time input)
     const now = new Date();

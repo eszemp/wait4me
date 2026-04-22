@@ -23,34 +23,29 @@ export class PassengerInterface {
     // clear saved values if component is newly loaded
     const state = history.state;
     if (state && state.clearStorage === true) {
-      sessionStorage.clear();
       this.tripService.reset();
       history.replaceState({}, '')
     }
 
-    // fill out form fields with saved values (if they exist)
-    if (sessionStorage.getItem("origin_name") && sessionStorage.getItem("destination_name")){
+    // fill out form fields with existing values
+    if (this.tripService.originName() && this.tripService.destinationName()) {
       this.tripForm.patchValue({
-        from: sessionStorage.getItem("origin_name") ?? '',
-        to: sessionStorage.getItem("destination_name") ?? ''
+        from: this.tripService.originName()!,
+        to: this.tripService.destinationName()!
       });
     }
 
-    // Connect form date and time to trip service signals
-    this.tripForm.valueChanges.subscribe(value => {
-      this.tripService.departureDay.set(value.date || null);
-      this.tripService.departureTimeOfDay.set(value.time || null);
-    });
+    // set initial values if they don't exist already
+    if (!this.tripService.departureDay() && !this.tripService.departureTimeOfDay()) {
+      this.tripService.departureDay.set(this.tripForm.value.date || null);
+      this.tripService.departureTimeOfDay.set(this.tripForm.value.time || null);
+    }
 
-    // Set initial values
-    this.tripService.departureDay.set(this.tripForm.value.date || null);
-    this.tripService.departureTimeOfDay.set(this.tripForm.value.time || null);
-
-    // fill out form fields with saved values (if they exist)
-    if (sessionStorage.getItem("departure_day") && sessionStorage.getItem("departure_time_of_day")){
+    // fill out form fields with existing values
+    if (this.tripService.departureDay() && this.tripService.departureTimeOfDay()){
       this.tripForm.patchValue({
-        date: sessionStorage.getItem("departure_day") ?? '',
-        time: sessionStorage.getItem("departure_time_of_day") ?? ''
+        date: this.tripService.departureDay()!,
+        time: this.tripService.departureTimeOfDay()!
       });
     }
   }
