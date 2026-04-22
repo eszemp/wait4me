@@ -18,7 +18,7 @@
     </div>
 
     <div class="time-and-location-column">
-      <div>
+      <div class="time-and-location-row">
         <span class="time-start"> 
           {{ trip.scheduledStart| date: 'HH:mm' }}
           <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
@@ -27,7 +27,7 @@
         </span>
         <span class="location-start">{{ tripService.originName() }}</span>
       </div>
-      <div>
+      <div class="time-and-location-row">
         <span class="time-end"> 
           {{ trip.scheduledEnd | date: 'HH:mm' }}
           <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
