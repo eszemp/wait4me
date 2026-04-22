@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
-import { from, map, Observable } from 'rxjs';
+import { Injectable, inject} from '@angular/core';
+import { from, map, Observable, firstValueFrom } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
 import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../types/DriverDeparturesTypes';
 import { OJPBase } from './ojp-base';
 import { Duration } from '../models/duration';
+import { OJPLocation } from './ojp-location';
 
 
 
@@ -20,6 +22,15 @@ export class OJPStopEvent extends OJPBase {
     'en',
   );
 
+  locationService = inject(OJPLocation);
+
+  private async getStopRef(stopName : string): Promise<string> {
+      const suggestions = await firstValueFrom(
+      this.locationService.getLocationInformation(stopName, 1)
+      );
+      return suggestions[0]?.stopPlaceRef ?? '';
+  }
+
   getDepartingLines(
     stopPlaceRef: string,
     departureDate: Date = new Date(),
@@ -34,15 +45,15 @@ export class OJPStopEvent extends OJPBase {
     };
 
     return from(request.fetchResponse(this.sdk)).pipe(
-      map((response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           throw response.error;
         }
 
         const rawResults = response.value.stopEventResult ?? [];
 
-        const rows = rawResults
-          .map((result) => {
+        const rows = await Promise.all( 
+          rawResults.map(async (result) => {
             const service = result.stopEvent?.service;
             const callAtStop = result.stopEvent?.thisCall?.callAtStop;
             const onwardCalls = result.stopEvent?.onwardCall ?? [];
@@ -84,6 +95,7 @@ export class OJPStopEvent extends OJPBase {
             );
 
             const currentStopName = this.asString(this.readTextValue(callAtStop?.stopPointName));
+            const currentStopRef = await this.getStopRef(currentStopName);
             //    callAtStop?.serviceArrival?.estimatedTime ??
             //    callAtStop?.serviceArrival?.timetabledTime,
             //    TODO: see below
@@ -92,10 +104,10 @@ export class OJPStopEvent extends OJPBase {
             const currentStopDelayInMinutes = currentStopTimeEstimated.getMinutes() - currentStopTimeTimetable.getMinutes();
             const currentStopDelay = Duration.initFromTotalMinutes(currentStopDelayInMinutes);
 
-            const onwardStops: DepartureStop[] = onwardCalls
-              .map((onwardCall, index) => {
+            const onwardStopsPromises = onwardCalls.map(async (onwardCall) => {
                 const onwardStop = onwardCall.callAtStop;
                 const stopName = this.asString(this.readTextValue(onwardStop?.stopPointName));
+                const stopRef = await this.getStopRef(stopName);
                 // TODO: include serviceArrival at Stops as well?
                 // onwardStop?.serviceArrival?.estimatedTime ??
                 // onwardStop?.serviceArrival?.timetabledTime ??
@@ -108,24 +120,26 @@ export class OJPStopEvent extends OJPBase {
                 }
 
                 return {
-                  id: `onward-${index}`,
+                  id: stopRef!,
                   name: stopName,
                   timeTimetable: stopTimeTimetable,
                   timeEstimated: stopTimeEstimated,
                   delay: stopDelay,
                 } satisfies DepartureStop;
               })
-              .filter((stop): stop is DepartureStop => stop !== null);
+
+              const resolvedOnwardStops = (await Promise.all(onwardStopsPromises))
+                .filter((s): s is DepartureStop => s !== null);
 
             const stops: DepartureStop[] = [
               {
-                id: 'origin',
+                id: currentStopRef!,
                 name: currentStopName || this.asString(this.readTextValue(service?.originText)) || 'Current stop',
                 timeTimetable: currentStopTimeTimetable,
                 timeEstimated: currentStopTimeEstimated,
                 delay: currentStopDelay,
               },
-              ...onwardStops,
+              ...resolvedOnwardStops,
             ];
 
             return {
@@ -144,10 +158,13 @@ export class OJPStopEvent extends OJPBase {
               stops,
             };
           })
+        );
+
+        const finalRows = rows
           .filter((row) => row.line.trim().length > 0 && row.departureTimetable instanceof Date)
           .sort((a, b) => a.departureTimetable.getTime() - b.departureTimetable.getTime());
 
-        const uniqueRows = rows.filter((row, index, allRows) => {
+        const uniqueRows = finalRows.filter((row, index, allRows) => {
           return (
             allRows.findIndex((candidate) => {
               return (

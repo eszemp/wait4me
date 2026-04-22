@@ -36,9 +36,12 @@ export class W4MPassengerService {
     this.request_id = null;
   }
 
-  enable_if_eligible(transfer: CriticalTransfer) {
+  enable_if_eligible(trip: PassengerTrip) {
+    if (this.status()!=='inactive') {
+      return;
+    }
     // TODO: determine max allowed requested delay and difference to current time
-    const delay_too_big = (transfer.requestedDelay.totalMinutes>=60);
+    const delay_too_big = (trip.criticalTransfer!.requestedDelay.totalMinutes>=60);
     const request_too_early = false;// TODO: (transfer.scheduledOutgoingDeparture);
     const request_too_late = false;
     if (delay_too_big || request_too_early || request_too_late) {
@@ -49,8 +52,18 @@ export class W4MPassengerService {
     // TODO: aslo check if its in the past
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
-    this.transfer = transfer;
+    this.trip = trip;
+    this.transfer = trip.criticalTransfer!;
     return;
+  }
+
+  disable_if_not_active() {
+    // TODO: what to do with accepted request?
+    if (this.status()==='pending') {
+      return;
+    }
+    // else if status is inactive / enabled / declined / expired, reset to inactive
+    this.status.set('inactive');
   }
 
   async click_on_button() {

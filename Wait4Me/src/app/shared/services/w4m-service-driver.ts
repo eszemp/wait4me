@@ -1,117 +1,186 @@
-import { Injectable } from '@angular/core';
-import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
-import { Wait4MeRequest, PostResponse, GetRequestResponse, BACKEND_URL } from '../types/Wait4MeRequest';
+import { Injectable, WritableSignal, signal, computed } from '@angular/core';
+import { lastValueFrom} from 'rxjs';
+import { PostResponse, GetRequestResponse, BACKEND_URL } from '../types/Wait4MeRequest';
 import { HttpClient } from '@angular/common/http';
-import { Duration } from '../models/duration';
 
 
-
-
+export type MapRequestIdsToDelays = { [delay: number]: string[] };
+export type IncomingRequestState = { [stopRef: string]: MapRequestIdsToDelays };
 
 @Injectable({ providedIn: 'root' })
 export class W4MDriverService {
 
-  // for querying all request at a stop
-  journey_ref: string = '';
-  stop_ref: Number = 0;
 
-  // for editing a stop
-  edit_mode: Boolean = false;
-  request_id: string = ' ';
+  public requestIds : WritableSignal<IncomingRequestState> = signal({});
+  public activeStopRef : WritableSignal<string | null> = signal(null);
+  public editMode : WritableSignal<Boolean> = signal(false);
+  public hideEditMode : WritableSignal<Boolean> = signal(false);
+  public busy : WritableSignal<Boolean> = signal(false);
+  public smallestRequestedDelays : WritableSignal<{ [stopRef: string]: number }> = signal({});
+  public acceptedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
+
+  public activeRequestIds = computed(() => {
+    const stopRef = this.activeStopRef();
+    return stopRef ? this.requestIds()[stopRef] ?? {} : {};
+  });
+  public numberOfStacks = computed(() => Object.keys(this.activeRequestIds()).length);
+  
 
   constructor(private http: HttpClient) {}
 
-  public async accept_request() : Promise<void> {
-    console.log('accepting request', this.request_id);
-    if (!this.request_id) {
-      return;
-    }
+  async query_all_requests(journey_ref: string, stop_ref: string): Promise<void> {
+    this.busy.set(true);
+    this.activeStopRef.set(stop_ref);
     try {
       const response = await lastValueFrom(
-        this.http.post<PostResponse>(
-          `${BACKEND_URL}/update-request/${this.request_id}`,
-          { status: 'accepted' }
-        )
+        this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${stop_ref}&outgoing_service=${journey_ref}`)
       );
 
-      console.log(response.api_status);
+      // console.log('API Response:', response);
 
-      if (response.api_status === 'changed') {
-        this.request_id = ' ';
-        this.edit_mode = false;
+      if (response.api_status === "No incoming connections" || !response.data) {
+        this.busy.set(false);
         return;
       }
-      console.error('Accepting request failed, backend did not confirm change:', response.api_status);
+
+      const requestsByDelay = response.data.reduce((acc: { [key: number]: string[] }, data: any) => {
+        
+        const minutes = data.requested_delay_min;
+        if (!acc[minutes]) {
+          acc[minutes] = []; // init empty array if no entry for this duration exists
+        }
+        acc[minutes].push(data.request_id);
+        return acc;
+
+      }, {});
+
+      // console.log('Grouped Requests:', requestsByDelay);
+  
+
+      // update requestIds signal for this stop    
+      this.requestIds.update(state => {
+        let newState = { ...state };
+        
+        if (newState[stop_ref]) {
+          // MERGE: Stop exists, merge delay bundles
+          const existingStopData = { ...newState[stop_ref] };
+          Object.keys(requestsByDelay).forEach(delay => {
+            const delayNum = Number(delay);
+            if (existingStopData[delayNum]) {
+              existingStopData[delayNum] = [...new Set([...existingStopData[delayNum], ...requestsByDelay[delayNum]])];
+            } else {
+              existingStopData[delayNum] = requestsByDelay[delayNum];
+            }
+          });
+          newState[stop_ref] = existingStopData;
+        } else {
+          // CREATE: New entry for this stop
+          newState[stop_ref] = requestsByDelay;
+        }
+        return newState;
+      });
+      this.smallestRequestedDelays.update(state => {
+        let newState = { ...state };
+        if (Object.keys(this.activeRequestIds()).length!=0) {
+          const delays = Object.keys(this.activeRequestIds()).map(Number).sort((a, b) => a - b);
+          newState[stop_ref] = delays[0];
+        }
+        return newState;
+      });
     } catch (error) {
-      console.error('Accepting request failed:', error);
+      console.error('DB Query of all requests failed:', error);
+      this.busy.set(false);
+      return;
     }
+    this.busy.set(false);
+    return;
+  }
+
+  public async openEditMode(stopRef: string) {
+    while(this.busy()) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    this.activeStopRef.set(stopRef);
+    this.editMode.set(true);
+  }
+
+  public async closeEditMode() : Promise<void> {
+    this.editMode.set(false);
+    return;
+  };
+
+
+  async change_request_status(new_status: string) : Promise<void> {
+
+    const stopRef = this.activeStopRef()!;
+    const delay = this.smallestRequestedDelays()[stopRef];
+    if (!stopRef || delay === null) return;
+
+    for (const id of this.activeRequestIds()[delay]) {
+      try {
+        const response = await lastValueFrom(this.http.post<PostResponse>(`${BACKEND_URL}/update-request/${id}`, {status: new_status}));
+        if (response.api_status === 'changed') {
+          console.log(`successfully ${new_status} request with id ${id}`);
+        }
+      } catch (error) {
+        console.error(`request not ${new_status}:`, error);
+      }
+    }
+
+    this.requestIds.update(state => {
+      const newState = { ...state };
+      const newStopMap = { ...newState[stopRef] };
+      delete newStopMap[delay];
+      newState[stopRef] = newStopMap;
+      return newState;
+    });
+    //console.log("updated signal requestIDs", this.requestIds());
+
+    this.smallestRequestedDelays.update(state => {
+        let newState = { ...state };
+        if (Object.keys(this.activeRequestIds()).length!=0) {
+          const delays = Object.keys(this.activeRequestIds()).map(Number).sort((a, b) => a - b);
+          newState[stopRef] = delays[0];
+        }
+        else {
+          delete newState[stopRef];
+        }
+        return newState;
+    });
+    //console.log("updated signal smallestRequestedDelays", this.smallestRequestedDelays());
+
+    if (new_status=='accepted') {
+      this.acceptedDelays.update(state => {
+          let newState = { ...state };
+          newState[stopRef] = delay;
+          return newState;
+      });
+      //console.log("updated signal acceptedDelays", this.acceptedDelays());
+    }
+
+  }
+
+  public async accept_request() : Promise<void> {
+    await this.change_request_status('accepted');
+    this.hideEditMode.set(true);
+    if (this.numberOfStacks() > 0) {
+      // edit bar reappears for next bundle after short delay
+      setTimeout(() => this.hideEditMode.set(false), 100);
+      return;
+    }
+    await this.closeEditMode();
+    return;
   }
 
   public async decline_request() : Promise<void> {
-    console.log('declining request', this.request_id);
-    if (!this.request_id) {
-      return;
+    await this.change_request_status('declined');
+    while (this.numberOfStacks() > 0) {
+      console.log("declining bigger open requests");
+      await this.change_request_status('declined');
+      console.log("successfully declined bigger open requests");
     }
-    try {
-      const response = await lastValueFrom(
-        this.http.post<PostResponse>(
-          `${BACKEND_URL}/update-request/${this.request_id}`,
-          { status: 'declined' }
-        )
-      );
-
-      if (response.api_status === 'changed') {
-        this.request_id = ' ';
-        this.edit_mode = false;
-        return;
-      }
-      console.error('Declining request failed, backend did not confirm change:', response.api_status);
-    } catch (error) {
-      console.error('Declining request failed:', error);
-    }
+    await this.closeEditMode();
+    return;
   }
-
-  public set_params_query(journey: string, stop: Number) {
-    this.journey_ref = journey;
-    console.log("Jouney_Ref:", this.journey_ref);
-    this.stop_ref = stop;
-    console.log("Stop Ref: ", this.stop_ref);
-  }
-
-  async query_all_requests(): Promise<Wait4MeRequest[]> {
-    try {
-      const response = await lastValueFrom(
-        this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${this.stop_ref}&outgoing_service=${this.journey_ref}`)
-      );
-
-      console.log('API Response:', response);
-
-      // Check for the "No incoming connections" message inside the object
-      if (response.api_status === "No incoming connections") {
-        return [];
-      }
-
-      const array_of_requests = response.data.map((data: any) => {
-        return {
-          requestId: data.request_id,
-          passengerId: data.passenger_id,
-          incomingJourneyRef: data.incoming_journey_ref,
-          outgoingJourneyRef: data.outgoing_journey_ref,
-          transferStopRef: data.transfer_stop_ref,
-          scheduledDepartureTime: new Date(data.scheduled_departure_time),
-          requestedDelay: Duration.initFromTotalMinutes(data.requested_delay_min),
-          status: data.status
-        } satisfies Wait4MeRequest;
-      });
-
-      console.log(array_of_requests);
-      return array_of_requests;
-
-    } catch (error) {
-      console.error('DB Query of all requests failed:', error);
-      return [];
-    }
-  }
-
-
+  
 }

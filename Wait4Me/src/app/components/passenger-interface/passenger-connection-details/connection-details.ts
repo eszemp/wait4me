@@ -25,10 +25,9 @@ export class ConnectionDetails {
     this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
     if (this.trip?.criticalTransfer) {
       console.log(this.trip?.criticalTransfer);
-      this.w4mService.enable_if_eligible(this.trip?.criticalTransfer)
+      this.w4mService.enable_if_eligible(this.trip);
     }
   }
-
 
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
     // TODO display walking route
@@ -38,5 +37,6 @@ export class ConnectionDetails {
 
   backToPassenger(): void {
     this.router.navigate(['/passenger']);
+    this.w4mService.disable_if_not_active();
   }
 }

@@ -5,8 +5,8 @@
         </div>
     }
     @else {
-        <div class="request open" (click)="this.process_request()">
-            <span>+ {{this.current_request?.requestedDelay?.format()}} min ?</span>
+        <div class="request open" (click)="this.process_requests_for_this_stop()">
+            <span>+ {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min ?</span>
         </div>
     }
 </div>

@@ -56,6 +56,12 @@ export class Duration {
   }
 
   public plus(otherDuration: Duration): Duration {
+    if (!this.totalMinutes){
+      return Duration.initFromTotalMinutes(0 + otherDuration.totalMinutes)
+    }
+    if (!otherDuration.totalMinutes){
+      Duration.initFromTotalMinutes(this.totalMinutes + 0)
+    }
     return Duration.initFromTotalMinutes(this.totalMinutes + otherDuration.totalMinutes)
   }
 

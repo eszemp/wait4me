@@ -1,12 +1,12 @@
 <div class="edit-bar">
-    @if (this.w4mService.edit_mode) {
+    @if (this.w4mService.editMode() && !this.w4mService.hideEditMode()) {
         <button type="button" class="accept" (click)="this.w4mService.accept_request()">
             Accept
         </button>
         <button type="button" class="decline" (click)="this.w4mService.decline_request()">
             Decline
         </button>
-        <div class="total_requests">1x requested</div>
+        <div class="total_requests">{{this.w4mService.activeRequestIds()[this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!]].length}}x requested</div>
     }
 </div>
 

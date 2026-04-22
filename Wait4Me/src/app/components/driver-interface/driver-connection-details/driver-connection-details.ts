@@ -5,6 +5,7 @@ import { DepartureLine, DepartureStop, DriverStopRow } from '../../../shared/typ
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { Wait4MeDisplay } from '../w4m-display/w4m-display';
 import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
+import { Duration } from '../../../shared/models/duration';
 
 
 
@@ -17,6 +18,8 @@ import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
 export class DriverConnectionDetails {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
+  w4mService = inject(W4MDriverService);
 
   readonly currentTime = signal(new Date());
 
@@ -109,5 +112,23 @@ export class DriverConnectionDetails {
 
   backToDriver(): void {
     this.router.navigate(['/driver']);
+  }
+
+  disable_edit_mode_when_active(event: Event): void {
+    const target = event.target as HTMLElement;
+  
+    // check if the click was inside a w4m-display component
+    if (target.closest('w4m-display')) {
+      return;
+    }
+    if (this.w4mService.editMode()) {
+      this.w4mService.closeEditMode();
+      console.log("disabled edit mode");
+    }
+    return;
+  }
+
+  calculate_new_delay(stop : DepartureStop): string {
+    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id])).format();
   }
 }

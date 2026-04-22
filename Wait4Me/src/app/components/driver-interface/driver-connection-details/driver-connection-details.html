@@ -20,7 +20,7 @@
   </section>
 
   @if (departure) {
-    <section class="stops-card">
+    <section class="stops-card" (click)="disable_edit_mode_when_active($event)">
       @for (stop of visibleStops; track stop.id; let isLast = $last; let isFirst = $first) {
         <div class="stop-row" [class.last]="isLast" [class.first]="isFirst">
           <div class="timeline-column">
@@ -34,9 +34,9 @@
 
           <span class="time">
             {{ stop.timeTimetable | date: 'HH:mm:ss' }}
-            @if (false) {
+            @if (this.w4mService.acceptedDelays()[stop.id]) {
               <span class="time-delay">
-                +{{ stop.delay.format()}}
+                +{{ this.calculate_new_delay(stop)}}
               </span>
             }
             @else {
