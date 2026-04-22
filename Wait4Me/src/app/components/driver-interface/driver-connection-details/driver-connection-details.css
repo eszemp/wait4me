@@ -6,6 +6,7 @@
 .driver-connection-details-page {
   --status-gap: 12px;
   --clock-width: 250px;
+  --side-gutter: 10px;
   width: 100%;
   margin-top: 0;
   position: relative;
@@ -31,8 +32,8 @@
   display: flex;
   gap: var(--status-gap);
   align-items: stretch;
-  width: calc(100% - 20px);
-  margin-left: 10px;
+  width: calc(100% - (2 * var(--side-gutter)));
+  margin-left: var(--side-gutter);
   margin-top: -20px;
 }
 
@@ -111,17 +112,18 @@
 
 .stops-card {
   margin-top: 20px;
-  width: calc(100% - 20px);
-  margin-left: 10px;
-  margin-right: 10px;
-  padding: 12px 10px;
+  width: calc(100% - (2 * var(--side-gutter)));
+  margin-left: var(--side-gutter);
+  margin-right: var(--side-gutter);
+  padding: 12px 0;
+  box-sizing: border-box;
 }
 
 .stop-row {
   position: relative;
   min-height: 76px;
   display: grid;
-  grid-template-columns: 44px auto 1fr 150px;
+  grid-template-columns: 44px auto 1fr var(--clock-width);
   align-items: center;
   column-gap: 12px;
 }
@@ -129,8 +131,8 @@
 .stop-row.first::before {
   content: '';
   position: absolute;
-  top: 6px;
-  bottom: 6px;
+  top: 5px;
+  bottom: 5px;
   left: 0;
   right: calc(var(--clock-width) + var(--status-gap));
   border: 1px solid var(--fir-green);

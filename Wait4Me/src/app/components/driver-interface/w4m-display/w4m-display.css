@@ -1,6 +1,8 @@
 .w4m-display-shell {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
   min-height: 76px;
   height: max-content;
 }
@@ -13,7 +15,9 @@
   justify-self: end;
   font-size: 28px;
   padding: 14px 18px;
-  min-height: 76px;
+  min-height: 64px;
+  width: 100%;
+  box-sizing: border-box;
   text-wrap: nowrap;
 }
 .none {
@@ -28,8 +32,42 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
   background: #ffffff;
   z-index: 0;
+  justify-self: stretch;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  gap: 10px;
+  height: calc(100% - 10px);
+  margin: 5px 0;
 }
 
-.selected {
-   background:var(--mint);
+
+.open.accepted {
+  background: var(--mint);
+}
+
+
+
+.open.selected {
+  border-width: 6px;
+}
+
+.request-delay,
+.request-question {
+  white-space: nowrap;
+}
+
+.request-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.request-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--fir-green);
+  border-radius: 50%;
+  background: transparent;
+  box-sizing: border-box;
 }
