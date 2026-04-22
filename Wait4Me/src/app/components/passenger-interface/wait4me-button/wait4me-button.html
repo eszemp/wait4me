@@ -1,32 +1,69 @@
 <div class="w4m-button-shell">
   @if (this.w4mService.status() === 'pending') {
     <div class="w4m-status w4m-status--pending">
-      <span>Request pending...</span>
-      <button type="button" class="w4m-status-action" (click)="this.cancel_request()">Cancel ×</button>
+      <div class="w4m-status-message">
+        <img class="w4m-status-icon" src="/delay.svg" alt="" aria-hidden="true" />
+        <img
+          class="w4m-status-icon w4m-status-icon--info"
+          src="/circle-information-extra-small.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <span>Request pending...</span>
+      </div>
+      <button type="button" class="w4m-status-action" (click)="this.cancel_request()">
+        <span>Cancel</span>
+        <img class="w4m-status-action-icon" src="/close.svg" alt="" aria-hidden="true" />
+      </button>
     </div>
   }
 
   @if (this.w4mService.status() === 'accepted') {
     <div class="w4m-status w4m-status--success">
+      <img class="w4m-status-icon w4m-status-icon--status" src="/check-mark.svg" alt="" aria-hidden="true" />
+      <img
+        class="w4m-status-icon w4m-status-icon--info"
+        src="/circle-information-extra-small.svg"
+        alt=""
+        aria-hidden="true"
+      />
       <span>Accepted.</span>
     </div>
   }
 
   @if (this.w4mService.status() === 'declined') {
     <div class="w4m-status w4m-status--error">
-      <span>Transfer not possible.</span>
-      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">Re-route</button>
+      <div class="w4m-status-message">
+        <img class="w4m-status-icon w4m-status-icon--status" src="/close.svg" alt="" aria-hidden="true" />
+        <img
+          class="w4m-status-icon w4m-status-icon--info"
+          src="/circle-information-extra-small.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <span>Transfer not possible.</span>
+      </div>
+      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">
+        Re-route
+      </button>
     </div>
   }
 
   @if (this.w4mService.status() === 'expired') {
     <div class="w4m-status w4m-status--error">
       <span>Request expired. Outgoing service has departed.</span>
-      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">Re-route</button>
+      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">
+        Re-route
+      </button>
     </div>
   }
 
-  <button type="button" class="w4m-button" [class.is_enabled]="this.w4mService.status()==='enabled'" (click)="this.w4mService.click_on_button()">
-      Wait4Me
+  <button
+    type="button"
+    class="w4m-button"
+    [class.is_enabled]="this.w4mService.status() === 'enabled'"
+    (click)="this.w4mService.click_on_button()"
+  >
+    Wait4Me
   </button>
 </div>
