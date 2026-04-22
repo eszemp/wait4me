@@ -9,21 +9,20 @@
   @if (this.w4mService.status() === 'accepted') {
     <div class="w4m-status w4m-status--success">
       <span>Accepted.</span>
-      <button type="button" class="w4m-status-action" (click)="this.cancel_request()">Cancel ×</button>
     </div>
   }
 
   @if (this.w4mService.status() === 'declined') {
     <div class="w4m-status w4m-status--error">
       <span>Transfer not possible.</span>
-      <button type="button" class="w4m-status-action">Re-route</button>
+      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">Re-route</button>
     </div>
   }
 
   @if (this.w4mService.status() === 'expired') {
     <div class="w4m-status w4m-status--error">
       <span>Request expired. Outgoing service has departed.</span>
-      <button type="button" class="w4m-status-action">Re-route</button>
+      <button type="button" class="w4m-status-action" (click)="this.search_alternative_route()">Re-route</button>
     </div>
   }
 

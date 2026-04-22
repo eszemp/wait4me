@@ -25,7 +25,7 @@ export class ConnectionDetails {
     this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
     if (this.trip?.criticalTransfer) {
       console.log(this.trip?.criticalTransfer);
-      this.w4mService.enable_if_eligible(this.trip?.criticalTransfer)
+      this.w4mService.enable_if_eligible(this.trip);
     }
   }
 
