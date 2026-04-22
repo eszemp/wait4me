@@ -1,3 +1,14 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.passenger-connection-details-page {
+  width: 100%;
+  margin-top: 0;
+  position: relative;
+}
+
 .trip-overview {
   width: min(calc(100vw - 20px), 680px);
   margin-top: -20px;
@@ -69,9 +80,9 @@
 
 .back-button {
   position: absolute;
-  top: 20px;
+  top: -50px;
   left: 10px;
-  z-index: 10;
+  z-index: 5;
   border: 0;
   background: transparent;
   cursor: pointer;

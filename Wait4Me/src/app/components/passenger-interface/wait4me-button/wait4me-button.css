@@ -31,7 +31,7 @@
   padding-bottom: max(10px, env(safe-area-inset-bottom));
   box-sizing: border-box;
   align-items: stretch;
-  min-height: 120px;
+  min-height: 90px;
 }
 
 .w4m-status {

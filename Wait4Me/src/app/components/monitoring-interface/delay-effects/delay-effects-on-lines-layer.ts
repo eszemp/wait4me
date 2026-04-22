@@ -414,7 +414,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
             <div class="station-series-value">${arrivalTimeText || 'n/a'}</div>
           </div>
           <div class="station-series-row">
-            <div class="station-series-time">Available transfer time</div>
+            <div class="station-series-time">Available transfer buffer time</div>
             <div class="station-series-value">${transferTimeText}</div>
           </div>
           <div class="station-series-row">
