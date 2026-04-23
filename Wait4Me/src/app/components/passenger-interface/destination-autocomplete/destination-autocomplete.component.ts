@@ -26,39 +26,51 @@ export class DestinationAutocompleteComponent {
   constructor(private ojpService: OJPLocation) {
     //if tripService.originName and destinationName are set, but Ids not -> determine and set ids
     (async () => {
-      if (this.tripService.originName() && this.tripService.destinationName()) {
+        // 1. Handle Origin
+        const originName = this.tripService.originName();
+        if (originName) {
+          console.log("searching stopref for origin...");
+          const results = await this.searchForLocation(originName);
+          
+          if (results.length > 0) {
+            const origin_id = results[0].stopPlaceRef;
+            this.tripService.originId.set(origin_id);
+            console.log("Origin result:", origin_id);
+          }
+        }
 
-        this.searchForLocation(this.tripService.originName()!);
-        this.searchForLocation(this.tripService.destinationName()!);
-
-        setTimeout(() => {
-          const origin_id = this.destinations[0]!.stopPlaceRef;
-          this.tripService.originId.set(origin_id);
-          const destination_id = this.destinations[0]!.stopPlaceRef;
-          this.tripService.destinationId.set(destination_id);
-        }, 1000);
-      }
-    })();
+        // 2. Handle Destination
+        const destName = this.tripService.destinationName();
+        if (destName) {
+          console.log("searching stopref for destination...");
+          const results = await this.searchForLocation(destName);
+          
+          if (results.length > 0) {
+            const destination_id = results[0].stopPlaceRef;
+            this.tripService.destinationId.set(destination_id);
+            console.log("Destination result:", destination_id);
+          }
+        }
+      })();
   }
 
-  searchForLocation(loc_name: string) : void {
-    this.ojpService.getLocationInformation(loc_name).subscribe({
-      next: (response) => {
-        this.destinations = response || [];
-      },
-      error: (err) => {
-        console.error('API Error:', err);
-        this.destinations = [];
-      }
-    });
+  async searchForLocation(loc_name: string): Promise<LocationSuggestion[]> {
+    try {
+      // firstValueFrom converts the Observable to a Promise and takes the first emission
+      const response = await firstValueFrom(this.ojpService.getLocationInformation(loc_name));
+      return response || [];
+    } catch (err) {
+      console.error('API Error:', err);
+      return [];
+    }
   }
 
-  onQueryChange(query: string): void {
+  async onQueryChange(query: string): Promise<void> {
     if (query.length <2) { //only start searching from min. 2 letters
       this.destinations = []
       return;
     }
-    this.searchForLocation(query);
+    this.destinations = await this.searchForLocation(query);
     this.showSuggestions = true;
   }
 
