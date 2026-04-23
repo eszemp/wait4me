@@ -28,7 +28,7 @@ find name screen -ls
 reattach to screen session: screen -r <name of run_backend>
 ensure venv is running (otherwise: source venv/bin/activate)
 cd to Wait4Me/PythonBackend and run
-waitress-serve --host=0.0.0.0 --port=8000 backend_app:backend_app
+waitress-serve --host=127.0.0.1 --port=8000 backend_app:backend_app
 (exit using ctrl+a, d)
 
 

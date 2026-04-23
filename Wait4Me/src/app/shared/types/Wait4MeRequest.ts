@@ -1,6 +1,6 @@
 import { Duration } from '../models/duration';
 
-export const BACKEND_URL = 'http://localhost:5000';
+export const BACKEND_URL = 'http://127.0.0.1:8000';
 
 export type Wait4MeRequest = {
     requestId: string;
