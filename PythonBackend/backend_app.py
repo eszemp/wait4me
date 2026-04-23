@@ -72,4 +72,4 @@ if __name__ == '__main__':
     scheduler.add_job(id='ExpiredRequestCleanup', func=expire_old_requests, trigger='interval', hours=1)
     scheduler.start()
 
-    backend_app.run(host='localhost', port=8000)
+    backend_app.run(host='127.0.0.1', port=8000)
