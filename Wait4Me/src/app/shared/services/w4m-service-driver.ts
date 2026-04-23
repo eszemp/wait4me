@@ -29,6 +29,9 @@ export class W4MDriverService {
   constructor(private http: HttpClient) {}
 
   async query_all_requests(journey_ref: string, stop_ref: string): Promise<void> {
+    if (this.editMode()) {
+      return;
+    }
     this.busy.set(true);
     this.activeStopRef.set(stop_ref);
     try {
@@ -105,7 +108,10 @@ export class W4MDriverService {
   }
 
   public async closeEditMode() : Promise<void> {
+    this.hideEditMode.set(false);
+    this.busy.set(false);
     this.editMode.set(false);
+    console.log("closed edit mode");
     return;
   };
 
@@ -155,7 +161,7 @@ export class W4MDriverService {
           newState[stopRef] = delay;
           return newState;
       });
-      //console.log("updated signal acceptedDelays", this.acceptedDelays());
+    //console.log("updated signal acceptedDelays", this.acceptedDelays());
     }
 
   }
@@ -165,7 +171,8 @@ export class W4MDriverService {
     this.hideEditMode.set(true);
     if (this.numberOfStacks() > 0) {
       // edit bar reappears for next bundle after short delay
-      setTimeout(() => this.hideEditMode.set(false), 100);
+      console.log("staying in edit mode after accepting");
+      setTimeout(() => this.hideEditMode.set(false), 200);
       return;
     }
     await this.closeEditMode();

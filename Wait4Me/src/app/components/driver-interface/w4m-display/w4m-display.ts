@@ -1,5 +1,5 @@
-import { Component, inject, Input, computed, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Component, inject, Input} from '@angular/core';
+import { firstValueFrom, Subscription, timer, from, exhaustMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { OJPLocation } from '../../../shared/services/ojp-location';
@@ -20,16 +20,51 @@ export class Wait4MeDisplay {
     stopRef: string = '';
     state: string = 'Loading...';
 
+    private incomingRequestsSubscription: Subscription | null = null;
+
     public w4mService = inject(W4MDriverService);
     locationService = inject(OJPLocation);
+
 
     async ngOnInit() {
         await this.get_stop_ref();
         console.log(this.w4mService.busy());
-        while(this.w4mService.busy()) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        this.startRequestPolling();
+    }
+
+    ngOnDestroy() {
+        console.log('w4m display for', this.stopName, "is being destroyed. Cleaning up...");
+        this.stopRequestPolling();
+    }
+
+    private startRequestPolling() {
+        if (this.incomingRequestsSubscription) return;
+
+        console.log("Polling incoming requests from db for", this.stopName);
+
+        this.incomingRequestsSubscription = timer(0, 5000)
+        .pipe(
+            exhaustMap(() => from(this.executeWhenNotBusy()))
+        )
+        .subscribe({
+            error: (err) => console.error('Polling failed:', err)
+        });
+    }
+
+    private stopRequestPolling() {
+        if (this.incomingRequestsSubscription) {
+            this.incomingRequestsSubscription.unsubscribe();
+        }
+        return;
+    }
+
+    private async executeWhenNotBusy() {
+        while (this.w4mService.busy() || this.w4mService.editMode()) {
+            console.log("components wait for service to have capacity. Busy:", this.w4mService.busy(), "Edit Mode:", this.w4mService.editMode());
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
         await this.query_db();
+        return;
     }
 
     private async get_stop_ref(): Promise<void> {
@@ -46,7 +81,6 @@ export class Wait4MeDisplay {
             this.state = 'No requests';
         }
         return;
-        // TODO: visualize request stack based on w4mService.numberOfStacks()
     }
 
     hasOpenRequestForStop(): boolean {
@@ -61,9 +95,8 @@ export class Wait4MeDisplay {
     async process_requests_for_this_stop(): Promise<void> {
         this.w4mService.openEditMode(this.stopRef);
         console.log("enabled edit mode for requests at stop", this.stopName );
-        while(this.w4mService.editMode()) {
-            console.log("still in edit mode");
-            await new Promise(resolve => setTimeout(resolve, 100));
+        while (this.w4mService.editMode()) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         if (!this.hasOpenRequestForStop() && !this.hasAcceptedRequestForStop()) {
             this.state = 'No requests';
