@@ -12,6 +12,8 @@
   align-items: center;
   font-family: sans-serif;
   gap: 15px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .leg {
@@ -26,6 +28,8 @@
   margin-bottom: 9px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .leg.transfer-leg {
@@ -44,7 +48,9 @@
   margin-bottom: 9px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
-  height: 60px
+  height: 60px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .arrow-right-icon {
@@ -69,8 +75,8 @@
 
 .back-button {
   position: absolute;
-  top: 20px;
-  left: 10px;
+  top: 10px;
+  left: max(10px, calc((100vw - 680px) / 2));
   z-index: 10;
   border: 0;
   background: transparent;
@@ -81,5 +87,53 @@
 .back-button img {
   width: 36px;
   height: 36px;
+}
+
+/* Text Overflow Handling - same as trip-cards */
+.time-and-location-column {
+  display: flex;
+  color: black;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 10px;
+}
+
+.time-and-location-column > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.time-start, .time-end, .location-start, .location-end {
+  font-size: 1.1rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.location-start,
+.location-end {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time-start, .time-end {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-column {
+  overflow: hidden;
+}
+
+.time-column {
+  flex-shrink: 0;
 }
 

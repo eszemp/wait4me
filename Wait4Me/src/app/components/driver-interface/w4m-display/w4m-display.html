@@ -1,12 +1,32 @@
 <div class="w4m-display-shell">
-    @if(this.state!='open') {
-        <div class="request none">
-            <span>{{this.state}}</span>
+    @if (this.hasOpenRequestForStop()) {
+        <div
+            class="request open"
+            [class.selected]="this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef"
+            (click)="this.process_requests_for_this_stop()"
+        >
+            <span class="request-delay">+ {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min</span>
+            <span class="request-dots" aria-hidden="true">
+                <span class="request-dot"></span>
+                <span class="request-dot"></span>
+                <span class="request-dot"></span>
+            </span>
+            <span class="request-question">?</span>
+        </div>
+    }
+    @else if (this.hasAcceptedRequestForStop()) {
+        <div class="request open accepted">
+            <span class="request-delay">+ {{this.w4mService.acceptedDelays()[this.stopRef]}} min</span>
+            <span class="request-dots" aria-hidden="true">
+                <span class="request-dot"></span>
+                <span class="request-dot"></span>
+                <span class="request-dot"></span>
+            </span>
         </div>
     }
     @else {
-        <div class="request open" (click)="this.process_requests_for_this_stop()">
-            <span>+ {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min ?</span>
+        <div class="request none">
+            <span>{{this.state}}</span>
         </div>
     }
 </div>

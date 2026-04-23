@@ -42,15 +42,22 @@ export class Wait4MeDisplay {
 
     private async query_db(): Promise<void> {
         await this.w4mService.query_all_requests(this.serviceJourneyRef, this.stopRef);
-        if (this.w4mService.numberOfStacks()===0) {
+        if (!this.hasOpenRequestForStop() && !this.hasAcceptedRequestForStop()) {
             this.state = 'No requests';
-        }
-        else {
-            this.state = 'open';
         }
         return;
         // TODO: visualize request stack based on w4mService.numberOfStacks()
     }
+
+    hasOpenRequestForStop(): boolean {
+        const requestsByDelay = this.w4mService.requestIds()[this.stopRef];
+        return !!requestsByDelay && Object.keys(requestsByDelay).length > 0;
+    }
+
+    hasAcceptedRequestForStop(): boolean {
+        return this.w4mService.acceptedDelays()[this.stopRef] !== undefined;
+    }
+
     async process_requests_for_this_stop(): Promise<void> {
         this.w4mService.openEditMode(this.stopRef);
         console.log("enabled edit mode for requests at stop", this.stopName );
@@ -58,7 +65,7 @@ export class Wait4MeDisplay {
             console.log("still in edit mode");
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-        if (this.w4mService.numberOfStacks()===0) {
+        if (!this.hasOpenRequestForStop() && !this.hasAcceptedRequestForStop()) {
             this.state = 'No requests';
             console.log("no longer in edit mode, new_state: ", this.state);
         }
