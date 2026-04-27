@@ -160,6 +160,18 @@ export class LineSearchComponent implements OnDestroy {
     this.lineSelected.emit(null);
   }
 
+  clearStationQuery(): void {
+    this.stationQuery = '';
+    this.stationSuggestions.set([]);
+    this.showStationSuggestions = false;
+    this.selectedStation.set(null);
+    this.selectedLine.set(null);
+    this.departingLines.set([]);
+    this.showDepartureDropdown.set(false);
+    this.error.set(null);
+    this.lineSelected.emit(null);
+  }
+
   /** Formats departure times as dd.MM.yyyy HH:mm. */
   formatDepartureTime(time: Date | string | null | undefined): string {
     if (!time) {

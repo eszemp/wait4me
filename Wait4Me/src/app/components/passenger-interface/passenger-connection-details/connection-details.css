@@ -55,8 +55,8 @@
 
 .arrow-right-icon {
   transform: scaleX(-1) translateY(-20px);
-  height: 35px;
-  width: 35px;
+  height: 20px;
+  width: 20px;
 }
 
 .walking-icon {
@@ -75,7 +75,7 @@
 
 .back-button {
   position: absolute;
-  top: 10px;
+  top: 16px;
   left: max(10px, calc((100vw - 680px) / 2));
   z-index: 10;
   border: 0;
@@ -85,8 +85,8 @@
 }
 
 .back-button img {
-  width: 36px;
-  height: 36px;
+  width: 25px;
+  height: 25px;
 }
 
 /* Text Overflow Handling - same as trip-cards */
