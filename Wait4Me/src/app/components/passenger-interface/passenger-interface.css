@@ -1,7 +1,7 @@
 .info-section {
   width: min(calc(100vw - 100px), 680px);
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 .info-icon {
@@ -15,6 +15,18 @@
 .info-text {
   font-size: 16px;
   color: var(--grey);
+}
+
+.state-section {
+  width: min(calc(100vw - 100px), 680px);
+  margin: 100px auto 0;
+  text-align: center;
+}
+
+.state-text {
+  font-size: 16px;
+  color: var(--grey);
+  margin: 0;
 }
 
 .content {

@@ -1,5 +1,10 @@
 <app-route-form [tripForm]="tripForm" />
 
+@if (tripService.isLoadingTrips()) {
+  <section class="state-section">
+    <p class="state-text">Loading connections...</p>
+  </section>
+} @else if (tripService.tripResults().length > 0) {
 <section class="content">
 @for (trip of tripService.tripResults(); track trip.id) {
     <section class="trip-card" 
@@ -55,7 +60,23 @@
       </p>
     </section>
 }
-</section>
+  </section>
+} @else if (tripService.originId() && tripService.destinationId()) {
+  <section class="state-section">
+    <p class="state-text">No connections found for this search.</p>
+  </section>
+} @else {
+  <section class="content">
+    <section class="info-section">
+      <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
+      <p class="info-text">
+        To use Wait4Me, search for your route and select your connection. If there is a delay and 
+        you might not be able to make the transfer, you can send a request for the driver of the 
+        second vehicle to Wait4You by clicking the button below.
+      </p>
+    </section>
+  </section>
+}
 
 
 <w4m-button></w4m-button>
