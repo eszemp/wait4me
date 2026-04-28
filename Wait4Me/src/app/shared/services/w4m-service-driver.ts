@@ -30,7 +30,7 @@ export class W4MDriverService {
   constructor(private http: HttpClient) {}
 
   async query_all_requests(journey_ref: string, stop_ref: string): Promise<void> {
-    
+
     this.busy.set(true);
     this.activeStopRef.set(stop_ref);
     try {
@@ -61,6 +61,7 @@ export class W4MDriverService {
           }, {});
 
         await this.handle_pending_requests(requestsByDelay, stop_ref);
+
       }
       
   
@@ -113,6 +114,14 @@ export class W4MDriverService {
       }
       return newState;
     });
+
+    // in case of a currently enabled edit mode for this stop
+    if (this.editMode() && this.activeStopRef() === stop_ref) {
+      // exit edit mode if there are now no requests left
+      if (this.numberOfStacks()==0) {
+        await this.closeEditMode();
+      }
+    }
   }
 
   private async handle_pending_requests(requestsByDelay : { [key: number]: string[] }, stop_ref: string) {
