@@ -1,6 +1,10 @@
 import { Duration } from '../models/duration';
 
+// dev mode
 export const BACKEND_URL = 'http://127.0.0.1:8000';
+
+// production mode
+// export const BACKEND_URL = 'https://wait4me.ethz.ch/app';
 
 export type Wait4MeRequest = {
     requestId: string;
@@ -25,5 +29,6 @@ export interface GetStatusResponse {
 
 export interface GetRequestResponse {
   api_status: string;
-  data: Array<JSON>;
+  incoming_requests: Array<JSON>;
+  cancelled_requests: Array<JSON>;
 }

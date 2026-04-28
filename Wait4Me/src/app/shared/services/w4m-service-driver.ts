@@ -41,20 +41,30 @@ export class W4MDriverService {
         this.http.get<GetRequestResponse>(`${BACKEND_URL}/driver/get-requests?transfer_stop_ref=${stop_ref}&outgoing_service=${journey_ref}`)
       );
 
-      if (response.api_status === "No incoming connections" || !response.data) {
-        this.busy.set(false);
-        return;
+
+      if (response.cancelled_requests) {
+        const requestsByDelay = response.cancelled_requests.reduce(
+          (acc: { [key: number]: string[] }, data: any) => {
+            const minutes = data.requested_delay_min;
+            if (!acc[minutes]) {acc[minutes] = [];}
+            acc[minutes].push(data.request_id);
+            return acc;
+          }, {});
+        await this.handle_cancelled_requests(requestsByDelay, stop_ref);
       }
 
-      const requestsByDelay = response.data.reduce(
-        (acc: { [key: number]: string[] }, data: any) => {
-          const minutes = data.requested_delay_min;
-          if (!acc[minutes]) {acc[minutes] = [];}
-          acc[minutes].push(data.request_id);
-          return acc;
-        }, {});
+      if (response.incoming_requests) {
+        const requestsByDelay = response.incoming_requests.reduce(
+          (acc: { [key: number]: string[] }, data: any) => {
+            const minutes = data.requested_delay_min;
+            if (!acc[minutes]) {acc[minutes] = [];}
+            acc[minutes].push(data.request_id);
+            return acc;
+          }, {});
 
-      await this.handle_pending_requests(requestsByDelay, stop_ref);
+        await this.handle_pending_requests(requestsByDelay, stop_ref);
+      }
+      
   
     } catch (error) {
       console.error('DB Query of all requests failed:', error);
@@ -63,6 +73,48 @@ export class W4MDriverService {
     }
     this.busy.set(false);
     return;
+  }
+
+  private async handle_cancelled_requests(requestsByDelay : { [key: number]: string[] }, stop_ref: string) {
+    // Update requestIds signal by removing the specific IDs provided in the cancellation
+    this.requestIds.update(state => {
+      if (!state[stop_ref]) return state;
+
+      const newState = { ...state };
+      const updatedStopData = { ...newState[stop_ref] };
+
+      Object.keys(requestsByDelay).forEach(delayStr => {
+        const delay = Number(delayStr);
+        if (updatedStopData[delay]) {
+          // Filter out the cancelled IDs from this delay bucket
+          const cancelledIds = new Set(requestsByDelay[delay]);
+          updatedStopData[delay] = updatedStopData[delay].filter(id => !cancelledIds.has(id));
+
+          // If the bucket is now empty, remove the delay key entirely
+          if (updatedStopData[delay].length === 0) {
+            delete updatedStopData[delay];
+          }
+        }
+      });
+
+      newState[stop_ref] = updatedStopData;
+      return newState;
+    });
+
+    // Recalculate smallestRequestedDelays based on the updated state
+    this.smallestRequestedDelays.update(state => {
+      const newState = { ...state };
+      const currentRequests = this.requestIds()[stop_ref] ?? {};
+      const remainingDelays = Object.keys(currentRequests).map(Number).sort((a, b) => a - b);
+
+      if (remainingDelays.length > 0) {
+        newState[stop_ref] = remainingDelays[0];
+      } else {
+        // If no requests left for this stop, remove it from the smallest delays map
+        delete newState[stop_ref];
+      }
+      return newState;
+    });
   }
 
   private async handle_pending_requests(requestsByDelay : { [key: number]: string[] }, stop_ref: string) {
