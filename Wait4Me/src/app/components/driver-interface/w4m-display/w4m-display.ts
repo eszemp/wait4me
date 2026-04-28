@@ -59,7 +59,7 @@ export class Wait4MeDisplay {
     }
 
     private async executeWhenNotBusy() {
-        while (this.w4mService.busy() || this.w4mService.editMode()) {
+        while (this.w4mService.busy() || (this.w4mService.editMode() && this.w4mService.activeStopRef() !== this.stopRef)) {
             console.log("components wait for service to have capacity. Busy:", this.w4mService.busy(), "Edit Mode:", this.w4mService.editMode());
             await new Promise(resolve => setTimeout(resolve, 300));
         }

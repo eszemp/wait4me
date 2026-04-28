@@ -30,9 +30,7 @@ export class W4MDriverService {
   constructor(private http: HttpClient) {}
 
   async query_all_requests(journey_ref: string, stop_ref: string): Promise<void> {
-    if (this.editMode()) {
-      return;
-    }
+    
     this.busy.set(true);
     this.activeStopRef.set(stop_ref);
     try {
