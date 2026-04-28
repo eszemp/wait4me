@@ -3,6 +3,7 @@ import { from, map, Observable, firstValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
 import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../types/DriverDeparturesTypes';
+import type { InternationalTextSchema } from 'ojp-shared-types';
 import { OJPBase } from './ojp-base';
 import { Duration } from '../models/duration';
 import { OJPLocation } from './ojp-location';
@@ -88,11 +89,7 @@ export class OJPStopEvent extends OJPBase {
             const arrivalEstimated = new Date(this.asString(lastOnwardCall?.serviceArrival?.estimatedTime));
             const arrivalDelayInMinutes = arrivalEstimated.getMinutes() - arrivalTimetable.getMinutes();
             const arrivalDelay = Duration.initFromTotalMinutes(arrivalDelayInMinutes);
-            const departurePlatformOrStop = this.asNullableString(
-              this.readTextValue(callAtStop?.estimatedQuay) ??
-                this.readTextValue(callAtStop?.plannedQuay) ??
-                this.readTextValue(callAtStop?.stopPointName),
-            );
+            const departurePlatformOrStop = this.getQuayText(callAtStop?.estimatedQuay) ?? this.getQuayText(callAtStop?.plannedQuay);
 
             const currentStopName = this.asString(this.readTextValue(callAtStop?.stopPointName));
             const currentStopRef = await this.getStopRef(currentStopName);
@@ -281,6 +278,27 @@ export class OJPStopEvent extends OJPBase {
 
       if (typeof textValue === 'number') {
         return String(textValue);
+      }
+    }
+
+    return null;
+  }
+
+  private getQuayText(value: InternationalTextSchema | undefined): string | null {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (value && typeof value === 'object') {
+      if (typeof value.text === 'string') {
+        if (value.text.includes('/')) {
+          // e.g. platform 43/44
+          return 'Pl. ' + value.text;
+        }
+        return 'Stop ' + value.text;
+      }
+      if (typeof value.text === 'number') {
+        return 'Pl. ' + String(value.text);
       }
     }
 
