@@ -107,6 +107,10 @@ export class DestinationAutocompleteComponent {
       this.tripService.destinationId.set('');
       this.tripService.destinationName.set('');
     }
+
+    this.tripService.tripResults.set([]);
+    this.tripService.selectedConnectionTrip.set(null);
+    this.tripService.isLoadingTrips.set(false);
   }
   
 }
