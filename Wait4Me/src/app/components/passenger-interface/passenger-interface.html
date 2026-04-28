@@ -5,61 +5,67 @@
     <p class="state-text">Loading connections...</p>
   </section>
 } @else if (tripService.tripResults().length > 0) {
-<section class="content">
-@for (trip of tripService.tripResults(); track trip.id) {
-    <section class="trip-card" 
-              (click)="selectConnection(trip)" 
-              [class.critical]="trip.criticalTransferId !== null">
-    <div class="trip-timeline">
-      <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
-        <span class="dot top"></span>
-        <div class="middle-dots-container" [style.--total]="trip.transfers">
-          @for (dot of [].constructor(trip.transfers); track $index) {
-            <span class="dot middle" [style.--i]="$index"></span>
-          }
+  <section class="content">
+    @for (trip of tripService.tripResults(); track trip.id) {
+      <section
+        class="trip-card"
+        (click)="selectConnection(trip)"
+        [class.critical]="trip.criticalTransferId !== null"
+      >
+        <div class="trip-timeline">
+          <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
+            <span class="dot top"></span>
+            <div class="middle-dots-container" [style.--total]="trip.transfers">
+              @for (dot of [].constructor(trip.transfers); track $index) {
+                <span class="dot middle" [style.--i]="$index"></span>
+              }
+            </div>
+            <span class="dot bottom"></span>
+          </div>
         </div>
-        <span class="dot bottom"></span>
-      </div>
-    </div>
 
-    <div class="time-and-location-column">
-      <div class="time-and-location-row">
-        <span class="time-start"> 
-          {{ trip.scheduledStart| date: 'HH:mm' }}
-          <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
-            + {{ trip.startDelay.format() }}
-          </span>
-        </span>
-        <span class="location-start">{{ tripService.originName() }}</span>
-      </div>
-      <div class="time-and-location-row">
-        <span class="time-end"> 
-          {{ trip.scheduledEnd | date: 'HH:mm' }}
-          <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
-            + {{ trip.endDelay.format() }}
-          </span>
-        </span>
-        <span class="location-end">{{ tripService.destinationName() }}</span>
-      </div>
-    </div>
+        <div class="time-and-location-column">
+          <div class="time-and-location-row">
+            <span class="time-start">
+              {{ trip.scheduledStart | date: 'HH:mm' }}
+              <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
+                + {{ trip.startDelay.format() }}
+              </span>
+            </span>
+            <span class="location-start">{{ tripService.originName() }}</span>
+          </div>
+          <div class="time-and-location-row">
+            <span class="time-end">
+              {{ trip.scheduledEnd | date: 'HH:mm' }}
+              <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
+                + {{ trip.endDelay.format() }}
+              </span>
+            </span>
+            <span class="location-end">{{ tripService.destinationName() }}</span>
+          </div>
+        </div>
 
-    <div class="meta-column">
-      <span class="platform"> {{ trip.departurePlatform }}</span>
-      <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
-      <span> </span>
-    </div>
-  </section>
-} 
-@empty {
-    <section class="info-section">
-      <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
-      <p class="info-text">
-        To use Wait4Me, search for your route and select your connection. If there is a delay and 
-        you might not be able to make the transfer, you can send a request for the driver of the 
-        second vehicle to Wait4You by clicking the button below.
-      </p>
-    </section>
-}
+        <div class="meta-column">
+          <span class="platform"> {{ trip.departurePlatform }}</span>
+          <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
+          <span> </span>
+        </div>
+      </section>
+    } @empty {
+      <section class="info-section">
+        <img
+          class="info-icon"
+          src="/circle-information-extra-small.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <p class="info-text">
+          To use Wait4Me, search for your route and select your connection. If there is a delay and
+          you might not be able to make the transfer, you can send a request for the driver of the
+          second vehicle to Wait4You by clicking the button below.
+        </p>
+      </section>
+    }
   </section>
 } @else if (tripService.originId() && tripService.destinationId()) {
   <section class="state-section">
@@ -70,13 +76,12 @@
     <section class="info-section">
       <img class="info-icon" src="/circle-information-extra-small.svg" alt="" aria-hidden="true" />
       <p class="info-text">
-        To use Wait4Me, search for your route and select your connection. If there is a delay and 
-        you might not be able to make the transfer, you can send a request for the driver of the 
+        To use Wait4Me, search for your route and select your connection. If there is a delay and
+        you might not be able to make the transfer, you can send a request for the driver of the
         second vehicle to Wait4You by clicking the button below.
       </p>
     </section>
   </section>
 }
-
 
 <w4m-button></w4m-button>
