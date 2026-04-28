@@ -77,6 +77,7 @@ export class OJPTrip extends OJPBase {
   departureDay = signal<string | null>(null);
   departureTimeOfDay = signal<string | null>(null);
   tripResults = signal<PassengerTrip[]>([]);
+  selectedConnectionTrip = signal<PassengerTrip | null>(null);
   isLoadingTrips = signal(false);
 
   constructor() {
@@ -126,6 +127,7 @@ export class OJPTrip extends OJPBase {
     this.departureDay.set(null);
     this.departureTimeOfDay.set(null);
     this.tripResults.set([]);
+    this.selectedConnectionTrip.set(null);
     this.isLoadingTrips.set(false);
   }
 

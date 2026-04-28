@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Wait4MeButton } from '../wait4me-button/wait4me-button';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { W4MPassengerService } from '../../../shared/services/w4m-service-passenger';
-import { PassengerTransferLeg, PassengerTrip } from '../../../shared/types/PassengerTripTypes'
+import { PassengerTimedLeg, PassengerTransferLeg, PassengerTrip } from '../../../shared/types/PassengerTripTypes'
 import { Duration } from '../../../shared/models/duration';
 
 @Component({
@@ -14,19 +14,44 @@ import { Duration } from '../../../shared/models/duration';
   styleUrls: ['../../../app.css','../passenger-interface.css', './connection-details.css'],
 })
 export class ConnectionDetails {
-
-  trip: PassengerTrip | null = null;
-
   public tripService = inject(OJPTrip);
   public w4mService = inject(W4MPassengerService);
 
   constructor(private router: Router) {
     const navigation = this.router.currentNavigation();
-    this.trip = navigation?.extras.state?.['selectedTrip'] ?? null;
-    if (this.trip?.criticalTransfer) {
-      console.log(this.trip?.criticalTransfer);
-      this.w4mService.enable_if_eligible(this.trip);
+    const selectedTrip = navigation?.extras.state?.['selectedTrip'] ?? null;
+    if (selectedTrip) {
+      this.tripService.selectedConnectionTrip.set(selectedTrip);
     }
+
+    effect(() => {
+      const trip = this.trip;
+      if (!trip) {
+        return;
+      }
+
+      if (trip.criticalTransfer) {
+        console.log(trip.criticalTransfer);
+        this.w4mService.enable_if_eligible(trip);
+      }
+
+      const timedLegs = trip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+      const firstTimedLeg = timedLegs[0];
+      const lastTimedLeg = timedLegs[timedLegs.length - 1];
+
+      if (firstTimedLeg) {
+        this.tripService.originName.set(firstTimedLeg.boardStopName);
+        this.tripService.originId.set(null);
+      }
+      if (lastTimedLeg) {
+        this.tripService.destinationName.set(lastTimedLeg.alightStopName);
+        this.tripService.destinationId.set(null);
+      }
+    });
+  }
+
+  get trip(): PassengerTrip | null {
+    return this.tripService.selectedConnectionTrip();
   }
 
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
