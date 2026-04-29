@@ -24,7 +24,14 @@
   color: #595959;
   font-style: italic;
 }
+
+.request-stack {
+  position: relative;
+  width: 100%;
+}
+
 .open {
+  position: relative;
   color: black;
   text-wrap: nowrap;
   border: 1px solid var(--fir-green);
@@ -39,6 +46,18 @@
   gap: 10px;
   height: calc(100% - 10px);
   margin: 5px 0;
+}
+
+.open.stacked-back {
+  position: absolute;
+  inset: 0;
+  transform: translate(5px, 5px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.open.stacked-front {
+  z-index: 1;
 }
 
 
