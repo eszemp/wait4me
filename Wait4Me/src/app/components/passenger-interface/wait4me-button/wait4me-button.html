@@ -1,6 +1,120 @@
 <div class="w4m-button-shell">
+  @if (this.showRequestConfirmation) {
+    <div class="w4m-confirm-overlay" (click)="this.close_request_confirmation()" aria-hidden="true"></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Confirm Wait4Me request"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <p class="w4m-confirm-title">You're about to send a Wait4Me request for the connection:</p>
+
+      @if (this.waiting_connection_leg; as waitingLeg) {
+        <div class="w4m-confirm-connection">
+          <div class="w4m-confirm-timeline">
+            <span class="w4m-confirm-dot w4m-confirm-dot--top"></span>
+            <span class="w4m-confirm-dot w4m-confirm-dot--bottom"></span>
+          </div>
+
+          <div class="w4m-confirm-locations">
+            <div class="w4m-confirm-row">
+              <span class="w4m-confirm-time">{{ waitingLeg.boardTimeTimetable | date: 'HH:mm' }}</span>
+              <span class="w4m-confirm-stop">{{ waitingLeg.boardStopName }}</span>
+            </div>
+            <div class="w4m-confirm-row">
+              <span class="w4m-confirm-time">{{ waitingLeg.alightTimeTimetable | date: 'HH:mm' }}</span>
+              <span class="w4m-confirm-stop">{{ waitingLeg.alightStopName }}</span>
+            </div>
+          </div>
+
+          <div class="w4m-confirm-meta">
+            <span>{{ waitingLeg.boardPlatform }}</span>
+            <span>{{ waitingLeg.duration.formatWithMinH() }}</span>
+          </div>
+        </div>
+      }
+
+      <p class="w4m-confirm-question">Do you want to proceed?</p>
+      <div class="w4m-confirm-actions">
+        <button
+          type="button"
+          class="w4m-confirm-btn w4m-confirm-btn--yes"
+          [disabled]="this.isSubmittingRequest"
+          (click)="this.confirm_and_send_request()"
+        >
+          Yes
+        </button>
+        <button
+          type="button"
+          class="w4m-confirm-btn w4m-confirm-btn--no"
+          [disabled]="this.isSubmittingRequest"
+          (click)="this.close_request_confirmation()"
+        >
+          No
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (this.showRequestDetails) {
+    <div class="w4m-confirm-overlay" (click)="this.close_request_details()" aria-hidden="true"></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Wait4Me request details"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <p class="w4m-confirm-title">You have sent a Wait4Me request for:</p>
+
+      @if (this.w4mService.trip) {
+        <div class="w4m-request-trip-card">
+          <div class="w4m-request-trip-timeline">
+            <span class="w4m-request-trip-dot w4m-request-trip-dot--top"></span>
+            <span class="w4m-request-trip-dot w4m-request-trip-dot--bottom"></span>
+          </div>
+
+          <div class="w4m-request-trip-locations">
+            <div class="w4m-request-trip-row">
+              <span class="w4m-request-trip-time">{{ this.w4mService.trip.scheduledStart | date: 'HH:mm' }}</span>
+              <span class="w4m-request-trip-stop">{{ this.request_details_origin_name }}</span>
+            </div>
+            <div class="w4m-request-trip-row">
+              <span class="w4m-request-trip-time">{{ this.w4mService.trip.scheduledEnd | date: 'HH:mm' }}</span>
+              <span class="w4m-request-trip-stop">{{ this.request_details_destination_name }}</span>
+            </div>
+          </div>
+
+          <div class="w4m-request-trip-meta">
+            <span>{{ this.w4mService.trip.departurePlatform }}</span>
+            <span>{{ this.w4mService.trip.duration.formatWithMinH() }}</span>
+          </div>
+        </div>
+      }
+
+      <p class="w4m-confirm-question">Status: {{ this.request_details_status_text }}</p>
+      <div class="w4m-confirm-actions w4m-confirm-actions--stacked">
+        <button
+          type="button"
+          class="w4m-confirm-btn w4m-confirm-btn--yes"
+          (click)="this.go_to_connection()"
+        >
+          Go to connection
+        </button>
+        <button
+          type="button"
+          class="w4m-confirm-btn w4m-confirm-btn--no"
+          (click)="this.close_request_details()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  }
+
   @if (this.w4mService.status() === 'pending') {
-    <div class="w4m-status w4m-status--pending">
+    <div class="w4m-status w4m-status--pending w4m-status--clickable" role="button" tabindex="0" (click)="this.open_request_details()">
       <div class="w4m-status-message">
         <img class="w4m-status-icon" src="/delay.svg" alt="" aria-hidden="true" />
         <img
@@ -11,7 +125,7 @@
         />
         <span>Request pending...</span>
       </div>
-      <button type="button" class="w4m-status-action" (click)="this.cancel_request()">
+      <button type="button" class="w4m-status-action" (click)="$event.stopPropagation(); this.cancel_request()">
         <span>Cancel</span>
         <img class="w4m-status-action-icon" src="/close.svg" alt="" aria-hidden="true" />
       </button>
@@ -19,7 +133,7 @@
   }
 
   @if (this.w4mService.status() === 'accepted') {
-    <div class="w4m-status w4m-status--success">
+    <div class="w4m-status w4m-status--success w4m-status--clickable" role="button" tabindex="0" (click)="this.open_request_details()">
       <img class="w4m-status-icon w4m-status-icon--status" src="/check-mark.svg" alt="" aria-hidden="true" />
       <img
         class="w4m-status-icon w4m-status-icon--info"
@@ -62,7 +176,7 @@
     type="button"
     class="w4m-button"
     [class.is_enabled]="this.w4mService.status() === 'enabled'"
-    (click)="this.w4mService.click_on_button()"
+    (click)="this.on_wait4me_button_click()"
   >
     Wait4Me
   </button>

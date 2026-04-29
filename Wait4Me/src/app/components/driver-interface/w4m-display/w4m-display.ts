@@ -92,6 +92,11 @@ export class Wait4MeDisplay {
         return this.w4mService.acceptedDelays()[this.stopRef] !== undefined;
     }
 
+    hasMultipleRequestsForStop(): boolean {
+        const requestsByDelay = this.w4mService.requestIds()[this.stopRef];
+        return !!requestsByDelay && Object.values(requestsByDelay).reduce((count, requestIds) => count + requestIds.length, 0) > 1;
+    }
+
     async process_requests_for_this_stop(): Promise<void> {
         this.w4mService.openEditMode(this.stopRef);
         console.log("enabled edit mode for requests at stop", this.stopName );

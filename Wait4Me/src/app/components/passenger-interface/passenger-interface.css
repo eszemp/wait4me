@@ -1,7 +1,7 @@
 .info-section {
   width: min(calc(100vw - 100px), 680px);
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 .info-icon {
@@ -17,6 +17,17 @@
   color: var(--grey);
 }
 
+.state-section {
+  width: min(calc(100vw - 100px), 680px);
+  margin: 100px auto 0;
+  text-align: center;
+}
+
+.state-text {
+  font-size: 16px;
+  color: var(--grey);
+  margin: 0;
+}
 
 .content {
   margin-top: 29px;
@@ -27,7 +38,6 @@
   box-sizing: border-box;
   overflow-x: hidden;
 }
-
 
 .trip-card {
   display: grid;
@@ -46,7 +56,6 @@
   min-width: 0;
   margin-bottom: 9px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  font-family: sans-serif;
   overflow: hidden;
 }
 
@@ -85,8 +94,12 @@
   position: absolute;
 }
 
-.dot.top { top: -5px; }
-.dot.bottom { bottom: -5px; }
+.dot.top {
+  top: -5px;
+}
+.dot.bottom {
+  bottom: -5px;
+}
 
 .middle-dots-container {
   display: flex;
@@ -94,13 +107,12 @@
   align-items: center;
   justify-content: center;
   flex-grow: 1; /* Takes up the space between top and bottom */
-  transform: translate(0%, calc(0% - ((var(--total) - 1) * 2px))); 
-} 
-
-.dot.middle {  
-  transform: translateY(calc(var(--i) * 4px));
+  transform: translate(0%, calc(0% - ((var(--total) - 1) * 2px)));
 }
 
+.dot.middle {
+  transform: translateY(calc(var(--i) * 4px));
+}
 
 /* Text Styling */
 .time-and-location-column {
@@ -122,8 +134,10 @@
   overflow: hidden;
 }
 
-
-.time-start, .time-end, .location-start, .location-end {
+.time-start,
+.time-end,
+.location-start,
+.location-end {
   font-size: 1.1rem;
   font-weight: 500;
   white-space: nowrap;
@@ -138,7 +152,8 @@
   text-overflow: ellipsis;
 }
 
-.time-start, .time-end {
+.time-start,
+.time-end {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -160,9 +175,17 @@
   overflow: hidden;
 }
 
-.platform { font-size: 1rem; color: #333; }
+.platform {
+  font-size: 1rem;
+  color: var(--grey);
+}
 .duration {
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 1rem;
+  color: var(--grey);
   white-space: nowrap;
+}
+
+.date {
+  font-size: 1rem;
+  color: var(--grey);
 }

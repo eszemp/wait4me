@@ -91,13 +91,23 @@
     }
 
     @else if (leg.kind === 'transfer') {
-      @if ((trip.criticalTransferId === leg.id) && w4mService.status() != 'accepted') {
-        <div class="transfer-warning">
+      @if (trip.criticalTransferId === leg.id) {
+        <div class="transfer-warning" [class.transfer-warning--accepted]="w4mService.status() === 'accepted'">
           <div class="time-column">
               <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
           </div>
-          <div class="time-and-location-column">
-              Likely to miss transfer!
+          <div class="transfer-warning-text">
+            @if (w4mService.status() === 'enabled') {
+              Likely to miss transfer. Send Wait4Me request.
+            } @else if (w4mService.status() === 'pending') {
+              Likely to miss transfer.
+            } @else if (w4mService.status() === 'declined') {
+              Transfer is not possible. Choose alternative.
+            } @else if (w4mService.status() === 'accepted') {
+              Connecting vehicle is waiting. Transfer fast.
+            } @else {
+              Likely to miss transfer. Send Wait4Me request.
+            }
           </div>
         </div>
       }

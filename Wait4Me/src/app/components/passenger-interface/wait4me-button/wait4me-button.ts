@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { W4MPassengerService } from '../../../shared/services/w4m-service-passenger';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { Router } from '@angular/router';
-import { PassengerTimedLeg, PassengerTransferLeg } from '../../../shared/types/PassengerTripTypes';
+import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 
 @Component({
@@ -16,6 +16,128 @@ export class Wait4MeButton {
     public w4mService = inject(W4MPassengerService);
     public tripService = inject(OJPTrip);
     private router = inject(Router);
+    showRequestConfirmation = false;
+    showRequestDetails = false;
+    isSubmittingRequest = false;
+    requestConfirmationTopPx = 120;
+
+    on_wait4me_button_click() {
+        if (this.w4mService.status() === 'enabled') {
+            this.update_request_confirmation_position();
+            this.showRequestConfirmation = true;
+            return;
+        }
+        this.w4mService.click_on_button();
+    }
+
+    get waiting_connection_leg(): PassengerTimedLeg | null {
+        const trip = this.w4mService.trip;
+        if (!trip || trip.criticalTransferId === null || trip.criticalTransferId === undefined) {
+            return null;
+        }
+        const waiting_leg_id = trip.criticalTransferId + 1;
+        return trip.legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed' && leg.id === waiting_leg_id) ?? null;
+    }
+
+    get request_details_origin_name(): string {
+        return this.requested_trip_first_leg?.boardStopName ?? '';
+    }
+
+    get request_details_destination_name(): string {
+        return this.requested_trip_last_leg?.alightStopName ?? '';
+    }
+
+    private get requested_trip_first_leg(): PassengerTimedLeg | null {
+        const trip = this.w4mService.trip;
+        if (!trip) {
+            return null;
+        }
+        return trip.legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed') ?? null;
+    }
+
+    private get requested_trip_last_leg(): PassengerTimedLeg | null {
+        const trip = this.w4mService.trip;
+        if (!trip) {
+            return null;
+        }
+        const timed_legs = trip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+        return timed_legs[timed_legs.length - 1] ?? null;
+    }
+
+    @HostListener('window:resize')
+    on_window_resize() {
+        if (!this.showRequestConfirmation) {
+            return;
+        }
+        this.update_request_confirmation_position();
+    }
+
+    private update_request_confirmation_position() {
+        const trip_overview = document.querySelector('.trip-overview') as HTMLElement | null;
+        if (!trip_overview) {
+            this.requestConfirmationTopPx = 120;
+            return;
+        }
+        const rect = trip_overview.getBoundingClientRect();
+        this.requestConfirmationTopPx = Math.round(rect.top);
+    }
+
+    close_request_confirmation() {
+        this.showRequestConfirmation = false;
+    }
+
+    open_request_details() {
+        this.update_request_confirmation_position();
+        this.showRequestDetails = true;
+    }
+
+    close_request_details() {
+        this.showRequestDetails = false;
+    }
+
+    get request_details_status_text(): string {
+        switch (this.w4mService.status()) {
+        case 'accepted':
+            return 'Accepted.';
+        case 'declined':
+            return 'Transfer not possible.';
+        case 'expired':
+            return 'Request expired. Outgoing service has departed.';
+        case 'pending':
+            return 'Request Pending...';
+        default:
+            return 'Request Pending...';
+        }
+    }
+
+    go_to_connection() {
+        const requestedTrip = this.w4mService.trip;
+        if (!requestedTrip) {
+            return;
+        }
+        this.tripService.selectedConnectionTrip.set(requestedTrip);
+        this.showRequestDetails = false;
+        if (this.router.url !== '/passenger/connection-details') {
+            this.router.navigate(['/passenger/connection-details'], {
+                state: { selectedTrip: requestedTrip }
+            });
+        }
+    }
+
+    async confirm_and_send_request() {
+        if (this.isSubmittingRequest) {
+            return;
+        }
+        this.isSubmittingRequest = true;
+        try {
+            await this.w4mService.trigger_new_request();
+            console.log('Sent request with ID: ', this.w4mService.request_id, 'New status: ', this.w4mService.status());
+        }
+        finally {
+            this.isSubmittingRequest = false;
+            this.showRequestConfirmation = false;
+        }
+    }
 
     cancel_request() {
         // TODO: Pop Up asking if user is sure
