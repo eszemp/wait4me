@@ -1,7 +1,7 @@
 import { Injectable, signal, effect, inject } from '@angular/core';
 import { from, Observable, firstValueFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { SDK, TripRequest } from 'ojp-sdk';
+import { SDK, TripRequest, TripRefineRequest } from 'ojp-sdk';
 import type {
   InternationalTextSchema,
   LegSchema,
@@ -157,6 +157,30 @@ export class OJPTrip extends OJPBase {
           .filter((trip): trip is Promise<PassengerTrip> => trip !== null);
       }),
     );
+  }
+
+  public async refineTrip(): Promise<void> {
+    const selected = this.selectedConnectionTrip();
+    if (!selected || !selected.rawTrip) {
+      return;
+    }
+
+    this.isLoadingTrips.set(true);
+
+    try {
+      const request = TripRefineRequest.initWithTrip(selected.rawTrip);
+      const response = await request.fetchResponse(this.sdk);
+      if (response.ok && response.value.tripResult?.[0]) {
+        const refinedTrip = await this.toPassengerTrip(response.value.tripResult[0]);
+        if (refinedTrip) {
+          this.selectedConnectionTrip.set(refinedTrip);
+        }
+      }
+    } catch (error) {
+      console.error('Trip refinement failed:', error);
+    } finally {
+      this.isLoadingTrips.set(false);
+    }
   }
 
   /**
@@ -385,6 +409,7 @@ export class OJPTrip extends OJPBase {
       legs,
       criticalTransferId: criticalTransferId,
       criticalTransfer: criticalTransfer,
+      rawTrip: trip
     };
   }
 
@@ -470,7 +495,7 @@ export class OJPTrip extends OJPBase {
     const arrival = prev_leg.alightTimeEstimated;
     const actual_arrival = transfer_leg.duration.addToDate(arrival);
     const departure = next_leg.boardTimeEstimated;
-    // TODO: maybe adjust so its rounded up to the nearest half minute
+    // TODO: maybe adjust so its rounded up to the nearest half minute (later)
     const req_delay_min = Math.ceil(
       Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60),
     );

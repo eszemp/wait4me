@@ -37,7 +37,7 @@ export class W4MPassengerService {
   }
 
   enable_if_eligible(trip: PassengerTrip) {
-    if (this.status()!=='inactive') {
+    if (this.status()!=='inactive' && this.status()!=='enabled') {
       return;
     }
     // TODO: determine max allowed requested delay and difference to current time
@@ -45,6 +45,7 @@ export class W4MPassengerService {
     const request_too_early = false;// TODO: (transfer.scheduledOutgoingDeparture);
     const request_too_late = false;
     if (delay_too_big || request_too_early || request_too_late) {
+      this.status.set('inactive');
       return;
     }
     // TODO: geofencing
