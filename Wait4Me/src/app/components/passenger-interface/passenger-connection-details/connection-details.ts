@@ -54,10 +54,13 @@ export class ConnectionDetails {
     return this.tripService.selectedConnectionTrip();
   }
 
+  /**
+   * Opens the walking-route view for the clicked transfer leg.
+   */
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
-    // TODO display walking route
-    console.log("see detailed walking route for transfer");
-    return;
+    this.router.navigate(['/passenger/walking-route'], {
+      state: { selectedTrip: this.trip, transferLegId: transferLeg.id }
+    });
   }
 
   backToPassenger(): void {

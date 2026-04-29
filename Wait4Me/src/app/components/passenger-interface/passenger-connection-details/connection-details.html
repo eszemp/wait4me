@@ -111,7 +111,7 @@
           </div>
         </div>
       }
-      <div class="leg transfer-leg" (click)="popup_walking_route(leg)">
+        <div class="leg transfer-leg">
           <div class="time-column">
               <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
           </div>
@@ -121,7 +121,9 @@
           </div>
           
           <div class="info-col">
-              <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
+            <button type="button" class="arrow-right-button" (click)="popup_walking_route(leg)" aria-label="Open walking route details">
+            <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
+            </button>
           </div>
       </div>
     }
