@@ -44,7 +44,7 @@ export class DriverInterface {
       history.replaceState({}, '')
     }
 
-    const timer = window.setInterval(() => {
+    const clockTimer = window.setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
 
@@ -57,7 +57,7 @@ export class DriverInterface {
     }, 60000);
 
     this.destroyRef.onDestroy(() => {
-      window.clearInterval(timer);
+      window.clearInterval(clockTimer);
       window.clearInterval(refreshTimer);
     });
 

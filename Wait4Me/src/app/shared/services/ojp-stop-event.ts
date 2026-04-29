@@ -145,6 +145,7 @@ export class OJPStopEvent extends OJPBase {
               journeyRef,
               direction,
               destinationStopPointRef,
+              departureStopPointRef: stopPlaceRef,
               departureTimetable,
               departureEstimated,
               departureDelay,
@@ -179,6 +180,18 @@ export class OJPStopEvent extends OJPBase {
         return uniqueRows.slice(0, maxResults);
       }),
     );
+  }
+
+  /**
+   * Refreshes a single DepartureLine with the latest real-time data.
+   */
+  async refreshDepartureLine(line: DepartureLine): Promise<DepartureLine> {
+
+    const updatedLines = await firstValueFrom(
+      this.getDepartingLines(line.departureStopPointRef, line.departureTimetable)
+    );
+    const refreshed = updatedLines.find(l => l.journeyRef === line.journeyRef);
+    return refreshed ?? line; // return original if not found
   }
 
   searchStopsByName(searchTerm: string, maxResults = 8): Observable<StopLookupResult[]> {
