@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { OJPStopEvent } from '../../shared/services/ojp-stop-event';
-import { DepartureLine, StopLookupResult } from  '../../shared/types/DriverDeparturesTypes';
+import { DepartureLine, StopLookupResult } from '../../shared/types/DriverDeparturesTypes';
 import { DriverDeparturesComponent } from './driver-departures/driver-departures';
 import { DriverStatusComponent } from './driver-status/driver-status';
 
@@ -36,12 +36,11 @@ export class DriverInterface {
   private readonly selectedStopRef = signal<string | null>(null);
 
   constructor() {
-
     // clear saved values if component is newly loaded
     const state = history.state;
     if (state && state.clearStorage === true) {
       sessionStorage.clear();
-      history.replaceState({}, '')
+      history.replaceState({}, '');
     }
 
     const timer = window.setInterval(() => {
@@ -52,7 +51,7 @@ export class DriverInterface {
       // Only refresh if we actually have a station selected
       if (this.selectedStopRef()) {
         this.refreshDepartures();
-        console.log("real-time traffic data updated.")
+        console.log('real-time traffic data updated.');
       }
     }, 60000);
 
@@ -127,7 +126,9 @@ export class DriverInterface {
   }
 
   onStationInputFocus(): void {
-    this.showSuggestions.set(this.stationQuery().trim().length >= 2 && this.stationSuggestions().length > 0);
+    this.showSuggestions.set(
+      this.stationQuery().trim().length >= 2 && this.stationSuggestions().length > 0,
+    );
   }
 
   selectSuggestedStation(stop: StopLookupResult): void {

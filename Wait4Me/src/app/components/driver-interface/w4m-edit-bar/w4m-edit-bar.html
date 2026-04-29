@@ -1,14 +1,11 @@
 <div class="edit-bar">
-    @if (this.w4mService.editMode() && !this.w4mService.hideEditMode()) {
-        <div class="edit-actions">
-            <button type="button" class="accept" (click)="this.w4mService.accept_request()">
-                Wait
-            </button>
-            <button type="button" class="decline" (click)="this.w4mService.decline_request()">
-                Do not wait
-            </button>
-        </div>
-        <div class="total-requests">{{this.number_of_requests()}}x requested</div>
-    }
+  @if (this.w4mService.editMode() && !this.w4mService.hideEditMode()) {
+    <div class="edit-actions">
+      <button type="button" class="accept" (click)="this.w4mService.accept_request()">Wait</button>
+      <button type="button" class="decline" (click)="this.w4mService.decline_request()">
+        Do not wait
+      </button>
+    </div>
+    <div class="total-requests">{{ this.number_of_requests() }}x requested</div>
+  }
 </div>
-

@@ -22,7 +22,7 @@ textarea {
   --mint: #d1ffed;
   --fir-green: #395148;
   --grey: #3b3b3b;
-  --light-grey: #F0F0F0;
+  --light-grey: #f0f0f0;
   --light-red: #ffd1d1;
   --red: red;
 }
@@ -48,5 +48,3 @@ textarea {
   padding: 20px;
   padding-bottom: 30px;
 }
-
-

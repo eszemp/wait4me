@@ -295,7 +295,9 @@ export class OJPTrip extends OJPBase {
     selectedTrip: PassengerTrip,
     transferLegId: number,
   ): Observable<{ type: 'FeatureCollection'; features: WalkingRouteFeature[] }> {
-    const timedLegs = selectedTrip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    const timedLegs = selectedTrip.legs.filter(
+      (leg): leg is PassengerTimedLeg => leg.kind === 'timed',
+    );
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
 

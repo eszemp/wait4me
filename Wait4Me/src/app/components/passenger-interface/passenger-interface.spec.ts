@@ -50,4 +50,3 @@ describe('PassengerInterface', () => {
     expect(component.tripForm.controls.time.value).toMatch(/^\d{2}:\d{2}$/);
   });
 });
-

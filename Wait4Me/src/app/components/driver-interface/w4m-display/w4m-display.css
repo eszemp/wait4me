@@ -60,12 +60,9 @@
   z-index: 1;
 }
 
-
 .open.accepted {
   background: var(--mint);
 }
-
-
 
 .open.selected {
   border-width: 6px;

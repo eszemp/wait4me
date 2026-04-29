@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { DepartureLine, DepartureStop, DriverStopRow } from '../../../shared/types/DriverDeparturesTypes';
+import {
+  DepartureLine,
+  DepartureStop,
+  DriverStopRow,
+} from '../../../shared/types/DriverDeparturesTypes';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { Wait4MeDisplay } from '../w4m-display/w4m-display';
 import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
 import { Duration } from '../../../shared/models/duration';
-
-
 
 @Component({
   selector: 'app-driver-connection-details',
@@ -34,7 +36,7 @@ export class DriverConnectionDetails {
     };
 
     this.departure = state.selectedDeparture ?? null;
-    console.log("Journey Ref", this.departure?.journeyRef);
+    console.log('Journey Ref', this.departure?.journeyRef);
     this.originName = state.originName?.trim() || 'Current stop';
 
     const timer = window.setInterval(() => {
@@ -82,7 +84,7 @@ export class DriverConnectionDetails {
       })
       .filter((stop): stop is DriverStopRow => stop !== null);
 
-      if (apiStops.length > 0) {
+    if (apiStops.length > 0) {
       return apiStops;
     }
 
@@ -116,23 +118,25 @@ export class DriverConnectionDetails {
 
   disable_edit_mode_when_active(event: Event): void {
     const target = event.target as HTMLElement;
-  
+
     // check if the click was inside a w4m-display component
     if (target.closest('w4m-display')) {
       return;
     }
     if (this.w4mService.editMode()) {
       this.w4mService.closeEditMode();
-      console.log("disabled edit mode");
+      console.log('disabled edit mode');
     }
     return;
   }
 
-  calculate_new_delay(stop : DepartureStop): string {
-    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id])).format();
+  calculate_new_delay(stop: DepartureStop): string {
+    return stop.delay
+      .plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id]))
+      .format();
   }
 
-  has_delay(stop_delay: Duration) : Boolean {
+  has_delay(stop_delay: Duration): Boolean {
     return stop_delay.totalMinutes > 0;
   }
 }

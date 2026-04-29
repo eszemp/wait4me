@@ -1,4 +1,4 @@
-.home{
+.home {
   width: min(calc(100vw - 20px), 680px);
   margin-top: -20px;
   margin-bottom: 20px;
@@ -6,7 +6,7 @@
   border: 2px solid var(--fir-green);
   border-radius: 20px;
   font-size: 20px;
-  font-weight: bold; 
+  font-weight: bold;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   padding-bottom: 10px;
   padding-top: 10px;

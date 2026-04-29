@@ -3,7 +3,10 @@ import maplibregl from 'maplibre-gl';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
-import { LineSearchComponent, type SelectedConnectionPayload } from '../line-search/line-search.component';
+import {
+  LineSearchComponent,
+  type SelectedConnectionPayload,
+} from '../line-search/line-search.component';
 
 type StationTransferSeriesEntry = {
   time: string;
@@ -289,7 +292,10 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   }
 
   /** Enriches connection features with station transfer metrics used for styling and popup details. */
-  private enrichStationFeatures(geojson: { type: 'FeatureCollection'; features: unknown[] }): { type: 'FeatureCollection'; features: unknown[] } {
+  private enrichStationFeatures(geojson: { type: 'FeatureCollection'; features: unknown[] }): {
+    type: 'FeatureCollection';
+    features: unknown[];
+  } {
     const generatedStationFeatures: unknown[] = [];
     const generatedFeatureKeys = new Set<string>();
 
@@ -312,8 +318,13 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           continue;
         }
 
-        const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, stationStop.arrivalTime);
-        const remainingBufferMinutes = selectedTransfer ? selectedTransfer.minutes - this.selectedDelayMinutes : null;
+        const selectedTransfer = this.findTransferForArrival(
+          dataset.transferSeries,
+          stationStop.arrivalTime,
+        );
+        const remainingBufferMinutes = selectedTransfer
+          ? selectedTransfer.minutes - this.selectedDelayMinutes
+          : null;
         const featureKey = `${stationStop.stopRef}__${stationStop.arrivalTime}`;
         if (generatedFeatureKeys.has(featureKey)) {
           continue;
@@ -346,7 +357,10 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       ...geojson,
       features: [
         ...geojson.features.map((feature) => {
-          const typedFeature = feature as { geometry?: { type?: string }; properties?: Record<string, unknown> };
+          const typedFeature = feature as {
+            geometry?: { type?: string };
+            properties?: Record<string, unknown>;
+          };
           if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
             return feature;
           }
@@ -365,7 +379,9 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           }
 
           const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
-          const remainingBufferMinutes = selectedTransfer ? selectedTransfer.minutes - this.selectedDelayMinutes : null;
+          const remainingBufferMinutes = selectedTransfer
+            ? selectedTransfer.minutes - this.selectedDelayMinutes
+            : null;
 
           return {
             ...typedFeature,
@@ -392,18 +408,22 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
     const properties = feature.properties as Record<string, unknown>;
     const coordinates = feature.geometry.coordinates as [number, number];
-    const stopName = this.escapeHtml(this.toSafeString(properties['stopName']) ?? this.toSafeString(properties['Name']) ?? 'Stop');
+    const stopName = this.escapeHtml(
+      this.toSafeString(properties['stopName']) ?? this.toSafeString(properties['Name']) ?? 'Stop',
+    );
     const arrivalTimeIso = this.toSafeString(properties['arrivalTime']) ?? '';
     const arrivalTimeText = this.escapeHtml(this.formatIsoForPopup(arrivalTimeIso));
     const transferMinutesValue = properties['transferTimeMinutes'];
-    const transferMinutes = transferMinutesValue == null ? null : this.toSafeNumber(transferMinutesValue);
+    const transferMinutes =
+      transferMinutesValue == null ? null : this.toSafeNumber(transferMinutesValue);
     const remainingBufferValue = properties['remainingBufferMinutes'];
     const remainingBufferMinutes =
       remainingBufferValue == null || Number.isNaN(Number(remainingBufferValue))
         ? null
         : Number(remainingBufferValue);
     const transferTimeText = transferMinutes === null ? 'n/a' : `${transferMinutes} min`;
-    const remainingBufferText = remainingBufferMinutes === null ? 'n/a' : `${remainingBufferMinutes} min`;
+    const remainingBufferText =
+      remainingBufferMinutes === null ? 'n/a' : `${remainingBufferMinutes} min`;
 
     const content = `
       <div class="station-series-popup">
@@ -425,7 +445,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       </div>
     `;
 
-    new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'station-series-popup-shell' })
+    new maplibregl.Popup({
+      closeButton: true,
+      closeOnClick: true,
+      className: 'station-series-popup-shell',
+    })
       .setLngLat(coordinates)
       .setHTML(content)
       .addTo(map);
@@ -441,7 +465,9 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const bounds = new maplibregl.LngLatBounds();
     let hasPoints = false;
 
-    for (const feature of geojson.features as Array<{ geometry?: { type?: string; coordinates?: number[][] | number[] } }>) {
+    for (const feature of geojson.features as Array<{
+      geometry?: { type?: string; coordinates?: number[][] | number[] };
+    }>) {
       if (!feature.geometry || !Array.isArray(feature.geometry.coordinates)) {
         continue;
       }
@@ -533,8 +559,15 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return this.stationTransferByName.get(stopNameKey) ?? null;
   }
 
-  private parsePointCoordinates(geometry: { type?: string; coordinates?: unknown }): [number, number] | null {
-    if (geometry.type !== 'Point' || !Array.isArray(geometry.coordinates) || geometry.coordinates.length < 2) {
+  private parsePointCoordinates(geometry: {
+    type?: string;
+    coordinates?: unknown;
+  }): [number, number] | null {
+    if (
+      geometry.type !== 'Point' ||
+      !Array.isArray(geometry.coordinates) ||
+      geometry.coordinates.length < 2
+    ) {
       return null;
     }
 

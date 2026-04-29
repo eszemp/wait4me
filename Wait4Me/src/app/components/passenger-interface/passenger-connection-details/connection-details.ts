@@ -4,14 +4,18 @@ import { CommonModule } from '@angular/common';
 import { Wait4MeButton } from '../wait4me-button/wait4me-button';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { W4MPassengerService } from '../../../shared/services/w4m-service-passenger';
-import { PassengerTimedLeg, PassengerTransferLeg, PassengerTrip } from '../../../shared/types/PassengerTripTypes'
+import {
+  PassengerTimedLeg,
+  PassengerTransferLeg,
+  PassengerTrip,
+} from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 
 @Component({
   selector: 'app-connection-details',
   imports: [CommonModule, Wait4MeButton],
   templateUrl: './connection-details.html',
-  styleUrls: ['../../../app.css','../passenger-interface.css', './connection-details.css'],
+  styleUrls: ['../../../app.css', '../passenger-interface.css', './connection-details.css'],
 })
 export class ConnectionDetails {
   public tripService = inject(OJPTrip);
@@ -59,7 +63,7 @@ export class ConnectionDetails {
    */
   popup_walking_route(transferLeg: PassengerTransferLeg): void {
     this.router.navigate(['/passenger/walking-route'], {
-      state: { selectedTrip: this.trip, transferLegId: transferLeg.id }
+      state: { selectedTrip: this.trip, transferLegId: transferLeg.id },
     });
   }
 

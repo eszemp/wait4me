@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, effect, ElementRef, inject, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import maplibregl from 'maplibre-gl';
@@ -114,7 +122,10 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
   /**
    * Writes the walking route GeoJSON into the map source and fits the viewport to it.
    */
-  private updateWalkingRouteSource(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
+  private updateWalkingRouteSource(geojson: {
+    type: 'FeatureCollection';
+    features: unknown[];
+  }): void {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
       return;
@@ -125,13 +136,17 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
     source?.setData(geojson as GeoJSON.FeatureCollection);
 
     const coordinates = geojson.features.flatMap((feature) => {
-      const geometry = (feature as { geometry?: { type?: string; coordinates?: unknown } }).geometry;
+      const geometry = (feature as { geometry?: { type?: string; coordinates?: unknown } })
+        .geometry;
       if (geometry?.type !== 'LineString' || !Array.isArray(geometry.coordinates)) {
         return [];
       }
       return geometry.coordinates.filter(
         (coord): coord is [number, number] =>
-          Array.isArray(coord) && coord.length >= 2 && Number.isFinite(coord[0]) && Number.isFinite(coord[1]),
+          Array.isArray(coord) &&
+          coord.length >= 2 &&
+          Number.isFinite(coord[0]) &&
+          Number.isFinite(coord[1]),
       );
     });
 

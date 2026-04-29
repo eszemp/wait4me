@@ -1,5 +1,10 @@
 <section class="driver-connection-details-page">
-  <button type="button" class="back-button" (click)="backToDriver()" aria-label="Back to driver departures">
+  <button
+    type="button"
+    class="back-button"
+    (click)="backToDriver()"
+    aria-label="Back to driver departures"
+  >
     <img src="/return-back.svg" alt="" aria-hidden="true" />
   </button>
 
@@ -35,18 +40,18 @@
           <span class="time">
             {{ stop.timeTimetable | date: 'HH:mm:ss' }}
             @if (this.w4mService.acceptedDelays()[stop.id]) {
-              <span class="time-delay">
-                +{{ this.calculate_new_delay(stop)}}
-              </span>
-            }
-            @else {
+              <span class="time-delay"> +{{ this.calculate_new_delay(stop) }} </span>
+            } @else {
               <span *ngIf="has_delay(stop.delay)" class="time-delay">
                 +{{ stop.delay.totalMinutes }}
               </span>
             }
           </span>
           <span class="label">{{ stop.label }}</span>
-          <w4m-display [stopName]="stop.name" [serviceJourneyRef]="this.departure.journeyRef"></w4m-display>
+          <w4m-display
+            [stopName]="stop.name"
+            [serviceJourneyRef]="this.departure.journeyRef"
+          ></w4m-display>
         </div>
       }
     </section>

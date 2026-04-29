@@ -146,7 +146,11 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
         </div>
       `;
 
-      new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'station-statistics-popup' })
+      new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        className: 'station-statistics-popup',
+      })
         .setLngLat(coordinates)
         .setHTML(content)
         .addTo(map);
