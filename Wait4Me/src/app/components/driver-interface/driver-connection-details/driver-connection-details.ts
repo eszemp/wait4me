@@ -39,18 +39,22 @@ export class DriverConnectionDetails {
     console.log("Journey Ref", this.departure?.journeyRef);
     this.originName = state.originName?.trim() || 'Current stop';
 
+    if (this.departure) {
+      const sequence = this.stops.map(stop => stop.id);
+      this.w4mService.stopSequence.set(sequence);
+      console.log("Initialized stop sequence:", sequence);
+    }
+
     const clockTimer = window.setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
 
     const refreshTimer = window.setInterval(async () => {
-      // Only refresh if we actually have a station selected
       if (this.departure) {
         this.departure = await this.stopEventService.refreshDepartureLine(this.departure);
         console.log("real-time traffic data updated.")
       }
     }, 60000);
-
 
     this.destroyRef.onDestroy(() => {
       window.clearInterval(clockTimer);
@@ -142,7 +146,7 @@ export class DriverConnectionDetails {
   }
 
   calculate_new_delay(stop : DepartureStop): string {
-    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id])).format();
+    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.additionalDelaysAnySource()[stop.id])).format();
   }
 
   has_delay(stop_delay: Duration) : Boolean {
