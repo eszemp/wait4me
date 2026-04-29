@@ -92,6 +92,26 @@ export class DestinationAutocompleteComponent {
       this.showSuggestions = false;
     }, 120);
   }
+
+  clearInput(): void {
+    this.control().setValue('');
+    this.destinations = [];
+    this.showSuggestions = false;
+
+    if (this.placeholder() == 'From') {
+      this.tripService.originId.set('');
+      this.tripService.originName.set('');
+    }
+
+    if (this.placeholder() == 'To') {
+      this.tripService.destinationId.set('');
+      this.tripService.destinationName.set('');
+    }
+
+    this.tripService.tripResults.set([]);
+    this.tripService.selectedConnectionTrip.set(null);
+    this.tripService.isLoadingTrips.set(false);
+  }
   
 }
 

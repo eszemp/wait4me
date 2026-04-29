@@ -22,7 +22,7 @@
   align-items: center;
   gap: 15px;
   background: white;
-  border: 2px solid var(--fir-green);
+  border: 1px solid var(--fir-green);
   border-radius: 20px;
   padding: 20px 25px;
   margin-bottom: 9px;
@@ -38,44 +38,66 @@
 
 .transfer-warning {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 30px 1fr;
   align-items: center;
   gap: 15px;
-  background:white;
-  border: 4px solid var(--red);
+  background: white;
+  color: black;
+  border: 2px solid var(--red);
   border-radius: 20px;
-  padding: 20px 25px;
+  padding: 4px 25px;
   margin-bottom: 9px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
-  height: 60px;
+  min-height: 60px;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.transfer-warning--accepted {
+  background: var(--mint);
+  border-color: var(--fir-green);
 }
 
 .arrow-right-icon {
   transform: scaleX(-1) translateY(-20px);
-  height: 35px;
-  width: 35px;
+  height: 20px;
+  width: 20px;
 }
 
 .walking-icon {
   height: 30px;
   width: 30px;
-  transform: translateY(-20px);
   color: var(--fir-green);
+}
+
+.transfer-warning .time-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .attention-icon {
   height: 30px;
   width: 30px;
+  display: block;
+}
+
+.transfer-warning-text {
+  display: block;
+  line-height: 1.15;
+  margin: 0;
+  white-space: normal;
+}
+
+/* Keep walking icon vertically offset for transfer legs to match design */
+.leg.transfer-leg .walking-icon {
   transform: translateY(-20px);
-  color: var(--fir-green);
 }
 
 .back-button {
   position: absolute;
-  top: 10px;
+  top: 16px;
   left: max(10px, calc((100vw - 680px) / 2));
   z-index: 10;
   border: 0;
@@ -85,8 +107,8 @@
 }
 
 .back-button img {
-  width: 36px;
-  height: 36px;
+  width: 25px;
+  height: 25px;
 }
 
 /* Text Overflow Handling - same as trip-cards */

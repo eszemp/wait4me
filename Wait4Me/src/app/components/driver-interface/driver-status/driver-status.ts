@@ -32,6 +32,10 @@ export class DriverStatusComponent {
     this.stationQueryChange.emit(query);
   }
 
+  clearStationQuery(): void {
+    this.stationQueryChange.emit('');
+  }
+
   onInputFocus(): void {
     this.stationInputFocus.emit();
   }
