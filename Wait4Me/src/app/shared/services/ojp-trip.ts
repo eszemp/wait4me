@@ -45,6 +45,15 @@ type ConnectionStationFeature = {
 
 type ConnectionTrackFeature = ConnectionLineFeature | ConnectionStationFeature;
 
+type WalkingRouteFeature = {
+  type: 'Feature';
+  geometry: { type: 'LineString'; coordinates: number[][] };
+  properties: {
+    featureType: 'walking-transfer';
+    transferLegId: number;
+  };
+};
+
 type TimedLegStop = {
   stopRef: string;
   stopName: string;
@@ -280,6 +289,95 @@ export class OJPTrip extends OJPBase {
   }
 
   /**
+   * Re-requests the selected trip and extracts the clicked transfer leg's walking path.
+   */
+  getTransferWalkingRoute(
+    selectedTrip: PassengerTrip,
+    transferLegId: number,
+  ): Observable<{ type: 'FeatureCollection'; features: WalkingRouteFeature[] }> {
+    const timedLegs = selectedTrip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    const firstTimedLeg = timedLegs[0];
+    const lastTimedLeg = timedLegs[timedLegs.length - 1];
+
+    if (!firstTimedLeg || !lastTimedLeg) {
+      return from(Promise.resolve({ type: 'FeatureCollection' as const, features: [] }));
+    }
+
+    return from(this.locationService.getLocationInformation(firstTimedLeg.boardStopName, 1)).pipe(
+      switchMap(async (originSuggestions) => {
+        const originStopRef = originSuggestions[0]?.stopPlaceRef;
+        if (!originStopRef) {
+          return { type: 'FeatureCollection' as const, features: [] };
+        }
+
+        const destinationSuggestions = await firstValueFrom(
+          this.locationService.getLocationInformation(lastTimedLeg.alightStopName, 1),
+        );
+        const destinationStopRef = destinationSuggestions[0]?.stopPlaceRef;
+        if (!destinationStopRef) {
+          return { type: 'FeatureCollection' as const, features: [] };
+        }
+
+        const request = TripRequest.initWithPlaceRefsOrCoords(originStopRef, destinationStopRef);
+        request.setDepartureDatetime(selectedTrip.startTime);
+        request.setNumberOfResults(8);
+
+        if (request.payload.params) {
+          request.payload.params.includeTrackSections = true;
+          request.payload.params.includeLegProjection = true;
+          request.payload.params.useRealtimeData = 'explanatory';
+        }
+
+        const response = await request.fetchResponse(this.sdk);
+        if (!response.ok) {
+          throw response.error;
+        }
+
+        const tripResults = response.value.tripResult ?? [];
+        const matchingTrip =
+          tripResults.find((result) => {
+            const trip = result.trip;
+            if (!trip) {
+              return false;
+            }
+            const resultTripId = this.asString(trip.id) || this.asString(result.id);
+            return resultTripId === selectedTrip.id;
+          }) ?? tripResults[0];
+
+        const transferLeg = (matchingTrip?.trip?.leg ?? []).find(
+          (leg) => Number(leg.id) === transferLegId && !!leg.transferLeg,
+        )?.transferLeg;
+
+        if (!transferLeg) {
+          return { type: 'FeatureCollection' as const, features: [] };
+        }
+
+        const coordinates = this.extractTransferLegCoordinates(transferLeg);
+        if (coordinates.length < 2) {
+          return { type: 'FeatureCollection' as const, features: [] };
+        }
+
+        return {
+          type: 'FeatureCollection' as const,
+          features: [
+            {
+              type: 'Feature' as const,
+              geometry: {
+                type: 'LineString' as const,
+                coordinates,
+              },
+              properties: {
+                featureType: 'walking-transfer' as const,
+                transferLegId,
+              },
+            },
+          ],
+        };
+      }),
+    );
+  }
+
+  /**
    * Extracts all board/intermediate/alight stops from a timed leg.
    */
   private collectTimedLegStops(timedLeg: TimedLegSchema): TimedLegStop[] {
@@ -332,6 +430,100 @@ export class OJPTrip extends OJPBase {
     }
 
     return stops;
+  }
+
+  /**
+   * Extracts walking-leg coordinates from the OJP path-guidance and projection variants.
+   */
+  private extractTransferLegCoordinates(transferLeg: TransferLegSchema): number[][] {
+    const rawLeg = transferLeg as unknown as {
+      pathGuidance?: {
+        pathGuidanceSection?: Array<{
+          trackSection?: {
+            linkProjection?: { position?: Array<{ longitude?: unknown; latitude?: unknown }> };
+            trackSectionStart?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
+            trackSectionEnd?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
+          };
+        }>;
+      };
+      legStart?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
+      legEnd?: { geoPosition?: { longitude?: unknown; latitude?: unknown } };
+      legProjection?: { position?: Array<{ longitude?: unknown; latitude?: unknown }> };
+      projection?: { position?: Array<{ longitude?: unknown; latitude?: unknown }> };
+      transferLegProjection?: { position?: Array<{ longitude?: unknown; latitude?: unknown }> };
+      legTrack?: {
+        trackSection?: Array<{
+          linkProjection?: { position?: Array<{ longitude?: unknown; latitude?: unknown }> };
+        }>;
+      };
+    };
+
+    const candidates: Array<Array<{ longitude?: unknown; latitude?: unknown }>> = [];
+
+    const pathGuidanceSections = rawLeg.pathGuidance?.pathGuidanceSection;
+    if (Array.isArray(pathGuidanceSections)) {
+      for (const section of pathGuidanceSections) {
+        const trackSection = section.trackSection;
+        if (Array.isArray(trackSection?.linkProjection?.position)) {
+          candidates.push(trackSection.linkProjection.position);
+        }
+
+        const startGeoPosition = trackSection?.trackSectionStart?.geoPosition;
+        const endGeoPosition = trackSection?.trackSectionEnd?.geoPosition;
+        if (startGeoPosition && endGeoPosition) {
+          candidates.push([
+            { longitude: startGeoPosition.longitude, latitude: startGeoPosition.latitude },
+            { longitude: endGeoPosition.longitude, latitude: endGeoPosition.latitude },
+          ]);
+        }
+      }
+    }
+
+    const legStart = rawLeg.legStart?.geoPosition;
+    const legEnd = rawLeg.legEnd?.geoPosition;
+    if (legStart && legEnd) {
+      candidates.push([
+        { longitude: legStart.longitude, latitude: legStart.latitude },
+        { longitude: legEnd.longitude, latitude: legEnd.latitude },
+      ]);
+    }
+
+    if (Array.isArray(rawLeg.legProjection?.position)) {
+      candidates.push(rawLeg.legProjection.position);
+    }
+    if (Array.isArray(rawLeg.projection?.position)) {
+      candidates.push(rawLeg.projection.position);
+    }
+    if (Array.isArray(rawLeg.transferLegProjection?.position)) {
+      candidates.push(rawLeg.transferLegProjection.position);
+    }
+
+    const trackSections = rawLeg.legTrack?.trackSection ?? [];
+    for (const section of trackSections) {
+      const positions = section.linkProjection?.position;
+      if (Array.isArray(positions)) {
+        candidates.push(positions);
+      }
+    }
+
+    for (const positions of candidates) {
+      const coordinates = positions
+        .map((position) => {
+          const lon = Number(position.longitude);
+          const lat = Number(position.latitude);
+          if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+            return null;
+          }
+          return [lon, lat] as number[];
+        })
+        .filter((coord): coord is number[] => coord !== null);
+
+      if (coordinates.length >= 2) {
+        return coordinates;
+      }
+    }
+
+    return [];
   }
 
   /**

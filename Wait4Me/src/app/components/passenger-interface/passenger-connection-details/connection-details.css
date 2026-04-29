@@ -65,6 +65,21 @@
   width: 20px;
 }
 
+.arrow-right-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-col {
+  display: flex;
+  align-items: center;
+}
+
 .walking-icon {
   height: 30px;
   width: 30px;

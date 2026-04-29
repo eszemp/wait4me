@@ -4,6 +4,7 @@ import { PassengerInterface } from './components/passenger-interface/passenger-i
 import { DriverInterface } from './components/driver-interface/driver-interface';
 import { MonitoringInterface } from './components/monitoring-interface/monitoring-interface';
 import { ConnectionDetails } from './components/passenger-interface/passenger-connection-details/connection-details'
+import { WalkingRoute } from './components/passenger-interface/passenger-walking-route/walking-route';
 import { DriverConnectionDetails } from './components/driver-interface/driver-connection-details/driver-connection-details';
 
 export const routes: Routes = [
@@ -13,4 +14,5 @@ export const routes: Routes = [
   { path: 'driver/connection-details', component: DriverConnectionDetails },
   { path: 'monitoring', component: MonitoringInterface },
   { path: 'passenger/connection-details', component: ConnectionDetails },
+  { path: 'passenger/walking-route', component: WalkingRoute },
 ];
