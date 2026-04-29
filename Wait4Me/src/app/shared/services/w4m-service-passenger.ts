@@ -26,6 +26,7 @@ export class W4MPassengerService {
   transfer: CriticalTransfer | null;
   passenger_id: string;
   request_id: string | null;
+  requested_delay: Number | null;
 
   private pollingSubscription: Subscription | null = null;
 
@@ -34,6 +35,7 @@ export class W4MPassengerService {
     this.transfer = null;
     this.passenger_id = uuidv4();
     this.request_id = null;
+    this.requested_delay = null;
   }
 
   enable_if_eligible(trip: PassengerTrip) {
@@ -112,6 +114,7 @@ export class W4MPassengerService {
 
     if (response.api_status === "created") {
       this.request_id = response.request_id ?? null;
+      this.requested_delay = this.transfer?.requestedDelay.totalMinutes ?? null;
       this.status.set('pending');
       this.startStatusPolling();
     }
@@ -135,6 +138,7 @@ export class W4MPassengerService {
       if (response.api_status === 'changed') {
         this.stopStatusPolling();
         this.request_id = null;
+        this.requested_delay = null;
         this.status.set('enabled');
         return;
       }
