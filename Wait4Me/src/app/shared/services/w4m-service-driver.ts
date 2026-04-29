@@ -18,7 +18,9 @@ export class W4MDriverService {
   public busy : WritableSignal<Boolean> = signal(false);
   public smallestRequestedDelays : WritableSignal<{ [stopRef: string]: number }> = signal({});
   public acceptedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
+  public additionalDelaysAnySource: WritableSignal<{ [stopRef: string]: number }> = signal({});
   public declinedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
+  public stopSequence: WritableSignal<string[]> = signal([]);
 
   public activeRequestIds = computed(() => {
     const stopRef = this.activeStopRef();
@@ -132,8 +134,8 @@ export class W4MDriverService {
       console.log("Pending requests for", delay, "minutes");
 
       // accept requests for delays smaller / equal to already accepted delays
-      if (this.acceptedDelays()[stop_ref]) {
-        const biggest_accepted_delay = this.acceptedDelays()[stop_ref];
+      if (this.additionalDelaysAnySource()[stop_ref]) {
+        const biggest_accepted_delay = this.additionalDelaysAnySource()[stop_ref];
         console.log("Accept incoming requests for delays smaller/equal to already accepted", biggest_accepted_delay, "minutes");
         if (delay <= biggest_accepted_delay) {
           await this.post_changes_to_db(requestsByDelay[delay], 'accepted');
@@ -254,6 +256,29 @@ export class W4MDriverService {
           return newState;
       });
       console.log("updated signal acceptedDelays", this.acceptedDelays());
+
+      this.additionalDelaysAnySource.update(state => {
+          let newState = { ...state };
+          newState[stopRef] = delay;
+          
+          // Find current stop in sequence and apply delay to all subsequent stops
+          const sequence = this.stopSequence();
+          const currentIndex = sequence.indexOf(stopRef);
+          
+          if (currentIndex !== -1) {
+            for (let i = currentIndex + 1; i < sequence.length; i++) {
+              const downstreamStopRef = sequence[i];
+              // Only update if the new delay is larger than what was previously accepted for that stop
+              const existingDelay = newState[downstreamStopRef] || 0;
+              if (delay > existingDelay) {
+                newState[downstreamStopRef] = delay;
+                console.log(`Propagated accepted delay of ${delay}m to downstream stop: ${downstreamStopRef}`);
+              }
+            }
+          }
+          return newState;
+      });
+      console.log("updated signal additionalDelaysAnySource", this.additionalDelaysAnySource());
     }
 
     if (new_status==='declined') {
