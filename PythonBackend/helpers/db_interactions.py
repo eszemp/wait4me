@@ -116,6 +116,19 @@ def get_incoming_requests(stop_ref, service):
 
     return results
 
+def get_cancelled_requests(stop_ref, service):
+
+    command = """
+        SELECT * 
+        FROM wait4me_requests 
+        WHERE outgoing_journey_ref = %s AND transfer_stop_ref = %s AND status = %s
+    """
+    params = (service, stop_ref, 'cancelled')
+
+    results = get_from_db(command, params, multiple=True)
+
+    return results
+
 def cleanup_expired_requests():
     """
     Updates all pending requests to 'expired' if their scheduled 

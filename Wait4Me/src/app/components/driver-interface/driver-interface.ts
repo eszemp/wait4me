@@ -48,8 +48,17 @@ export class DriverInterface {
       this.currentTime.set(new Date());
     }, 1000);
 
+    const refreshTimer = window.setInterval(() => {
+      // Only refresh if we actually have a station selected
+      if (this.selectedStopRef()) {
+        this.refreshDepartures();
+        console.log("real-time traffic data updated.")
+      }
+    }, 60000);
+
     this.destroyRef.onDestroy(() => {
       window.clearInterval(timer);
+      window.clearInterval(refreshTimer);
     });
 
     const persistedName = sessionStorage.getItem('origin_name')?.trim() ?? '';

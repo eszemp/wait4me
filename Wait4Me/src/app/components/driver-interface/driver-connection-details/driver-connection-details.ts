@@ -131,4 +131,8 @@ export class DriverConnectionDetails {
   calculate_new_delay(stop : DepartureStop): string {
     return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id])).format();
   }
+
+  has_delay(stop_delay: Duration) : Boolean {
+    return stop_delay.totalMinutes > 0;
+  }
 }

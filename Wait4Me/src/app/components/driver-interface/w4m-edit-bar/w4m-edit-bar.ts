@@ -18,4 +18,15 @@ export class Wait4MeEditBar {
 
     public w4mService = inject(W4MDriverService);
 
+    public number_of_requests() : String {
+        const delay_in_edit = this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!];
+        if (!delay_in_edit) {
+            return '0';
+        }
+        if (!this.w4mService.activeRequestIds()[delay_in_edit]) {
+            return '0';
+        }
+        return String(this.w4mService.activeRequestIds()[delay_in_edit].length);
+    }
+
 }

@@ -42,17 +42,30 @@ def get_status(request_id):
     return jsonify({"api_status": "found", "request_status": result}), 200
 
 
-# GET all pending requests (driver-side)
+# GET all pending (and cancelled) requests (driver-side)
 # example usage: /driver/request?transfer_stop_ref=xxx&outgoing_service=xxx
 @backend_app.route('/driver/get-requests', methods=['GET'])
 def get_requests():
     stop_ref = request.args.get('transfer_stop_ref')
     service = request.args.get('outgoing_service')
-    result = get_incoming_requests(stop_ref, service)
-    if result == 'Not found':
-        return jsonify({"api_status": "No incoming connections"}), 200
+    incoming_requests = get_incoming_requests(stop_ref, service)
+    cancelled_requests = get_cancelled_requests(stop_ref, service)
+    if incoming_requests != 'Not found':
+        if cancelled_requests != 'Not found':
+            return jsonify({"api_status": "incoming connections and changes", 
+                            "incoming_requests": incoming_requests,
+                            "cancelled_requests" : cancelled_requests}), 200
+        else:
+            return jsonify({"api_status": "incoming connections", 
+                            "incoming_requests": incoming_requests}), 200
+    else:
+        if cancelled_requests != 'Not found':
+            return jsonify({"api_status": "incoming changes", 
+                            "cancelled_requests" : cancelled_requests}), 200
+        else:
+            return jsonify({"api_status": "No incoming connections or changes"}), 200
 
-    return jsonify({"api_status": "incoming connection(s)", "data": result}), 200
+    
 
 # GET health check (see if API is running)
 @backend_app.route("/health", methods=["GET"])
