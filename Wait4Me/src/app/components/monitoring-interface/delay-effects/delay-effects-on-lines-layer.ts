@@ -27,6 +27,7 @@ type TrackStationStop = {
   stopName: string;
   stopRole: 'board' | 'intermediate' | 'alight';
   arrivalTime: string;
+  coordinates?: [number, number] | null;
 };
 
 @Component({
@@ -38,11 +39,17 @@ type TrackStationStop = {
 })
 /**
  * Hosts the delay-effects map and overlays the line search control.
+ *
+ * This component renders a MapLibre map showing a selected connection's
+ * track and station points. It augments OJP-provided station stops with
+ * transfer buffer data from a local GeoJSON dataset and marks stations
+ * without transfer data (OJP-only) so they can be styled differently.
  */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   selectedDelayMinutes = 0;
+  legendExpanded = false;
 
   private readonly ojpTrip = inject(OJPTrip);
   private readonly destroy$ = new Subject<void>();
@@ -61,7 +68,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     features: [],
   };
 
-  /** Creates a non-rotatable map instance for delay visualization. */
+  /**
+   * Create the map instance and initialize layers.
+   *
+   * The map is created in a non-rotatable configuration optimized for
+   * the delay-visualization use-case.
+   */
   ngAfterViewInit(): void {
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
@@ -87,7 +99,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     });
   }
 
-  /** Requests and renders the selected connection track, or clears it on deselection. */
+  /**
+   * Requests and renders the selected connection track, or clears it on deselection.
+   *
+   * Retrieves GeoJSON from `OJPTrip.getConnectionTrack(...)` and updates the
+   * map source. If `selection` is `null` the map source is cleared.
+   */
   onLineSelected(selection: SelectedConnectionPayload | null): void {
     void this.loadStationTransferDataset();
 
@@ -114,7 +131,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       });
   }
 
-  /** Updates the simulated delay and recomputes remaining transfer buffers for visible stations. */
+  /**
+   * Updates the simulated delay and recomputes remaining transfer buffers for visible stations.
+   *
+   * Clamps the slider input to a safe integer range and triggers a refresh of
+   * the currently displayed station features so remaining buffers are recalculated.
+   */
   onDelaySliderInput(event: Event): void {
     const target = event.target as HTMLInputElement | null;
     const value = Number(target?.value ?? 0);
@@ -127,7 +149,18 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     }
   }
 
-  /** Ensures the dedicated source/layer pair for the selected connection track exists. */
+  /** Toggles the legend expand/collapse state. */
+  toggleLegend(): void {
+    this.legendExpanded = !this.legendExpanded;
+  }
+
+  /**
+   * Ensures the dedicated source/layer pair for the selected connection track exists.
+   *
+   * Adds a GeoJSON source and layers for track lines and station circles when
+   * they are not already present. Also registers simple cursor and click
+   * interactions for station features.
+   */
   private ensureTrackLayer(): void {
     const map = this.map;
     if (!map) {
@@ -168,10 +201,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         paint: {
           'circle-color': [
             'case',
+            ['==', ['get', 'hasTransferData'], false],
+            '#395148',
             ['==', ['get', 'remainingBufferMinutes'], null],
             '#ffffff',
             ['<', ['get', 'remainingBufferMinutes'], 0],
-            '#ff0000',
+            '#ff5555',
             ['==', ['get', 'remainingBufferMinutes'], 0],
             '#ffd1d1',
             '#d1ffed',
@@ -196,12 +231,23 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           return;
         }
 
+        // Only show popups for stations with transfer data
+        const hasTransferData = (feature.properties as Record<string, unknown>)['hasTransferData'];
+        if (!hasTransferData) {
+          return;
+        }
+
         this.showStationPopup(feature);
       });
     }
   }
 
-  /** Updates the track source data and re-frames the map to the drawn geometry. */
+  /**
+   * Updates the track source data and re-frames the map to the drawn geometry.
+   *
+   * Enriches received GeoJSON features with transfer data and sets the
+   * GeoJSON source; then adjusts the viewport to fit the geometry.
+   */
   private updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
@@ -218,7 +264,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     this.fitToTrack(enrichedGeojson);
   }
 
-  /** Lazily loads the station transfer-time dataset and builds ref/name lookup indexes. */
+  /**
+   * Lazily loads the station transfer-time dataset and builds ref/name lookup indexes.
+   *
+   * The dataset is a local GeoJSON file containing precomputed transfer buffer
+   * time series which is parsed into lookup maps by stop reference and name.
+   */
   private async loadStationTransferDataset(): Promise<void> {
     if (this.stationTransferDatasetPromise) {
       return this.stationTransferDatasetPromise;
@@ -291,7 +342,14 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return this.stationTransferDatasetPromise;
   }
 
-  /** Enriches connection features with station transfer metrics used for styling and popup details. */
+  /**
+   * Enriches connection features with station transfer metrics used for styling and popup details.
+   *
+   * Produces point features for stations when coordinates are available
+   * (either from the transfer dataset or from OJP-provided coordinates) and
+   * annotates them with `hasTransferData` so the layer paint can visually
+   * distinguish OJP-only stations.
+   */
   private enrichStationFeatures(geojson: { type: 'FeatureCollection'; features: unknown[] }): {
     type: 'FeatureCollection';
     features: unknown[];
@@ -314,14 +372,14 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
       for (const stationStop of stationStops) {
         const dataset = this.findDatasetForStation(stationStop.stopRef, stationStop.stopName);
-        if (!dataset?.coordinates) {
+        const coordinates = dataset?.coordinates ?? stationStop.coordinates ?? null;
+        if (!coordinates) {
           continue;
         }
 
-        const selectedTransfer = this.findTransferForArrival(
-          dataset.transferSeries,
-          stationStop.arrivalTime,
-        );
+        const selectedTransfer = dataset
+          ? this.findTransferForArrival(dataset.transferSeries, stationStop.arrivalTime)
+          : null;
         const remainingBufferMinutes = selectedTransfer
           ? selectedTransfer.minutes - this.selectedDelayMinutes
           : null;
@@ -335,19 +393,20 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: dataset.coordinates,
+            coordinates,
           },
           properties: {
             line,
             featureType: 'station',
             stopRef: stationStop.stopRef,
-            stopName: stationStop.stopName || dataset.stopName,
+            stopName: stationStop.stopName || dataset?.stopName || '',
             stopRole: stationStop.stopRole,
             arrivalTime: stationStop.arrivalTime,
-            transferSeries: dataset.transferSeries,
+            transferSeries: dataset?.transferSeries ?? null,
             transferTimeMinutes: selectedTransfer?.minutes ?? null,
             transferTimeMatchedAt: selectedTransfer?.time ?? null,
             remainingBufferMinutes,
+            hasTransferData: !!dataset,
           },
         });
       }
@@ -375,7 +434,18 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
           const dataset = this.findDatasetForStation(stopRef, stopName);
           if (!dataset) {
-            return feature;
+            return {
+              ...typedFeature,
+              properties: {
+                ...typedFeature.properties,
+                stopName: typedFeature.properties['stopName'] ?? '',
+                transferSeries: null,
+                transferTimeMinutes: null,
+                transferTimeMatchedAt: null,
+                remainingBufferMinutes: null,
+                hasTransferData: false,
+              },
+            };
           }
 
           const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
@@ -392,6 +462,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
               transferTimeMinutes: selectedTransfer?.minutes ?? null,
               transferTimeMatchedAt: selectedTransfer?.time ?? null,
               remainingBufferMinutes,
+              hasTransferData: true,
             },
           };
         }),
@@ -400,6 +471,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     };
   }
 
+  /**
+   * Shows a popup for a station feature.
+   *
+   * The popup displays arrival time, available transfer buffer, and the
+   * remaining buffer after applying the simulated delay.
+   */
   private showStationPopup(feature: maplibregl.MapGeoJSONFeature): void {
     const map = this.map;
     if (!map || feature.geometry.type !== 'Point') {
@@ -455,7 +532,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       .addTo(map);
   }
 
-  /** Fits the map viewport to all valid coordinates of the currently rendered track. */
+  /**
+   * Fits the map viewport to all valid coordinates of the currently rendered track.
+   *
+   * Ignores invalid geometries and ensures padding is applied for UI elements.
+   */
   private fitToTrack(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
     const map = this.map;
     if (!map || geojson.features.length === 0) {
@@ -559,6 +640,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return this.stationTransferByName.get(stopNameKey) ?? null;
   }
 
+  /** Parse GeoJSON Point geometry into a `[lng, lat]` tuple or `null`. */
   private parsePointCoordinates(geometry: {
     type?: string;
     coordinates?: unknown;
@@ -580,37 +662,58 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return [lng, lat];
   }
 
+  /**
+   * Reads station stop descriptors from OJP track properties.
+   *
+   * The OJP track may include minimal stop metadata — this helper extracts
+   * the expected fields and optionally parses coordinates when present.
+   */
   private readStationStops(value: unknown): TrackStationStop[] {
     if (!Array.isArray(value)) {
       return [];
     }
+    const out: TrackStationStop[] = [];
+    for (const entry of value) {
+      const raw = entry as Record<string, unknown>;
+      const stopRef = this.toSafeString(raw['stopRef'])?.trim() ?? '';
+      const stopName = this.toSafeString(raw['stopName']) ?? '';
+      const rawStopRole = this.toSafeString(raw['stopRole']) ?? 'intermediate';
+      const stopRole: TrackStationStop['stopRole'] =
+        rawStopRole === 'board' || rawStopRole === 'intermediate' || rawStopRole === 'alight'
+          ? rawStopRole
+          : 'intermediate';
+      const arrivalTime = this.toSafeString(raw['arrivalTime']) ?? '';
 
-    return value
-      .map((entry) => {
-        const raw = entry as Record<string, unknown>;
-        const stopRef = this.toSafeString(raw['stopRef'])?.trim() ?? '';
-        const stopName = this.toSafeString(raw['stopName']) ?? '';
-        const rawStopRole = this.toSafeString(raw['stopRole']) ?? 'intermediate';
-        const stopRole: TrackStationStop['stopRole'] =
-          rawStopRole === 'board' || rawStopRole === 'intermediate' || rawStopRole === 'alight'
-            ? rawStopRole
-            : 'intermediate';
-        const arrivalTime = this.toSafeString(raw['arrivalTime']) ?? '';
-
-        if (!stopRef) {
-          return null;
+      let coordinates: [number, number] | null = null;
+      const rawCoords = raw['coordinates'];
+      if (Array.isArray(rawCoords) && rawCoords.length >= 2) {
+        const lng = Number(rawCoords[0]);
+        const lat = Number(rawCoords[1]);
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+          coordinates = [lng, lat];
         }
+      }
 
-        return {
-          stopRef,
-          stopName,
-          stopRole,
-          arrivalTime,
-        } satisfies TrackStationStop;
-      })
-      .filter((stop): stop is TrackStationStop => stop !== null);
+      if (!stopRef && !stopName && !coordinates) {
+        continue;
+      }
+
+      out.push({
+        stopRef,
+        stopName,
+        stopRole,
+        arrivalTime,
+        coordinates,
+      });
+    }
+
+    return out;
   }
 
+  /**
+   * Finds a transfer timeseries entry matching the arrival minute.
+   * Returns `null` when no matching entry exists.
+   */
   private findTransferForArrival(
     transferSeries: StationTransferSeriesEntry[],
     arrivalTimeIso: string,
@@ -635,6 +738,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return null;
   }
 
+  /** Parse an ISO timestamp string to epoch milliseconds or NaN on failure. */
   private parseTimestampMs(value: string | null): number {
     if (!value) {
       return Number.NaN;
@@ -644,10 +748,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return Number.isFinite(timestampMs) ? timestampMs : Number.NaN;
   }
 
+  /** Round epoch milliseconds down to the minute (ms). */
   private toMinuteMs(timestampMs: number): number {
     return Math.floor(timestampMs / 60000) * 60000;
   }
 
+  /** Format an ISO timestamp for display in the station popup (de-CH). */
   private formatIsoForPopup(value: string): string {
     if (!value) {
       return '';
@@ -670,6 +776,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     });
   }
 
+  /** Convert a likely primitive value to string or return `null`. */
   private toSafeString(value: unknown): string | null {
     if (typeof value === 'string') {
       return value;
@@ -682,11 +789,13 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return null;
   }
 
+  /** Parse a numeric-like value to a finite non-negative number; else `0`. */
   private toSafeNumber(value: unknown): number {
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
   }
 
+  /** Basic HTML escape used for popup content. */
   private escapeHtml(value: string): string {
     return value
       .replaceAll('&', '&amp;')
@@ -696,7 +805,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       .replaceAll("'", '&#39;');
   }
 
-  /** Disposes map resources when the component is destroyed. */
+  /**
+   * Dispose resources when the component is destroyed.
+   *
+   * Signals observables to complete and removes the MapLibre instance.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
