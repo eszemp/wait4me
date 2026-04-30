@@ -78,7 +78,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json',
-      center: [8.23, 46.80],
+      center: [8.23, 46.8],
       zoom: 7.5,
       minZoom: 5,
       maxZoom: 18,

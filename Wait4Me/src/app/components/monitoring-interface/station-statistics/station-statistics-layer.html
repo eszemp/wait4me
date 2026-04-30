@@ -6,11 +6,7 @@
       <span>Loading points</span>
     </div>
   }
-  @if (loadingState() === 'empty') {
-    <div class="statistics-status statistics-status--empty" aria-live="polite">
-      <span>No points available</span>
-    </div>
-  }
+
   <div class="legend">
     <div class="legend-title">Highest wait time</div>
     <div class="legend-items">
@@ -19,6 +15,9 @@
         <div class="legend-label">{{ item.label }}</div>
       </div>
     </div>
-    <div class="legend-description">The colour of the points show which minimal transfer time occurs the most per day on this station. You can click on it to see a histogram withe the distribution of the transfer times.</div>
+    <div class="legend-description">
+      The colour of the points show which minimal transfer time occurs the most per day on this
+      station. You can click on it to see a histogram withe the distribution of the transfer times.
+    </div>
   </div>
 </div>

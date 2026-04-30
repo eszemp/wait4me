@@ -19,7 +19,6 @@ export class MonitoringInterface {
   readonly layerOptions: Array<{ id: MonitoringLayerId; label: string }> = [
     { id: 'delay-effects-on-lines', label: 'Delay effects on lines' },
     { id: 'station-statistics', label: 'Station statistics' },
-    
   ];
 
   selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';

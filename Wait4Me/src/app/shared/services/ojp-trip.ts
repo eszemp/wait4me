@@ -283,7 +283,11 @@ export class OJPTrip extends OJPBase {
               this.stopEventService.searchStopsByName(stop.stopName, 1),
             );
             const first = Array.isArray(results) && results.length > 0 ? results[0] : null;
-            if (first && typeof first.latitude === 'number' && typeof first.longitude === 'number') {
+            if (
+              first &&
+              typeof first.latitude === 'number' &&
+              typeof first.longitude === 'number'
+            ) {
               coords = [first.longitude, first.latitude];
             }
           } catch (e) {

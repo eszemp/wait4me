@@ -31,7 +31,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
   private readonly binColors = ['#b2182b', '#ef8a62', '#fddbc7', '#d1e5f0', '#67a9cf', '#2166ac'];
   private readonly sourceId = 'station-statistics-source';
   private readonly pointsLayerId = 'station-statistics-points';
-  protected loadingState = signal<'loading' | 'ready' | 'empty'>('loading');
+  protected loadingState = signal<'loading' | 'ready'>('loading');
   private map: maplibregl.Map | null = null;
 
   readonly legendItems = this.histogramBuckets.map((bucket, index) => ({
@@ -44,7 +44,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json',
-      center: [8.23, 46.80],
+      center: [8.23, 46.8],
       zoom: 7.5,
       minZoom: 5,
       maxZoom: 18,
@@ -78,13 +78,11 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
 
     const response = await fetch('/map-data/stop_histogram_schweiz.geojson');
     if (!response.ok) {
-      this.loadingState.set('empty');
       return;
     }
 
     const geojson = this.colorizeByMaxBin(await response.json());
     if (!geojson.features || geojson.features.length === 0) {
-      this.loadingState.set('empty');
       return;
     }
 

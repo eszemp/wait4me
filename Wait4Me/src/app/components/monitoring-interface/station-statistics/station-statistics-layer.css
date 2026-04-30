@@ -25,10 +25,6 @@
   backdrop-filter: blur(4px);
 }
 
-.statistics-status--empty {
-  font-size: 1.05rem;
-}
-
 .statistics-spinner {
   width: 20px;
   height: 20px;
