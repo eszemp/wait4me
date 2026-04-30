@@ -15,5 +15,41 @@
       (input)="onDelaySliderInput($event)"
       aria-label="Delay in minutes"
     />
+    <div class="legend">
+      <div class="legend-header">
+        <div class="legend-title">Legend</div>
+        <button
+          class="legend-toggle"
+          (click)="toggleLegend()"
+          [attr.aria-label]="legendExpanded ? 'Collapse legend' : 'Expand legend'"
+        >
+          {{ legendExpanded ? '−' : '+' }}
+        </button>
+      </div>
+      @if (legendExpanded) {
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ff5555"></div>
+            <div class="legend-label">No transfer buffer time available</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ffd1d1"></div>
+            <div class="legend-label">Only transfer time available</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #d1ffed"></div>
+            <div class="legend-label">Enough transfer time available</div>
+          </div>
+        </div>
+        <div class="legend-description">
+          All this data was calculated for the 15.04.2026 (typical weekday), you can search any line
+          to a given time at this date. When one is selected, its displayed on the map. Additionaly
+          can with the slider a delay be added and the effect on the following stations is
+          visualised. The colur indicates the reamining transfer buffer time. The transfer buffer
+          time is the addinional time available to the requiered transfer time. For additional
+          information can one click on stations.
+        </div>
+      }
+    </div>
   </div>
 </div>

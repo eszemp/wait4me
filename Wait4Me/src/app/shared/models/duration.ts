@@ -13,22 +13,22 @@ export class Duration {
 
   public static initWithDurationSchema(durationS: string | undefined): Duration {
     if (durationS === undefined) {
-      return new Duration(0,0);
+      return new Duration(0, 0);
     }
 
     // PT4H19M
     durationS = durationS.replace('PT', '');
 
-    let hours = 0
+    let hours = 0;
     const hoursMatches = durationS.match(/([0-9]+?)H/);
     if (hoursMatches) {
-      hours = parseInt(hoursMatches[1])
+      hours = parseInt(hoursMatches[1]);
     }
 
-    let minutes = 0
+    let minutes = 0;
     const minutesMatches = durationS.match(/([0-9]+?)M/);
     if (minutesMatches) {
-      minutes = parseInt(minutesMatches[1])
+      minutes = parseInt(minutesMatches[1]);
     }
 
     const duration = new Duration(hours, minutes);
@@ -56,13 +56,13 @@ export class Duration {
   }
 
   public plus(otherDuration: Duration): Duration {
-    if (!this.totalMinutes){
-      return Duration.initFromTotalMinutes(0 + otherDuration.totalMinutes)
+    if (!this.totalMinutes) {
+      return Duration.initFromTotalMinutes(0 + otherDuration.totalMinutes);
     }
-    if (!otherDuration.totalMinutes){
-      Duration.initFromTotalMinutes(this.totalMinutes + 0)
+    if (!otherDuration.totalMinutes) {
+      Duration.initFromTotalMinutes(this.totalMinutes + 0);
     }
-    return Duration.initFromTotalMinutes(this.totalMinutes + otherDuration.totalMinutes)
+    return Duration.initFromTotalMinutes(this.totalMinutes + otherDuration.totalMinutes);
   }
 
   public format(): string {
@@ -71,7 +71,7 @@ export class Duration {
 
   public formatWithMinH(): string {
     const durationParts: string[] = [];
-  
+
     if (this.hours > 0) {
       durationParts.push(this.hours + ' h ');
     }
@@ -96,6 +96,6 @@ export class Duration {
   }
 
   public isBiggerThanZero(): Boolean {
-    return (this.totalMinutes > 0);
+    return this.totalMinutes > 0;
   }
 }

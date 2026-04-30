@@ -18,6 +18,7 @@ import type {
 } from '../types/PassengerTripTypes';
 import { OJPBase } from './ojp-base';
 import { OJPLocation } from './ojp-location';
+import { OJPStopEvent } from './ojp-stop-event';
 import { Duration } from '../models/duration';
 
 type ConnectionLineFeature = {
@@ -32,7 +33,7 @@ type ConnectionLineFeature = {
 
 type ConnectionStationFeature = {
   type: 'Feature';
-  geometry: { type: 'Point'; coordinates: number[] };
+  geometry: { type: 'Point'; coordinates: [number, number] };
   properties: {
     line: string;
     featureType: 'station';
@@ -78,6 +79,7 @@ export class OJPTrip extends OJPBase {
   );
 
   private locationService = inject(OJPLocation);
+  private stopEventService = inject(OJPStopEvent);
 
   originId = signal<string | null>(null);
   originName = signal<string | null>(null);
@@ -289,12 +291,41 @@ export class OJPTrip extends OJPBase {
           }
         }
 
-        const serializedStops = bestStops.map((stop) => ({
-          stopRef: stop.stopRef,
-          stopName: stop.stopName,
-          stopRole: stop.stopRole,
-          arrivalTime: stop.arrivalTime,
-        }));
+        const serializedStops: Array<{
+          stopRef: string;
+          stopName: string;
+          stopRole: 'board' | 'intermediate' | 'alight';
+          arrivalTime: string;
+          coordinates?: [number, number];
+        }> = [];
+
+        for (const stop of bestStops) {
+          let coords: [number, number] | undefined;
+
+          try {
+            const results = await firstValueFrom(
+              this.stopEventService.searchStopsByName(stop.stopName, 1),
+            );
+            const first = Array.isArray(results) && results.length > 0 ? results[0] : null;
+            if (
+              first &&
+              typeof first.latitude === 'number' &&
+              typeof first.longitude === 'number'
+            ) {
+              coords = [first.longitude, first.latitude];
+            }
+          } catch (e) {
+            // ignore lookup failures and fall back to no coordinates
+          }
+
+          serializedStops.push({
+            stopRef: stop.stopRef,
+            stopName: stop.stopName,
+            stopRole: stop.stopRole,
+            arrivalTime: stop.arrivalTime,
+            ...(coords ? { coordinates: coords } : {}),
+          });
+        }
 
         const trackFeaturesWithStops = bestTrackFeatures.map((feature) => ({
           ...feature,
@@ -304,9 +335,30 @@ export class OJPTrip extends OJPBase {
           },
         }));
 
+        const stationPointFeatures = serializedStops
+          .map((s) => {
+            if (!s.coordinates) return null;
+            return {
+              type: 'Feature' as const,
+              geometry: {
+                type: 'Point' as const,
+                coordinates: s.coordinates,
+              },
+              properties: {
+                line: bestLineCode,
+                featureType: 'station' as const,
+                stopRef: s.stopRef,
+                stopName: s.stopName,
+                stopRole: s.stopRole,
+                arrivalTime: s.arrivalTime,
+              },
+            };
+          })
+          .filter((f): f is ConnectionStationFeature => f !== null);
+
         return {
           type: 'FeatureCollection' as const,
-          features: trackFeaturesWithStops,
+          features: [...trackFeaturesWithStops, ...stationPointFeatures],
         };
       }),
     );
@@ -319,7 +371,9 @@ export class OJPTrip extends OJPBase {
     selectedTrip: PassengerTrip,
     transferLegId: number,
   ): Observable<{ type: 'FeatureCollection'; features: WalkingRouteFeature[] }> {
-    const timedLegs = selectedTrip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    const timedLegs = selectedTrip.legs.filter(
+      (leg): leg is PassengerTimedLeg => leg.kind === 'timed',
+    );
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
 

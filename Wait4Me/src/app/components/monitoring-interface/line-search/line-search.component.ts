@@ -44,11 +44,7 @@ export class LineSearchComponent implements OnDestroy {
 
   constructor() {
     this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((query) => {
         if (query.length >= 2) {
           this.searchStations(query);

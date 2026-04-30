@@ -8,6 +8,32 @@
   width: 100%;
 }
 
+.statistics-status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  border-radius: 20px;
+  color: var(--fir-green);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
+.statistics-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #3951482b;
+  border-top-color: var(--fir-green);
+  animation: statistics-spin 0.9s linear infinite;
+}
+
 .monitoring-map {
   border: 2px solid var(--fir-green);
   width: 100%;
@@ -56,6 +82,19 @@
 .legend-label {
   font-size: 13px;
   color: var(--grey);
+}
+
+.legend-description {
+  font-size: 12px;
+  color: var(--grey);
+  margin-top: 8px;
+  padding-top: 8px;
+  hyphens: auto;
+  max-width: 130px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
 }
 
 :host ::ng-deep .station-statistics-popup .maplibregl-popup-content {
@@ -119,4 +158,10 @@
   font-size: 16px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+@keyframes statistics-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

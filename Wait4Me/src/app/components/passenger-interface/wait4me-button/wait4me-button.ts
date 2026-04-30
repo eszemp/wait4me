@@ -7,172 +7,182 @@ import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 
 @Component({
-    selector: 'w4m-button',
-    imports: [CommonModule],
-    templateUrl: './wait4me-button.html',
-    styleUrls: ['./wait4me-button.css', '../../../app.css'],
+  selector: 'w4m-button',
+  imports: [CommonModule],
+  templateUrl: './wait4me-button.html',
+  styleUrls: ['./wait4me-button.css', '../../../app.css'],
 })
 export class Wait4MeButton {
-    public w4mService = inject(W4MPassengerService);
-    public tripService = inject(OJPTrip);
-    private router = inject(Router);
-    showRequestConfirmation = false;
-    showRequestDetails = false;
-    isSubmittingRequest = false;
-    requestConfirmationTopPx = 120;
+  public w4mService = inject(W4MPassengerService);
+  public tripService = inject(OJPTrip);
+  private router = inject(Router);
+  showRequestConfirmation = false;
+  showRequestDetails = false;
+  isSubmittingRequest = false;
+  requestConfirmationTopPx = 120;
 
-    on_wait4me_button_click() {
-        if (this.w4mService.status() === 'enabled') {
-            this.update_request_confirmation_position();
-            this.showRequestConfirmation = true;
-            return;
-        }
-        this.w4mService.click_on_button();
+  on_wait4me_button_click() {
+    if (this.w4mService.status() === 'enabled') {
+      this.update_request_confirmation_position();
+      this.showRequestConfirmation = true;
+      return;
     }
+    this.w4mService.click_on_button();
+  }
 
-    get waiting_connection_leg(): PassengerTimedLeg | null {
-        const trip = this.w4mService.trip;
-        if (!trip || trip.criticalTransferId === null || trip.criticalTransferId === undefined) {
-            return null;
-        }
-        const waiting_leg_id = trip.criticalTransferId + 1;
-        return trip.legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed' && leg.id === waiting_leg_id) ?? null;
+  get waiting_connection_leg(): PassengerTimedLeg | null {
+    const trip = this.w4mService.trip;
+    if (!trip || trip.criticalTransferId === null || trip.criticalTransferId === undefined) {
+      return null;
     }
+    const waiting_leg_id = trip.criticalTransferId + 1;
+    return (
+      trip.legs.find(
+        (leg): leg is PassengerTimedLeg => leg.kind === 'timed' && leg.id === waiting_leg_id,
+      ) ?? null
+    );
+  }
 
-    get request_details_origin_name(): string {
-        return this.requested_trip_first_leg?.boardStopName ?? '';
+  get request_details_origin_name(): string {
+    return this.requested_trip_first_leg?.boardStopName ?? '';
+  }
+
+  get request_details_destination_name(): string {
+    return this.requested_trip_last_leg?.alightStopName ?? '';
+  }
+
+  private get requested_trip_first_leg(): PassengerTimedLeg | null {
+    const trip = this.w4mService.trip;
+    if (!trip) {
+      return null;
     }
+    return trip.legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed') ?? null;
+  }
 
-    get request_details_destination_name(): string {
-        return this.requested_trip_last_leg?.alightStopName ?? '';
+  private get requested_trip_last_leg(): PassengerTimedLeg | null {
+    const trip = this.w4mService.trip;
+    if (!trip) {
+      return null;
     }
+    const timed_legs = trip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
+    return timed_legs[timed_legs.length - 1] ?? null;
+  }
 
-    private get requested_trip_first_leg(): PassengerTimedLeg | null {
-        const trip = this.w4mService.trip;
-        if (!trip) {
-            return null;
-        }
-        return trip.legs.find((leg): leg is PassengerTimedLeg => leg.kind === 'timed') ?? null;
+  @HostListener('window:resize')
+  on_window_resize() {
+    if (!this.showRequestConfirmation) {
+      return;
     }
+    this.update_request_confirmation_position();
+  }
 
-    private get requested_trip_last_leg(): PassengerTimedLeg | null {
-        const trip = this.w4mService.trip;
-        if (!trip) {
-            return null;
-        }
-        const timed_legs = trip.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
-        return timed_legs[timed_legs.length - 1] ?? null;
+  private update_request_confirmation_position() {
+    const trip_overview = document.querySelector('.trip-overview') as HTMLElement | null;
+    if (!trip_overview) {
+      this.requestConfirmationTopPx = 120;
+      return;
     }
+    const rect = trip_overview.getBoundingClientRect();
+    this.requestConfirmationTopPx = Math.round(rect.top);
+  }
 
-    @HostListener('window:resize')
-    on_window_resize() {
-        if (!this.showRequestConfirmation) {
-            return;
-        }
-        this.update_request_confirmation_position();
+  close_request_confirmation() {
+    this.showRequestConfirmation = false;
+  }
+
+  open_request_details() {
+    this.update_request_confirmation_position();
+    this.showRequestDetails = true;
+  }
+
+  close_request_details() {
+    this.showRequestDetails = false;
+  }
+
+  get request_details_status_text(): string {
+    switch (this.w4mService.status()) {
+      case 'accepted':
+        return 'Accepted.';
+      case 'declined':
+        return 'Transfer not possible.';
+      case 'expired':
+        return 'Request expired. Outgoing service has departed.';
+      case 'pending':
+        return 'Request Pending...';
+      default:
+        return 'Request Pending...';
     }
+  }
 
-    private update_request_confirmation_position() {
-        const trip_overview = document.querySelector('.trip-overview') as HTMLElement | null;
-        if (!trip_overview) {
-            this.requestConfirmationTopPx = 120;
-            return;
-        }
-        const rect = trip_overview.getBoundingClientRect();
-        this.requestConfirmationTopPx = Math.round(rect.top);
+  go_to_connection() {
+    const requestedTrip = this.w4mService.trip;
+    if (!requestedTrip) {
+      return;
     }
-
-    close_request_confirmation() {
-        this.showRequestConfirmation = false;
+    this.tripService.selectedConnectionTrip.set(requestedTrip);
+    this.showRequestDetails = false;
+    if (this.router.url !== '/passenger/connection-details') {
+      this.router.navigate(['/passenger/connection-details'], {
+        state: { selectedTrip: requestedTrip },
+      });
     }
+  }
 
-    open_request_details() {
-        this.update_request_confirmation_position();
-        this.showRequestDetails = true;
+  async confirm_and_send_request() {
+    if (this.isSubmittingRequest) {
+      return;
     }
-
-    close_request_details() {
-        this.showRequestDetails = false;
+    this.isSubmittingRequest = true;
+    try {
+      await this.w4mService.trigger_new_request();
+      console.log(
+        'Sent request with ID: ',
+        this.w4mService.request_id,
+        'New status: ',
+        this.w4mService.status(),
+      );
+    } finally {
+      this.isSubmittingRequest = false;
+      this.showRequestConfirmation = false;
     }
+  }
 
-    get request_details_status_text(): string {
-        switch (this.w4mService.status()) {
-        case 'accepted':
-            return 'Accepted.';
-        case 'declined':
-            return 'Transfer not possible.';
-        case 'expired':
-            return 'Request expired. Outgoing service has departed.';
-        case 'pending':
-            return 'Request Pending...';
-        default:
-            return 'Request Pending...';
-        }
+  cancel_request() {
+    // TODO: Pop Up asking if user is sure
+    console.log('user wants to cancel');
+    this.w4mService.cancel_request();
+  }
+
+  search_alternative_route() {
+    // set trip service params for new routing from stop with broken transfer
+    const failed_transfer_leg_id = this.w4mService.trip!.criticalTransferId!;
+    const timedLegs = this.w4mService.trip!.legs.filter(
+      (leg): leg is PassengerTimedLeg => leg.kind === 'timed',
+    );
+    const next_leg = timedLegs.find((leg) => leg.id === failed_transfer_leg_id + 1);
+    const last_leg = timedLegs[timedLegs.length - 1];
+
+    this.tripService.originName.set(next_leg!.boardStopName);
+    this.tripService.originId.set(null);
+    this.tripService.destinationName.set(last_leg!.alightStopName);
+    this.tripService.destinationId.set(null);
+
+    const rawDuration = this.w4mService.trip!.criticalTransfer?.requestedDelay;
+    const requestedDelay = Duration.initFromTotalMinutes(rawDuration!.totalMinutes);
+
+    const new_departure = requestedDelay.addToDate(
+      this.w4mService.trip!.criticalTransfer!.scheduledOutgoingDeparture,
+    );
+    if (new_departure) {
+      const day = new_departure.toISOString().split('T')[0];
+      const time = new_departure.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      this.tripService.departureDay.set(day); // YYYY-MM-DD
+      this.tripService.departureTimeOfDay.set(time); // HH:MM
     }
-
-    go_to_connection() {
-        const requestedTrip = this.w4mService.trip;
-        if (!requestedTrip) {
-            return;
-        }
-        this.tripService.selectedConnectionTrip.set(requestedTrip);
-        this.showRequestDetails = false;
-        if (this.router.url !== '/passenger/connection-details') {
-            this.router.navigate(['/passenger/connection-details'], {
-                state: { selectedTrip: requestedTrip }
-            });
-        }
-    }
-
-    async confirm_and_send_request() {
-        if (this.isSubmittingRequest) {
-            return;
-        }
-        this.isSubmittingRequest = true;
-        try {
-            await this.w4mService.trigger_new_request();
-            console.log('Sent request with ID: ', this.w4mService.request_id, 'New status: ', this.w4mService.status());
-        }
-        finally {
-            this.isSubmittingRequest = false;
-            this.showRequestConfirmation = false;
-        }
-    }
-
-    cancel_request() {
-        // TODO: Pop Up asking if user is sure
-        console.log('user wants to cancel');
-        this.w4mService.cancel_request();
-    }
-
-    search_alternative_route() {
-        // set trip service params for new routing from stop with broken transfer
-        const failed_transfer_leg_id = this.w4mService.trip!.criticalTransferId!;
-        const timedLegs = this.w4mService.trip!.legs.filter((leg): leg is PassengerTimedLeg => leg.kind === 'timed');
-        const next_leg = timedLegs.find(leg => leg.id === failed_transfer_leg_id + 1);
-        const last_leg = timedLegs[timedLegs.length - 1];
-
-        this.tripService.originName.set(next_leg!.boardStopName);
-        this.tripService.originId.set(null);
-        this.tripService.destinationName.set(last_leg!.alightStopName);
-        this.tripService.destinationId.set(null);
-
-        const rawDuration = this.w4mService.trip!.criticalTransfer?.requestedDelay;
-        const requestedDelay = Duration.initFromTotalMinutes(rawDuration!.totalMinutes);
-
-        const new_departure = requestedDelay.addToDate(
-            this.w4mService.trip!.criticalTransfer!.scheduledOutgoingDeparture
-        );
-        if (new_departure) {
-            const day = new_departure.toISOString().split('T')[0]; 
-            const time = new_departure.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit'
-            }); 
-            this.tripService.departureDay.set(day);         // YYYY-MM-DD
-            this.tripService.departureTimeOfDay.set(time);  // HH:MM
-        }
-        this.w4mService.disable_if_not_active();
-        this.router.navigate(['/passenger']);
-    }
+    this.w4mService.disable_if_not_active();
+    this.router.navigate(['/passenger']);
+  }
 }

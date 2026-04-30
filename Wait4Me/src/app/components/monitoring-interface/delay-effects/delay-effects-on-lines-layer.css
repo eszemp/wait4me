@@ -22,6 +22,7 @@
   bottom: 20px;
   z-index: 3;
   min-width: 290px;
+  max-width: 290px;
   padding: 10px 12px;
   border-radius: 12px;
   background: white;
@@ -33,11 +34,91 @@
   align-items: center;
   justify-content: space-between;
   color: var(--fir-green);
-  font-size: 0.9rem;
+  font-size: 14px;
   margin-bottom: 6px;
 }
 
 .delay-slider-panel input[type='range'] {
   width: 100%;
   accent-color: var(--fir-green);
+}
+
+/* Legend styles (scoped to the slider panel) — based on station-statistics legend */
+.delay-slider-panel .legend {
+  margin-top: 8px;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.delay-slider-panel .legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.delay-slider-panel .legend-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fir-green);
+}
+
+.delay-slider-panel .legend-toggle {
+  background: none;
+  border: none;
+  color: var(--fir-green);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.delay-slider-panel .legend-toggle:hover {
+  color: var(--fir-green);
+}
+
+.delay-slider-panel .legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.delay-slider-panel .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delay-slider-panel .legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.delay-slider-panel .legend-label {
+  font-size: 13px;
+  color: var(--grey);
+}
+
+.delay-slider-panel .legend-description {
+  font-size: 12px;
+  color: var(--grey);
+  margin-top: 8px;
+  padding-top: 8px;
+  hyphens: auto;
+  max-width: 250px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+  padding-top: 8px;
 }

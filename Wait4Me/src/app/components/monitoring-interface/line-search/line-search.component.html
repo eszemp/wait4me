@@ -8,13 +8,7 @@
           @if (line.departureTimetable) {
             <span class="line-time">{{ formatDepartureTime(line.departureTimetable) }}</span>
           }
-          <button
-            type="button"
-            class="clear-line-btn"
-            (click)="clearSelectedLine()"
-          >
-            ✕
-          </button>
+          <button type="button" class="clear-line-btn" (click)="clearSelectedLine()">✕</button>
         </div>
       } @else {
         @if (error()) {
@@ -25,15 +19,13 @@
           <ul class="departures-dropdown">
             @for (line of departingLines(); track line.line) {
               <li class="departure-item">
-                <button
-                  type="button"
-                  class="departure-button"
-                  (mousedown)="selectLine(line)"
-                >
+                <button type="button" class="departure-button" (mousedown)="selectLine(line)">
                   <span class="line-number">{{ line.line }}</span>
                   <span class="line-direction">{{ line.direction }}</span>
                   @if (line.departureTimetable) {
-                    <span class="line-time">{{ formatDepartureTime(line.departureTimetable) }}</span>
+                    <span class="line-time">{{
+                      formatDepartureTime(line.departureTimetable)
+                    }}</span>
                   }
                 </button>
               </li>
@@ -66,28 +58,21 @@
           (click)="clearStationQuery()"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7a1 1 0 0 0-1.41 1.42L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.88a1 1 0 0 0 0-1.41Z"/>
+            <path
+              d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7a1 1 0 0 0-1.41 1.42L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.88a1 1 0 0 0 0-1.41Z"
+            />
           </svg>
         </button>
       }
     </div>
 
-    <input
-      type="time"
-      class="time-input"
-      [(ngModel)]="selectedTime"
-      (change)="onTimeChange()"
-    />
+    <input type="time" class="time-input" [(ngModel)]="selectedTime" (change)="onTimeChange()" />
 
     @if (showStationSuggestions && stationSuggestions().length > 0) {
       <ul class="suggestions-dropdown">
         @for (station of stationSuggestions(); track station.stopPlaceRef) {
           <li>
-            <button
-              type="button"
-              class="suggestion-item"
-              (mousedown)="selectStation(station)"
-            >
+            <button type="button" class="suggestion-item" (mousedown)="selectStation(station)">
               {{ station.stopPlaceName }}
             </button>
           </li>

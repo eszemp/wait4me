@@ -1,5 +1,12 @@
 <div class="map-wrapper">
   <div #mapContainer class="monitoring-map"></div>
+  @if (loadingState() === 'loading') {
+    <div class="statistics-status statistics-status--loading" aria-live="polite">
+      <span class="statistics-spinner" aria-hidden="true"></span>
+      <span>Loading points</span>
+    </div>
+  }
+
   <div class="legend">
     <div class="legend-title">Highest wait time</div>
     <div class="legend-items">
@@ -7,6 +14,10 @@
         <div class="legend-color" [style.background-color]="item.color"></div>
         <div class="legend-label">{{ item.label }}</div>
       </div>
+    </div>
+    <div class="legend-description">
+      The colour of the points show which minimal transfer time occurs the most per day on this
+      station. You can click on it to see a histogram withe the distribution of the transfer times.
     </div>
   </div>
 </div>

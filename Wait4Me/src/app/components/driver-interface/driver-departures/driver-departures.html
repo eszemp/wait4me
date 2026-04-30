@@ -5,7 +5,14 @@
     <p class="departures-message">No departures found for this station.</p>
   } @else {
     <ul class="departures-pill-list">
-      @for (departure of departureLines(); track departure.line + departure.departureTimetable + departure.direction + (departure.arrivalTimetable ?? '') + (departure.departurePlatformOrStop ?? '')) {
+      @for (
+        departure of departureLines();
+        track departure.line +
+          departure.departureTimetable +
+          departure.direction +
+          (departure.arrivalTimetable ?? '') +
+          (departure.departurePlatformOrStop ?? '')
+      ) {
         <li class="departure-pill" (click)="onDepartureClick(departure)">
           <div class="trip-timeline">
             <div class="timeline-line">
@@ -16,23 +23,23 @@
 
           <div class="time-and-location-column">
             <div>
-                <span class="time-start">
-                  {{ departure.departureTimetable | date: 'HH:mm' }}
-                  <span *ngIf="departure.departureDelay.isBiggerThanZero()" class="time-delay">
-                    +{{ departure.departureDelay.format() }}
-                  </span>
+              <span class="time-start">
+                {{ departure.departureTimetable | date: 'HH:mm' }}
+                <span *ngIf="departure.departureDelay.isBiggerThanZero()" class="time-delay">
+                  +{{ departure.departureDelay.format() }}
                 </span>
-                <span class="location-start">{{ actualPosition() }}</span>
+              </span>
+              <span class="location-start">{{ actualPosition() }}</span>
             </div>
             <div>
-                <span class="time-end">
-                  {{ departure.arrivalTimetable | date: 'HH:mm' }}
-                  <span *ngIf="departure.arrivalDelay.isBiggerThanZero()" class="time-delay">
-                    +{{ departure.arrivalDelay.format() }}
-                  </span>
+              <span class="time-end">
+                {{ departure.arrivalTimetable | date: 'HH:mm' }}
+                <span *ngIf="departure.arrivalDelay.isBiggerThanZero()" class="time-delay">
+                  +{{ departure.arrivalDelay.format() }}
                 </span>
-                <span class="location-end">{{ departure.direction || 'Direction n/a' }}</span>
-            </div>            
+              </span>
+              <span class="location-end">{{ departure.direction || 'Direction n/a' }}</span>
+            </div>
           </div>
 
           <div class="meta-column">

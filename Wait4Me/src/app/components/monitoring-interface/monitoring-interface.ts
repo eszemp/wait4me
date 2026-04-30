@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { StationStatisticsLayerComponent } from './station-statistics/station-statistics-layer';
 import { DelayEffectsOnLinesLayerComponent } from './delay-effects/delay-effects-on-lines-layer';
 
@@ -9,23 +10,16 @@ type MonitoringLayerId = 'station-statistics' | 'delay-effects-on-lines';
   templateUrl: './monitoring-interface.html',
   styleUrls: ['./monitoring-interface.css'],
   standalone: true,
-  imports: [StationStatisticsLayerComponent, DelayEffectsOnLinesLayerComponent],
+  imports: [FormsModule, StationStatisticsLayerComponent, DelayEffectsOnLinesLayerComponent],
 })
 /**
  * Entry component for monitoring layers with a simple layer switcher.
  */
 export class MonitoringInterface {
   readonly layerOptions: Array<{ id: MonitoringLayerId; label: string }> = [
-    { id: 'station-statistics', label: 'Station statistics' },
     { id: 'delay-effects-on-lines', label: 'Delay effects on lines' },
+    { id: 'station-statistics', label: 'Station statistics' },
   ];
 
-  selectedLayerId: MonitoringLayerId = 'station-statistics';
-
-  /** Applies the selected monitoring layer from the toolbar dropdown. */
-  onLayerChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as MonitoringLayerId;
-    this.selectedLayerId = value;
-  }
+  selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';
 }
-

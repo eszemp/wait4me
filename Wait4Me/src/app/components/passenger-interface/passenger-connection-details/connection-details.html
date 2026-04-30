@@ -1,9 +1,14 @@
-<button type="button" class="back-button" (click)="backToPassenger()" aria-label="Back to passenger routing page">
-    <img src="/return-back.svg" alt="" aria-hidden="true"/>
+<button
+  type="button"
+  class="back-button"
+  (click)="backToPassenger()"
+  aria-label="Back to passenger routing page"
+>
+  <img src="/return-back.svg" alt="" aria-hidden="true" />
 </button>
 
 @if (trip) {
-<section class="trip-overview">
+  <section class="trip-overview">
     <div class="trip-timeline">
       <div class="timeline-line" [class.has-transfers]="trip.transfers > 0">
         <span class="dot top"></span>
@@ -18,22 +23,22 @@
 
     <div class="time-and-location-column">
       <div>
-          <span class="time-start"> 
-            {{ trip.scheduledStart| date: 'HH:mm' }}
-            <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
-              + {{ trip.startDelay.format() }}
-            </span>
+        <span class="time-start">
+          {{ trip.scheduledStart | date: 'HH:mm' }}
+          <span *ngIf="trip.startDelay.isBiggerThanZero()" class="time-delay">
+            + {{ trip.startDelay.format() }}
           </span>
-          <span class="location-start">{{ tripService.originName() }}</span>
+        </span>
+        <span class="location-start">{{ tripService.originName() }}</span>
       </div>
       <div>
-          <span class="time-end"> 
-            {{ trip.scheduledEnd | date: 'HH:mm' }}
-            <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
-              + {{ trip.endDelay.format() }}
-            </span>
+        <span class="time-end">
+          {{ trip.scheduledEnd | date: 'HH:mm' }}
+          <span *ngIf="trip.endDelay.isBiggerThanZero()" class="time-delay">
+            + {{ trip.endDelay.format() }}
           </span>
-          <span class="location-end">{{ tripService.destinationName() }}</span>
+        </span>
+        <span class="location-end">{{ tripService.destinationName() }}</span>
       </div>
     </div>
 
@@ -42,97 +47,104 @@
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
       <span class="date">{{ trip.startTime | date: 'dd.MM.yyyy' }}</span>
     </div>
-</section>
+  </section>
 
-<section class="content">
-  @for (leg of trip.legs; track leg.id; let last = $last) {
-    @if (leg.kind === 'timed') {
-      <div class="leg timed-leg">
-          <div class="trip-timeline"> 
-              <div class="timeline-line">
-                  <span class="dot top"></span>
-                  <span class="dot bottom"></span>
-              </div>
+  <section class="content">
+    @for (leg of trip.legs; track leg.id; let last = $last) {
+      @if (leg.kind === 'timed') {
+        <div class="leg timed-leg">
+          <div class="trip-timeline">
+            <div class="timeline-line">
+              <span class="dot top"></span>
+              <span class="dot bottom"></span>
+            </div>
           </div>
 
           <div class="time-and-location-column">
-              <div>
-                <span class="time-start"> 
-                  {{ leg.boardTimeTimetable | date: 'HH:mm' }} 
-                  @if ((w4mService.status()==='accepted') && (trip.criticalTransferId! + 1 === leg.id)) {
-                    <span class="time-delay">
-                      +{{ leg.boardDelay.plus(w4mService.transfer!.requestedDelay).format() }}
-                    </span>
-                  }
-                  @else {
-                    <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
-                      +{{ leg.boardDelay.format() }}
-                    </span>
-                  }
+            <div>
+              <span class="time-start">
+                {{ leg.boardTimeTimetable | date: 'HH:mm' }}
+                @if (
+                  w4mService.status() === 'accepted' && trip.criticalTransferId! + 1 === leg.id
+                ) {
+                  <span class="time-delay">
+                    +{{ leg.boardDelay.plus(w4mService.transfer!.requestedDelay).format() }}
+                  </span>
+                } @else {
+                  <span *ngIf="leg.boardDelay.isBiggerThanZero()" class="time-delay">
+                    +{{ leg.boardDelay.format() }}
+                  </span>
+                }
+              </span>
+              <span class="location-start"
+                >{{ leg.boardStopName }}
+                <i>{{ leg.lineName }} to {{ leg.destinationText }}</i></span
+              >
+            </div>
+            <div>
+              <span class="time-end">
+                {{ leg.alightTimeTimetable | date: 'HH:mm' }}
+                <span *ngIf="leg.alightDelay.isBiggerThanZero()" class="time-delay">
+                  +{{ leg.alightDelay.format() }}
                 </span>
-                <span class="location-start">{{ leg.boardStopName }} <i>{{leg.lineName}} to {{ leg.destinationText }}</i></span>
-              </div>
-              <div>
-                <span class="time-end"> 
-                    {{ leg.alightTimeTimetable | date: 'HH:mm' }}
-                    <span *ngIf="leg.alightDelay.isBiggerThanZero()" class="time-delay">
-                      +{{ leg.alightDelay.format() }}
-                    </span>
-                </span>
-                <span class="location-end">{{ leg.alightStopName }}</span>
-              </div>        
+              </span>
+              <span class="location-end">{{ leg.alightStopName }}</span>
+            </div>
           </div>
 
           <div class="meta-column">
-              <span class="platform"> {{ leg.boardPlatform }}</span>
-              <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
-          </div>
-      </div>
-    }
-
-    @else if (leg.kind === 'transfer') {
-      @if (trip.criticalTransferId === leg.id) {
-        <div class="transfer-warning" [class.transfer-warning--accepted]="w4mService.status() === 'accepted'">
-          <div class="time-column">
-              <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
-          </div>
-          <div class="transfer-warning-text">
-            @if (w4mService.status() === 'enabled') {
-              Likely to miss transfer. Send Wait4Me request.
-            } @else if (w4mService.status() === 'pending') {
-              Likely to miss transfer.
-            } @else if (w4mService.status() === 'declined') {
-              Transfer is not possible. Choose alternative.
-            } @else if (w4mService.status() === 'accepted') {
-              Connecting vehicle is waiting. Transfer fast.
-            } @else {
-              Likely to miss transfer. Send Wait4Me request.
-            }
+            <span class="platform"> {{ leg.boardPlatform }}</span>
+            <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
           </div>
         </div>
-      }
+
+      } @else if (leg.kind === 'transfer') {
+        @if (trip.criticalTransferId === leg.id) {
+          <div
+            class="transfer-warning"
+            [class.transfer-warning--accepted]="w4mService.status() === 'accepted'"
+          >
+            <div class="time-column">
+              <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
+            </div>
+            <div class="transfer-warning-text">
+              @if (w4mService.status() === 'enabled') {
+                Likely to miss transfer. Send Wait4Me request.
+              } @else if (w4mService.status() === 'pending') {
+                Likely to miss transfer.
+              } @else if (w4mService.status() === 'declined') {
+                Transfer is not possible. Choose alternative.
+              } @else if (w4mService.status() === 'accepted') {
+                Connecting vehicle is waiting. Transfer fast.
+              } @else {
+                Likely to miss transfer. Send Wait4Me request.
+              }
+            </div>
+          </div>
+        }
         <div class="leg transfer-leg">
           <div class="time-column">
-              <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
+            <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
           </div>
-          
-          <div class="time-and-location-column">
-              {{ leg.duration.formatWithMinH() }} Walk
-          </div>
-          
+
+          <div class="time-and-location-column">{{ leg.duration.formatWithMinH() }} Walk</div>
+
           <div class="info-col">
-            <button type="button" class="arrow-right-button" (click)="popup_walking_route(leg)" aria-label="Open walking route details">
-            <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
+            <button
+              type="button"
+              class="arrow-right-button"
+              (click)="popup_walking_route(leg)"
+              aria-label="Open walking route details"
+            >
+              <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
             </button>
           </div>
-      </div>
+        </div>
+      } @else {
+        <p>Error</p>
+      }
     }
-    @else {
-          <p>Error</p>
-    }
-  }
-</section>
+  </section>
 
-<w4m-button></w4m-button>
-
+  <w4m-button></w4m-button>
 }
