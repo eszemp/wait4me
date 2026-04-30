@@ -11,6 +11,17 @@
   <div class="walking-route-map-shell">
     <div class="walking-route-map-stage">
       <div #mapContainer class="walking-route-map"></div>
+      @if (routeViewState() === 'loading') {
+        <div class="walking-route-status walking-route-status--loading" aria-live="polite">
+          <span class="walking-route-spinner" aria-hidden="true"></span>
+          <span>Loading route</span>
+        </div>
+      }
+      @if (routeViewState() === 'empty') {
+        <div class="walking-route-status walking-route-status--empty" aria-live="polite">
+          <span>No route available</span>
+        </div>
+      }
     </div>
   </div>
 </section>

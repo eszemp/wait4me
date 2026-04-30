@@ -5,6 +5,7 @@ import {
   ElementRef,
   inject,
   OnDestroy,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -31,6 +32,7 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
 
   public tripService = inject(OJPTrip);
   public w4mService = inject(W4MPassengerService);
+  protected routeViewState = signal<'loading' | 'ready' | 'empty'>('loading');
   private map: maplibregl.Map | null = null;
   private readonly destroy$ = new Subject<void>();
   private readonly walkingRouteSourceId = 'walking-route-source';
@@ -103,8 +105,11 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
     const map = this.map;
     const trip = this.trip;
     if (!map || !trip || this.transferLegId === null) {
+      this.routeViewState.set('empty');
       return;
     }
+
+    this.routeViewState.set('loading');
 
     this.tripService
       .getTransferWalkingRoute(trip, this.transferLegId)
@@ -156,7 +161,11 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
         new maplibregl.LngLatBounds(coordinates[0], coordinates[0]),
       );
       map.fitBounds(bounds, { padding: 40, maxZoom: 17 });
+      this.routeViewState.set('ready');
+      return;
     }
+
+    this.routeViewState.set('empty');
   }
 
   /**
