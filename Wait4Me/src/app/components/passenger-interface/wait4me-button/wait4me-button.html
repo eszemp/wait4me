@@ -78,7 +78,7 @@
       aria-label="Wait4Me request details"
       [style.top.px]="this.requestConfirmationTopPx"
     >
-      <p class="w4m-confirm-title">You have sent a Wait4Me request for:</p>
+      <p class="w4m-confirm-title">You have sent a Wait4Me request for {{this.w4mService.requested_delay}} min to this connection:</p>
 
       @if (this.w4mService.trip) {
         <div class="w4m-request-trip-card">

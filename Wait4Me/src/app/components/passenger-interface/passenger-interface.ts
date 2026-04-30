@@ -1,4 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, DestroyRef } from '@angular/core';
+import { timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -15,6 +17,7 @@ import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
 })
 export class PassengerInterface {
   public tripService = inject(OJPTrip);
+  private readonly destroyRef = inject(DestroyRef);
   private router = inject(Router);
 
   constructor() {
@@ -46,6 +49,43 @@ export class PassengerInterface {
         time: this.tripService.departureTimeOfDay()!,
       });
     }
+
+    timer(60000, 60000)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(() => {
+      this.refreshTrips();
+    });
+  }
+
+  private refreshTrips() : void {
+    // Only refresh if start / stop is defined for routing
+      if (this.tripService.originId() && this.tripService.destinationId()) {
+        this.tripService.isLoadingTrips.set(true);
+        this.tripService.getTripInformation(
+          this.tripService.originId()!,
+          this.tripService.destinationId()!,
+          this.tripService.departureDay() || '',
+          this.tripService.departureTimeOfDay() || '',
+        ).subscribe({
+          next: (results) => {
+            Promise.all(results)
+              .then((resolvedResults) => {
+                this.tripService.tripResults.set(resolvedResults);
+                this.tripService.isLoadingTrips.set(false);
+              })
+              .catch(() => {
+                this.tripService.tripResults.set([]);
+                this.tripService.isLoadingTrips.set(false);
+              });
+          },
+          error: () => {
+            this.tripService.tripResults.set([]);
+            this.tripService.isLoadingTrips.set(false);
+          },
+        });
+        console.log("real-time traffic data updated.")
+      } 
+    return;
   }
 
   readonly tripForm = new FormGroup({

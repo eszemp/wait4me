@@ -39,9 +39,12 @@
 
           <span class="time">
             {{ stop.timeTimetable | date: 'HH:mm:ss' }}
-            @if (this.w4mService.acceptedDelays()[stop.id]) {
-              <span class="time-delay"> +{{ this.calculate_new_delay(stop) }} </span>
-            } @else {
+            @if (this.w4mService.additionalDelaysAnySource()[stop.id]) {
+              <span class="time-delay">
+                +{{ this.calculate_new_delay(stop)}}
+              </span>
+            }
+            @else {
               <span *ngIf="has_delay(stop.delay)" class="time-delay">
                 +{{ stop.delay.totalMinutes }}
               </span>

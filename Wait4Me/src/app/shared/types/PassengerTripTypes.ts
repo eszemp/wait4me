@@ -1,4 +1,5 @@
 import { Duration } from '../models/duration';
+import type { TripSchema } from 'ojp-shared-types';
 
 export type PassengerTimedLeg = {
   kind: 'timed';
@@ -40,6 +41,7 @@ export type PassengerTrip = {
   legs: PassengerLeg[];
   criticalTransferId: number | null;
   criticalTransfer: CriticalTransfer | null;
+  rawTrip: TripSchema;
 };
 
 export type CriticalTransfer = {

@@ -10,6 +10,7 @@ import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
 import { Wait4MeDisplay } from '../w4m-display/w4m-display';
 import { Wait4MeEditBar } from '../w4m-edit-bar/w4m-edit-bar';
 import { Duration } from '../../../shared/models/duration';
+import { OJPStopEvent } from '../../../shared/services/ojp-stop-event';
 
 @Component({
   selector: 'app-driver-connection-details',
@@ -22,11 +23,12 @@ export class DriverConnectionDetails {
   private readonly destroyRef = inject(DestroyRef);
 
   w4mService = inject(W4MDriverService);
+  stopEventService = inject(OJPStopEvent);
 
   readonly currentTime = signal(new Date());
 
-  readonly departure: DepartureLine | null;
-  readonly originName: string;
+  departure: DepartureLine | null;
+  originName: string;
 
   constructor() {
     const navigation = this.router.currentNavigation();
@@ -39,13 +41,28 @@ export class DriverConnectionDetails {
     console.log('Journey Ref', this.departure?.journeyRef);
     this.originName = state.originName?.trim() || 'Current stop';
 
-    const timer = window.setInterval(() => {
+    if (this.departure) {
+      const sequence = this.stops.map(stop => stop.id);
+      this.w4mService.stopSequence.set(sequence);
+      console.log("Initialized stop sequence:", sequence);
+    }
+
+    const clockTimer = window.setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
 
+    const refreshTimer = window.setInterval(async () => {
+      if (this.departure) {
+        this.departure = await this.stopEventService.refreshDepartureLine(this.departure);
+        console.log("real-time traffic data updated.")
+      }
+    }, 60000);
+
     this.destroyRef.onDestroy(() => {
-      window.clearInterval(timer);
+      window.clearInterval(clockTimer);
+      window.clearInterval(refreshTimer);
     });
+
   }
 
   get lineLabel(): string {
@@ -130,10 +147,8 @@ export class DriverConnectionDetails {
     return;
   }
 
-  calculate_new_delay(stop: DepartureStop): string {
-    return stop.delay
-      .plus(Duration.initFromTotalMinutes(this.w4mService.acceptedDelays()[stop.id]))
-      .format();
+  calculate_new_delay(stop : DepartureStop): string {
+    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.additionalDelaysAnySource()[stop.id])).format();
   }
 
   has_delay(stop_delay: Duration): Boolean {

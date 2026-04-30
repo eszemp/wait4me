@@ -1,4 +1,6 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, DestroyRef } from '@angular/core';
+import { timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Wait4MeButton } from '../wait4me-button/wait4me-button';
@@ -20,6 +22,7 @@ import { Duration } from '../../../shared/models/duration';
 export class ConnectionDetails {
   public tripService = inject(OJPTrip);
   public w4mService = inject(W4MPassengerService);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private router: Router) {
     const navigation = this.router.currentNavigation();
@@ -50,6 +53,15 @@ export class ConnectionDetails {
       if (lastTimedLeg) {
         this.tripService.destinationName.set(lastTimedLeg.alightStopName);
         this.tripService.destinationId.set(null);
+      }
+    });
+
+    timer(60000, 60000)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(() => {
+      if (this.tripService.selectedConnectionTrip()) {
+        console.log("update trip with realtime traffic info");
+        this.tripService.refineTrip();
       }
     });
   }
