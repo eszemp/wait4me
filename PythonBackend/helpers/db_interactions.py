@@ -3,6 +3,7 @@ from psycopg2.extras import RealDictCursor
 import uuid
 import os
 from dotenv import load_dotenv
+from delay_impact_analysis import get_delay_impact_rating
 
 load_dotenv()
 DB_CONFIG = {
@@ -57,9 +58,10 @@ def create_new_request(data):
                     outgoing_journey_ref, 
                     transfer_stop_ref,
                     scheduled_departure_time,
-                    requested_delay_min
+                    requested_delay_min,
+                    delay_impact
                 ) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s) """
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) """
      
     params = (request_id, 
               data['passenger_id'], 
@@ -67,7 +69,8 @@ def create_new_request(data):
               data['outgoing_journey_ref'], 
               data['transfer_stop_ref'],
               data['scheduled_departure_time'],
-              data['requested_delay']
+              data['requested_delay'],
+              get_delay_impact_rating(data)
               )
     
     db_transaction = post_to_db(command, params)
