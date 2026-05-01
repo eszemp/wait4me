@@ -3,7 +3,7 @@ from psycopg2.extras import RealDictCursor
 import uuid
 import os
 from dotenv import load_dotenv
-from delay_impact_analysis import get_delay_impact_rating
+from helpers.delay_impact_analysis import get_delay_impact_rating
 
 load_dotenv()
 DB_CONFIG = {
