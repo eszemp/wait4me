@@ -90,3 +90,28 @@
   background: transparent;
   box-sizing: border-box;
 }
+
+
+/* SMALL: First dot Green */
+/*TODO: green dot is not yet displayed... plus still show dot colors after acceptance of request.*/
+.rating-small .request-dot:nth-child(1) {
+  background-color: #28a745;
+}
+.rating-small .request-dot:nth-child(2) 
+.rating-small .request-dot:nth-child(3) {
+  background-color: transparent;
+}
+
+/* MEDIUM: First two dots Orange */
+.rating-medium .request-dot:nth-child(1),
+.rating-medium .request-dot:nth-child(2) {
+  background-color: #fd7e14;
+} 
+.rating-medium .request-dot:nth-child(3) {
+  background-color: transparent;
+}
+
+/* LARGE: All three dots Red */
+.rating-large .request-dot {
+  background-color: #dc3545;
+}

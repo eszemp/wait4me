@@ -718,7 +718,7 @@ export class OJPTrip extends OJPBase {
     const estimated = new Date(this.asString(estimatedTime)).getTime();
 
     const diffInMs = estimated - scheduled; // in ms
-    const delayInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const delayInMinutes = Math.ceil(diffInMs / (1000 * 60)); // TODO: minutes no rounding here: rounding up and rounding down leads to errors
 
     return Duration.initFromTotalMinutes(delayInMinutes);
   }
@@ -758,9 +758,21 @@ export class OJPTrip extends OJPBase {
     if (!(transferLeg.id === 1 || transferLeg.id === totalLegs)) {
       const previous_leg = timedLegs.find((leg) => leg.id === transferLeg.id - 1);
       const following_leg = timedLegs.find((leg) => leg.id === transferLeg.id + 1);
-      const arrival = previous_leg?.alightTimeEstimated;
-      const departure = following_leg?.boardTimeEstimated;
+      const arrival = previous_leg?.alightTimeEstimated ? previous_leg.alightTimeEstimated : previous_leg?.alightTimeTimetable;
+      let departure = null;
+      if (following_leg!.boardTimeEstimated.getMilliseconds() > following_leg!.boardTimeTimetable.getMilliseconds()) {
+        departure = following_leg?.boardTimeEstimated;
+      }
+      else {
+        departure = following_leg?.boardTimeTimetable;
+      }
+      console.log("CRITICAL TRANSFER CHECK");
+      console.log(arrival)
+      console.log(departure)
+      console.log(transferLeg.duration)
       if (!arrival || !departure) return false; // Safety fallback
+      console.log(transferLeg.duration.addToDate(arrival));
+      console.log(departure)
       return transferLeg.duration.addToDate(arrival) > departure;
     }
     return false;

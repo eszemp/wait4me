@@ -24,8 +24,13 @@
                 [class.selected]="this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef"
                 (click)="this.process_requests_for_this_stop()"
             >
-                <span class="request-delay">+ {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min</span>
-                <span class="request-dots" aria-hidden="true">
+                <span class="request-delay">
+                    + {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min
+                </span>
+                <span class="request-dots" 
+                    aria-hidden="true"
+                    [class]="'rating-' + getImpactRating()"
+                >
                     <span class="request-dot"></span>
                     <span class="request-dot"></span>
                     <span class="request-dot"></span>
