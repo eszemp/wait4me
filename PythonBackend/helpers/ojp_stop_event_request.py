@@ -2,7 +2,7 @@ import os
 import requests
 import json
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import geopandas as gpd
 from shapely.geometry import Point
@@ -15,10 +15,13 @@ API_URL = 'https://odpch-api.clients.liip.ch/ojp20-beta'
 def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
 
     dt_object = datetime.fromisoformat(depTime)
-    depTime = dt_object.isoformat() # ISO string required 
+    depTime = dt_object.isoformat()
+    dt_object = dt_object - timedelta(minutes=3)
+    searchTime = dt_object.isoformat() # ensure the connection is actually present in the search results
 
     # get line (stop event request)
-    response = post_stop_event_request(depStopRef, depTime)
+    response = post_stop_event_request(depStopRef, searchTime)
+    # TODO: handle None returns (error case)
     service_name, onward_stops = read_response(response, depTime, journeyRef)
 
     buffer_times = get_buffer_time_per_stop(service_name, onward_stops)
@@ -107,11 +110,7 @@ def read_response(xml, reqDepTime, reqJourneyRef):
     namespaces = {'ojp': 'http://www.vdv.de/ojp', 'siri': 'http://www.siri.org.uk/siri'}
 
     root = ET.fromstring(xml)
-    first_ser = root.find('.//ojp:StopEventResult', namespaces)
-    if first_ser is None:
-        print("No StopEventResult found in the response.")
-        return
-    
+
     stop_context_lookup = {}
     places = root.findall('.//ojp:StopEventResponseContext/ojp:Places/ojp:Place', namespaces)
     
@@ -127,45 +126,55 @@ def read_response(xml, reqDepTime, reqJourneyRef):
                 'Lon': geo.find('siri:Longitude', namespaces).text if geo is not None else "0.0",
                 'Lat': geo.find('siri:Latitude', namespaces).text if geo is not None else "0.0"
             }
-    
-    departure_time = first_ser.find('.//ojp:ThisCall/ojp:CallAtStop/ojp:ServiceDeparture/ojp:TimetabledTime', namespaces)
-    departure_time = departure_time.text if departure_time is not None else "N/A"
 
-    journey_ref = first_ser.find('.//ojp:Service/ojp:JourneyRef', namespaces)
-    journey_ref = journey_ref.text if journey_ref is not None else "N/A"
-
-    # ensure the correct line has been found
-    assert datetime.fromisoformat(departure_time) == datetime.fromisoformat(reqDepTime)
-    assert journey_ref == reqJourneyRef
-
-    service_name_element = first_ser.find('.//ojp:Service/ojp:PublishedServiceName/ojp:Text', namespaces)
-    service_name = service_name_element.text if service_name_element is not None else "N/A"
-
-    onward_calls_data = []
-    onward_calls = first_ser.findall('.//ojp:OnwardCall/ojp:CallAtStop', namespaces)
-    
-    for call in onward_calls:
-        stop_point_ref = call.find('siri:StopPointRef', namespaces).text
-        stop_name = call.find('.//ojp:StopPointName/ojp:Text', namespaces).text
-        arrival_time = call.find('.//ojp:ServiceArrival/ojp:TimetabledTime', namespaces).text
-
-        context = stop_context_lookup.get(stop_point_ref, {})
+    stop_event_results = root.findall('.//ojp:StopEventResult', namespaces)
+    for ser in stop_event_results:
+        if ser is None:
+            print("No StopEventResult found in the response.")
+            return
         
-        onward_calls_data.append({
-            'StopName': stop_name,
-            'StopPointRef': stop_point_ref,
-            'StopPlaceRef': context.get('ParentRef', 'N/A'),
-            'Longitude': context.get('Lon', '0.0'),
-            'Latitude': context.get('Lat', '0.0'),
-            'TimetabledArrival': arrival_time
-        })
+        departure_time = ser.find('.//ojp:ThisCall/ojp:CallAtStop/ojp:ServiceDeparture/ojp:TimetabledTime', namespaces)
+        departure_time = departure_time.text if departure_time is not None else "N/A"
+
+        journey_ref = ser.find('.//ojp:Service/ojp:JourneyRef', namespaces)
+        journey_ref = journey_ref.text if journey_ref is not None else "N/A"
+
+        # ensure the correct line has been found
+        print(datetime.fromisoformat(departure_time))
+        print(datetime.fromisoformat(reqDepTime))
+        print(journey_ref)
+        print(reqJourneyRef)
+        if (datetime.fromisoformat(departure_time) != datetime.fromisoformat(reqDepTime)) or (journey_ref != reqJourneyRef):
+            continue
+
+        service_name_element = ser.find('.//ojp:Service/ojp:PublishedServiceName/ojp:Text', namespaces)
+        service_name = service_name_element.text if service_name_element is not None else "N/A"
+
+        onward_calls_data = []
+        onward_calls = ser.findall('.//ojp:OnwardCall/ojp:CallAtStop', namespaces)
+        
+        for call in onward_calls:
+            stop_point_ref = call.find('siri:StopPointRef', namespaces).text
+            stop_name = call.find('.//ojp:StopPointName/ojp:Text', namespaces).text
+            arrival_time = call.find('.//ojp:ServiceArrival/ojp:TimetabledTime', namespaces).text
+
+            context = stop_context_lookup.get(stop_point_ref, {})
+            
+            onward_calls_data.append({
+                'StopName': stop_name,
+                'StopPointRef': stop_point_ref,
+                'StopPlaceRef': context.get('ParentRef', 'N/A'),
+                'Longitude': context.get('Lon', '0.0'),
+                'Latitude': context.get('Lat', '0.0'),
+                'TimetabledArrival': arrival_time
+            })
 
 
-    print(f"Service Name: {service_name}")
-    for entry in onward_calls_data:
-        print(f" - {entry['StopName']} (Parent: {entry['StopPlaceRef']}) @ [{entry['Latitude']}, {entry['Longitude']}]")
+        print(f"Service Name: {service_name}")
+        for entry in onward_calls_data:
+            print(f" - {entry['StopName']} (Parent: {entry['StopPlaceRef']}) @ [{entry['Latitude']}, {entry['Longitude']}]")
 
-    return service_name, onward_calls_data
+        return service_name, onward_calls_data
     
 
 
@@ -186,7 +195,7 @@ def post_stop_event_request(depStopRef, depTime):
                         <DepArrTime>{depTime}</DepArrTime>
                     </Location>
                     <Params>
-                        <NumberOfResults>{8}</NumberOfResults>
+                        <NumberOfResults>{20}</NumberOfResults>
                         <IncludeOnwardCalls>1</IncludeOnwardCalls>
                         <IncludeRealtimeData>full</IncludeRealtimeData>
                     </Params>
