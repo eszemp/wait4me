@@ -687,6 +687,7 @@ export class OJPTrip extends OJPBase {
     const arrival = prev_leg.alightTimeEstimated;
     const actual_arrival = transfer_leg.duration.addToDate(arrival);
     const departure = next_leg.boardTimeEstimated;
+    const departure_timetable = next_leg.boardTimeTimetable;
     // TODO: maybe adjust so its rounded up to the nearest half minute (later)
     const req_delay_min = Math.ceil(
       Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60),
@@ -702,7 +703,8 @@ export class OJPTrip extends OJPBase {
       incomingJourneyRef: incomingServiceRef ?? '',
       outgoingJourneyRef: outgoingServiceRef ?? '',
       transferStopRef: Number(transferStopRef),
-      scheduledOutgoingDeparture: departure,
+      scheduledOutgoingDeparture: departure_timetable,
+      actualOutgoingDeparture: departure,
       requestedDelay: Duration.initFromTotalMinutes(req_delay_min),
     };
   }
