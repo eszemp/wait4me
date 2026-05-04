@@ -7,10 +7,10 @@ import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 
 @Component({
-    selector: 'w4m-button',
-    imports: [CommonModule],
-    templateUrl: './wait4me-button.html',
-    styleUrls: ['./wait4me-button.css', '../../../app.css'],
+  selector: 'w4m-button',
+  imports: [CommonModule],
+  templateUrl: './wait4me-button.html',
+  styleUrls: ['./wait4me-button.css', '../../../app.css'],
 })
 export class Wait4MeButton {
     public w4mService = inject(W4MPassengerService);

@@ -8,9 +8,8 @@ import { firstValueFrom } from 'rxjs';
   selector: 'app-destination-autocomplete',
   imports: [ReactiveFormsModule],
   templateUrl: './destination-autocomplete.component.html',
-  styleUrl: './destination-autocomplete.component.css'
+  styleUrl: './destination-autocomplete.component.css',
 })
-
 export class DestinationAutocompleteComponent {
   inputId = input.required<string>();
   placeholder = input.required<string>();
@@ -26,32 +25,32 @@ export class DestinationAutocompleteComponent {
   constructor(private ojpService: OJPLocation) {
     //if tripService.originName and destinationName are set, but Ids not -> determine and set ids
     (async () => {
-        // 1. Handle Origin
-        const originName = this.tripService.originName();
-        if (originName) {
-          console.log("searching stopref for origin...");
-          const results = await this.searchForLocation(originName);
-          
-          if (results.length > 0) {
-            const origin_id = results[0].stopPlaceRef;
-            this.tripService.originId.set(origin_id);
-            console.log("Origin result:", origin_id);
-          }
-        }
+      // 1. Handle Origin
+      const originName = this.tripService.originName();
+      if (originName) {
+        console.log('searching stopref for origin...');
+        const results = await this.searchForLocation(originName);
 
-        // 2. Handle Destination
-        const destName = this.tripService.destinationName();
-        if (destName) {
-          console.log("searching stopref for destination...");
-          const results = await this.searchForLocation(destName);
-          
-          if (results.length > 0) {
-            const destination_id = results[0].stopPlaceRef;
-            this.tripService.destinationId.set(destination_id);
-            console.log("Destination result:", destination_id);
-          }
+        if (results.length > 0) {
+          const origin_id = results[0].stopPlaceRef;
+          this.tripService.originId.set(origin_id);
+          console.log('Origin result:', origin_id);
         }
-      })();
+      }
+
+      // 2. Handle Destination
+      const destName = this.tripService.destinationName();
+      if (destName) {
+        console.log('searching stopref for destination...');
+        const results = await this.searchForLocation(destName);
+
+        if (results.length > 0) {
+          const destination_id = results[0].stopPlaceRef;
+          this.tripService.destinationId.set(destination_id);
+          console.log('Destination result:', destination_id);
+        }
+      }
+    })();
   }
 
   async searchForLocation(loc_name: string): Promise<LocationSuggestion[]> {
@@ -66,8 +65,9 @@ export class DestinationAutocompleteComponent {
   }
 
   async onQueryChange(query: string): Promise<void> {
-    if (query.length <2) { //only start searching from min. 2 letters
-      this.destinations = []
+    if (query.length < 2) {
+      //only start searching from min. 2 letters
+      this.destinations = [];
       return;
     }
     this.destinations = await this.searchForLocation(query);
@@ -77,11 +77,11 @@ export class DestinationAutocompleteComponent {
   selectDestination(destination: LocationSuggestion): void {
     this.control().setValue(destination.stopPlaceName);
     this.showSuggestions = false;
-    if (this.placeholder() == "From") {
+    if (this.placeholder() == 'From') {
       this.tripService.originId.set(destination.stopPlaceRef);
       this.tripService.originName.set(destination.stopPlaceName);
     }
-    if (this.placeholder() == "To") {
+    if (this.placeholder() == 'To') {
       this.tripService.destinationId.set(destination.stopPlaceRef);
       this.tripService.destinationName.set(destination.stopPlaceName);
     }
@@ -112,7 +112,4 @@ export class DestinationAutocompleteComponent {
     this.tripService.selectedConnectionTrip.set(null);
     this.tripService.isLoadingTrips.set(false);
   }
-  
 }
-
-

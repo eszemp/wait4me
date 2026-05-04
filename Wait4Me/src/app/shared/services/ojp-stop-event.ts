@@ -1,14 +1,17 @@
-import { Injectable, inject} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { from, map, Observable, firstValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { LocationInformationRequest, SDK, StopEventRequest } from 'ojp-sdk';
-import type { DepartureLine, DepartureStop, StopLookupResult, NearbyStopLookupResult } from '../types/DriverDeparturesTypes';
+import type {
+  DepartureLine,
+  DepartureStop,
+  StopLookupResult,
+  NearbyStopLookupResult,
+} from '../types/DriverDeparturesTypes';
 import type { InternationalTextSchema } from 'ojp-shared-types';
 import { OJPBase } from './ojp-base';
 import { Duration } from '../models/duration';
 import { OJPLocation } from './ojp-location';
-
-
 
 @Injectable({
   providedIn: 'root',
@@ -25,11 +28,11 @@ export class OJPStopEvent extends OJPBase {
 
   locationService = inject(OJPLocation);
 
-  private async getStopRef(stopName : string): Promise<string> {
-      const suggestions = await firstValueFrom(
-      this.locationService.getLocationInformation(stopName, 1)
-      );
-      return suggestions[0]?.stopPlaceRef ?? '';
+  private async getStopRef(stopName: string): Promise<string> {
+    const suggestions = await firstValueFrom(
+      this.locationService.getLocationInformation(stopName, 1),
+    );
+    return suggestions[0]?.stopPlaceRef ?? '';
   }
 
   getDepartingLines(
@@ -53,7 +56,7 @@ export class OJPStopEvent extends OJPBase {
 
         const rawResults = response.value.stopEventResult ?? [];
 
-        const rows = await Promise.all( 
+        const rows = await Promise.all(
           rawResults.map(async (result) => {
             const service = result.stopEvent?.service;
             const callAtStop = result.stopEvent?.thisCall?.callAtStop;
@@ -73,9 +76,14 @@ export class OJPStopEvent extends OJPBase {
             //  callAtStop?.serviceDeparture?.estimatedTime ??
             //    callAtStop?.serviceDeparture?.timetabledTime,
             //);
-            const departureTimetable = new Date(this.asString(callAtStop?.serviceDeparture?.timetabledTime));
-            const departureEstimated = new Date(this.asString(callAtStop?.serviceDeparture?.estimatedTime));
-            const departureDelayInMinutes = departureEstimated.getMinutes() - departureTimetable.getMinutes();
+            const departureTimetable = new Date(
+              this.asString(callAtStop?.serviceDeparture?.timetabledTime),
+            );
+            const departureEstimated = new Date(
+              this.asString(callAtStop?.serviceDeparture?.estimatedTime),
+            );
+            const departureDelayInMinutes =
+              departureEstimated.getMinutes() - departureTimetable.getMinutes();
             const departureDelay = Duration.initFromTotalMinutes(departureDelayInMinutes);
             //const arrival = this.asString(
             //  lastOnwardCall?.serviceArrival?.estimatedTime ??
@@ -85,53 +93,74 @@ export class OJPStopEvent extends OJPBase {
             //    callAtStop?.serviceArrival?.estimatedTime ??
             //    callAtStop?.serviceArrival?.timetabledTime,
             //);
-            const arrivalTimetable = new Date(this.asString(lastOnwardCall?.serviceArrival?.timetabledTime));
-            const arrivalEstimated = new Date(this.asString(lastOnwardCall?.serviceArrival?.estimatedTime));
-            const arrivalDelayInMinutes = arrivalEstimated.getMinutes() - arrivalTimetable.getMinutes();
+            const arrivalTimetable = new Date(
+              this.asString(lastOnwardCall?.serviceArrival?.timetabledTime),
+            );
+            const arrivalEstimated = new Date(
+              this.asString(lastOnwardCall?.serviceArrival?.estimatedTime),
+            );
+            const arrivalDelayInMinutes =
+              arrivalEstimated.getMinutes() - arrivalTimetable.getMinutes();
             const arrivalDelay = Duration.initFromTotalMinutes(arrivalDelayInMinutes);
-            const departurePlatformOrStop = this.getQuayText(callAtStop?.estimatedQuay) ?? this.getQuayText(callAtStop?.plannedQuay);
+            const departurePlatformOrStop =
+              this.getQuayText(callAtStop?.estimatedQuay) ??
+              this.getQuayText(callAtStop?.plannedQuay);
 
             const currentStopName = this.asString(this.readTextValue(callAtStop?.stopPointName));
             const currentStopRef = await this.getStopRef(currentStopName);
             //    callAtStop?.serviceArrival?.estimatedTime ??
             //    callAtStop?.serviceArrival?.timetabledTime,
             //    TODO: see below
-            const currentStopTimeTimetable = new Date(this.asString(callAtStop?.serviceDeparture?.timetabledTime));
-            const currentStopTimeEstimated = new Date(this.asString(callAtStop?.serviceDeparture?.estimatedTime ));
-            const currentStopDelayInMinutes = currentStopTimeEstimated.getMinutes() - currentStopTimeTimetable.getMinutes();
+            const currentStopTimeTimetable = new Date(
+              this.asString(callAtStop?.serviceDeparture?.timetabledTime),
+            );
+            const currentStopTimeEstimated = new Date(
+              this.asString(callAtStop?.serviceDeparture?.estimatedTime),
+            );
+            const currentStopDelayInMinutes =
+              currentStopTimeEstimated.getMinutes() - currentStopTimeTimetable.getMinutes();
             const currentStopDelay = Duration.initFromTotalMinutes(currentStopDelayInMinutes);
 
             const onwardStopsPromises = onwardCalls.map(async (onwardCall) => {
-                const onwardStop = onwardCall.callAtStop;
-                const stopName = this.asString(this.readTextValue(onwardStop?.stopPointName));
-                const stopRef = await this.getStopRef(stopName);
-                // TODO: include serviceArrival at Stops as well?
-                // onwardStop?.serviceArrival?.estimatedTime ??
-                // onwardStop?.serviceArrival?.timetabledTime ??
-                const stopTimeTimetable = new Date(this.asString(onwardStop?.serviceDeparture?.timetabledTime));
-                const stopTimeEstimated = new Date(this.asString(onwardStop?.serviceDeparture?.estimatedTime));
-                const stopDelayInMinutes = stopTimeEstimated.getMinutes() - stopTimeTimetable.getMinutes();
-                const stopDelay = Duration.initFromTotalMinutes(stopDelayInMinutes);
-                if (!stopName) {
-                  return null;
-                }
+              const onwardStop = onwardCall.callAtStop;
+              const stopName = this.asString(this.readTextValue(onwardStop?.stopPointName));
+              const stopRef = await this.getStopRef(stopName);
+              // TODO: include serviceArrival at Stops as well?
+              // onwardStop?.serviceArrival?.estimatedTime ??
+              // onwardStop?.serviceArrival?.timetabledTime ??
+              const stopTimeTimetable = new Date(
+                this.asString(onwardStop?.serviceDeparture?.timetabledTime),
+              );
+              const stopTimeEstimated = new Date(
+                this.asString(onwardStop?.serviceDeparture?.estimatedTime),
+              );
+              const stopDelayInMinutes =
+                stopTimeEstimated.getMinutes() - stopTimeTimetable.getMinutes();
+              const stopDelay = Duration.initFromTotalMinutes(stopDelayInMinutes);
+              if (!stopName) {
+                return null;
+              }
 
-                return {
-                  id: stopRef!,
-                  name: stopName,
-                  timeTimetable: stopTimeTimetable,
-                  timeEstimated: stopTimeEstimated,
-                  delay: stopDelay,
-                } satisfies DepartureStop;
-              })
+              return {
+                id: stopRef!,
+                name: stopName,
+                timeTimetable: stopTimeTimetable,
+                timeEstimated: stopTimeEstimated,
+                delay: stopDelay,
+              } satisfies DepartureStop;
+            });
 
-              const resolvedOnwardStops = (await Promise.all(onwardStopsPromises))
-                .filter((s): s is DepartureStop => s !== null);
+            const resolvedOnwardStops = (await Promise.all(onwardStopsPromises)).filter(
+              (s): s is DepartureStop => s !== null,
+            );
 
             const stops: DepartureStop[] = [
               {
                 id: currentStopRef!,
-                name: currentStopName || this.asString(this.readTextValue(service?.originText)) || 'Current stop',
+                name:
+                  currentStopName ||
+                  this.asString(this.readTextValue(service?.originText)) ||
+                  'Current stop',
                 timeTimetable: currentStopTimeTimetable,
                 timeEstimated: currentStopTimeEstimated,
                 delay: currentStopDelay,
@@ -155,7 +184,7 @@ export class OJPStopEvent extends OJPBase {
               departurePlatformOrStop,
               stops,
             };
-          })
+          }),
         );
 
         const finalRows = rows
@@ -195,7 +224,11 @@ export class OJPStopEvent extends OJPBase {
   }
 
   searchStopsByName(searchTerm: string, maxResults = 8): Observable<StopLookupResult[]> {
-    const request = LocationInformationRequest.initWithLocationName(searchTerm, ['stop'], maxResults);
+    const request = LocationInformationRequest.initWithLocationName(
+      searchTerm,
+      ['stop'],
+      maxResults,
+    );
 
     return from(request.fetchResponse(this.sdk)).pipe(
       map((response) => {
@@ -369,7 +402,10 @@ export class OJPStopEvent extends OJPBase {
 
     const a =
       Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-      Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2) * Math.cos(sourceLatRad) * Math.cos(targetLatRad);
+      Math.sin(deltaLon / 2) *
+        Math.sin(deltaLon / 2) *
+        Math.cos(sourceLatRad) *
+        Math.cos(targetLatRad);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return earthRadius * c;

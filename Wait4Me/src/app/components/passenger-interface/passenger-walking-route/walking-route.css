@@ -20,6 +20,36 @@
   height: 100%;
 }
 
+.walking-route-status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  border-radius: 20px;
+  color: var(--fir-green);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
+.walking-route-status--empty {
+  font-size: 1.05rem;
+}
+
+.walking-route-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #3951482b;
+  border-top-color: var(--fir-green);
+  animation: walking-route-spin 0.9s linear infinite;
+}
+
 .walking-route-map {
   border: 2px solid var(--fir-green);
   width: 100%;
@@ -42,4 +72,10 @@
 .back-button img {
   width: 25px;
   height: 25px;
+}
+
+@keyframes walking-route-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

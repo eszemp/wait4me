@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import maplibregl from 'maplibre-gl';
 import type * as GeoJSON from 'geojson';
@@ -31,6 +31,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
   private readonly binColors = ['#b2182b', '#ef8a62', '#fddbc7', '#d1e5f0', '#67a9cf', '#2166ac'];
   private readonly sourceId = 'station-statistics-source';
   private readonly pointsLayerId = 'station-statistics-points';
+  protected loadingState = signal<'loading' | 'ready'>('loading');
   private map: maplibregl.Map | null = null;
 
   readonly legendItems = this.histogramBuckets.map((bucket, index) => ({
@@ -43,8 +44,8 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json',
-      center: [8.65, 47.02],
-      zoom: 8.5,
+      center: [8.23, 46.8],
+      zoom: 7.5,
       minZoom: 5,
       maxZoom: 18,
       pitch: 0,
@@ -81,6 +82,9 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     }
 
     const geojson = this.colorizeByMaxBin(await response.json());
+    if (!geojson.features || geojson.features.length === 0) {
+      return;
+    }
 
     map.addSource(this.sourceId, {
       type: 'geojson',
@@ -99,6 +103,8 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
         'circle-stroke-width': 1,
       },
     });
+
+    this.loadingState.set('ready');
 
     map.on('mouseenter', this.pointsLayerId, () => {
       map.getCanvas().style.cursor = 'pointer';
@@ -146,7 +152,11 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
         </div>
       `;
 
-      new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'station-statistics-popup' })
+      new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        className: 'station-statistics-popup',
+      })
         .setLngLat(coordinates)
         .setHTML(content)
         .addTo(map);

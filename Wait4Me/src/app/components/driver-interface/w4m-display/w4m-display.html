@@ -59,10 +59,36 @@
             </div>
         }
     }
-    @else {
-        <div class="request none">
-            <span>{{this.state}}</span>
+  } @else if (this.hasAcceptedRequestForStop()) {
+    @if (this.hasMultipleRequestsForStop()) {
+      <div class="request-stack">
+        <div class="request open accepted stacked-back" aria-hidden="true"></div>
+        <div class="request open accepted stacked-front">
+          <span class="request-delay"
+            >+ {{ this.w4mService.acceptedDelays()[this.stopRef] }} min</span
+          >
+          <span class="request-dots" aria-hidden="true">
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+          </span>
         </div>
+      </div>
+    } @else {
+      <div class="request open accepted">
+        <span class="request-delay"
+          >+ {{ this.w4mService.acceptedDelays()[this.stopRef] }} min</span
+        >
+        <span class="request-dots" aria-hidden="true">
+          <span class="request-dot"></span>
+          <span class="request-dot"></span>
+          <span class="request-dot"></span>
+        </span>
+      </div>
     }
+  } @else {
+    <div class="request none">
+      <span>{{ this.state }}</span>
+    </div>
+  }
 </div>
-

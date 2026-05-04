@@ -51,4 +51,4 @@ export type CriticalTransfer = {
   actualOutgoingDeparture: Date;
   scheduledOutgoingDeparture: Date;
   requestedDelay: Duration;
-}
+};

@@ -6,12 +6,10 @@ import { environment } from '../../../environments/environments';
 @Injectable({
   providedIn: 'root',
 })
-
 export abstract class OJPBase {
   protected apiUrl = 'https://odpch-api.clients.liip.ch/ojp20-beta';
   protected requestorRef = 'Wait4Me';
   protected apiKey = environment.apiKey;
-
 
   protected getHeaders(): HttpHeaders {
     return new HttpHeaders()
@@ -33,5 +31,3 @@ export abstract class OJPBase {
     </OJP>`;
   }
 }
-
-

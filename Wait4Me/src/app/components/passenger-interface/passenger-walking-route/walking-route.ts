@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, effect, ElementRef, inject, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import maplibregl from 'maplibre-gl';
@@ -23,6 +32,7 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
 
   public tripService = inject(OJPTrip);
   public w4mService = inject(W4MPassengerService);
+  protected routeViewState = signal<'loading' | 'ready' | 'empty'>('loading');
   private map: maplibregl.Map | null = null;
   private readonly destroy$ = new Subject<void>();
   private readonly walkingRouteSourceId = 'walking-route-source';
@@ -71,8 +81,8 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
       style: 'https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json',
-      center: [8.65, 47.02],
-      zoom: 8.5,
+      center: [8.23, 46.8],
+      zoom: 7.5,
       minZoom: 5,
       maxZoom: 18,
       pitch: 0,
@@ -95,8 +105,11 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
     const map = this.map;
     const trip = this.trip;
     if (!map || !trip || this.transferLegId === null) {
+      this.routeViewState.set('empty');
       return;
     }
+
+    this.routeViewState.set('loading');
 
     this.tripService
       .getTransferWalkingRoute(trip, this.transferLegId)
@@ -114,7 +127,10 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
   /**
    * Writes the walking route GeoJSON into the map source and fits the viewport to it.
    */
-  private updateWalkingRouteSource(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
+  private updateWalkingRouteSource(geojson: {
+    type: 'FeatureCollection';
+    features: unknown[];
+  }): void {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
       return;
@@ -125,13 +141,17 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
     source?.setData(geojson as GeoJSON.FeatureCollection);
 
     const coordinates = geojson.features.flatMap((feature) => {
-      const geometry = (feature as { geometry?: { type?: string; coordinates?: unknown } }).geometry;
+      const geometry = (feature as { geometry?: { type?: string; coordinates?: unknown } })
+        .geometry;
       if (geometry?.type !== 'LineString' || !Array.isArray(geometry.coordinates)) {
         return [];
       }
       return geometry.coordinates.filter(
         (coord): coord is [number, number] =>
-          Array.isArray(coord) && coord.length >= 2 && Number.isFinite(coord[0]) && Number.isFinite(coord[1]),
+          Array.isArray(coord) &&
+          coord.length >= 2 &&
+          Number.isFinite(coord[0]) &&
+          Number.isFinite(coord[1]),
       );
     });
 
@@ -141,7 +161,11 @@ export class WalkingRoute implements AfterViewInit, OnDestroy {
         new maplibregl.LngLatBounds(coordinates[0], coordinates[0]),
       );
       map.fitBounds(bounds, { padding: 40, maxZoom: 17 });
+      this.routeViewState.set('ready');
+      return;
     }
+
+    this.routeViewState.set('empty');
   }
 
   /**

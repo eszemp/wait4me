@@ -145,7 +145,10 @@
   overflow: hidden;
 }
 
-.time-start, .time-end, .location-start, .location-end {
+.time-start,
+.time-end,
+.location-start,
+.location-end {
   font-size: 1.1rem;
   font-weight: 500;
   white-space: nowrap;
@@ -160,7 +163,8 @@
   text-overflow: ellipsis;
 }
 
-.time-start, .time-end {
+.time-start,
+.time-end {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -173,4 +177,3 @@
 .time-column {
   flex-shrink: 0;
 }
-

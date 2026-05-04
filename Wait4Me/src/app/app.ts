@@ -7,6 +7,6 @@ import { RouterModule, RouterOutlet } from '@angular/router';
   selector: 'app-root',
   imports: [CommonModule, ReactiveFormsModule, RouterOutlet, RouterModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {}

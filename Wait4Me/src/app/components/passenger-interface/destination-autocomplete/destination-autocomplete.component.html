@@ -20,7 +20,9 @@
       (click)="clearInput()"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7a1 1 0 0 0-1.41 1.42L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.88a1 1 0 0 0 0-1.41Z"/>
+        <path
+          d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7a1 1 0 0 0-1.41 1.42L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.88a1 1 0 0 0 0-1.41Z"
+        />
       </svg>
     </button>
   }
@@ -29,7 +31,11 @@
     <ul class="suggestions-list">
       @for (destination of destinations; track destination) {
         <li>
-          <button type="button" class="suggestion-item" (mousedown)="selectDestination(destination)">
+          <button
+            type="button"
+            class="suggestion-item"
+            (mousedown)="selectDestination(destination)"
+          >
             {{ destination.stopPlaceName }}
           </button>
         </li>
