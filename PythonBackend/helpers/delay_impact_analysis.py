@@ -44,6 +44,8 @@ def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
 
     # get line (stop event request)
     response = post_stop_event_request(depStopRef, searchTime)
+    if not response:
+        return [60.0]
     if read_response(response, depTime, journeyRef)==None:
         return [60.0]
     service_name, onward_stops = read_response(response, depTime, journeyRef)
