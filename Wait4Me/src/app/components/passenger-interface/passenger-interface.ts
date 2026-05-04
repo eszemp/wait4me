@@ -111,7 +111,6 @@ export class PassengerInterface {
     this.router.navigate(['/passenger/connection-details'], {
       state: { selectedTrip: trip },
     });
-    // TODO: W4M if no active request, make sure w4m button is disabled when a new connection is selected
     return;
   }
 }

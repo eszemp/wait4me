@@ -113,6 +113,9 @@ export class Wait4MeDisplay {
       this.state = 'No requests';
       console.log('no longer in edit mode, new_state: ', this.state);
     }
-    return;
-  }
+
+    getImpactRating(): string {
+        const delay = this.w4mService.smallestRequestedDelays()[this.stopRef];
+        return this.w4mService.get_delay_impact_rating(this.stopRef, delay);
+    }
 }

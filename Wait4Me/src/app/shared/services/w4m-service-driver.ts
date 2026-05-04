@@ -18,6 +18,7 @@ export class W4MDriverService {
   public additionalDelaysAnySource: WritableSignal<{ [stopRef: string]: number }> = signal({});
   public declinedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
   public stopSequence: WritableSignal<string[]> = signal([]);
+  public delayImpactRating: WritableSignal<{ [stopRef: string]: { [delay: number]: string } }> = signal({}); 
 
   public activeRequestIds = computed(() => {
     const stopRef = this.activeStopRef();
@@ -53,19 +54,21 @@ export class W4MDriverService {
       }
 
       if (response.incoming_requests) {
-        const requestsByDelay = response.incoming_requests.reduce(
-          (acc: { [key: number]: string[] }, data: any) => {
-            const minutes = data.requested_delay_min;
-            if (!acc[minutes]) {
-              acc[minutes] = [];
-            }
-            acc[minutes].push(data.request_id);
-            return acc;
-          },
-          {},
-        );
+        const requestsByDelay: { [key: number]: string[] } = {};
+        const impactsByDelay: { [key: number]: string } = {};
 
-        await this.handle_pending_requests(requestsByDelay, stop_ref);
+        response.incoming_requests.forEach((data: any) => {
+          const minutes = data.requested_delay_min;
+          if (!requestsByDelay[minutes]) {
+            requestsByDelay[minutes] = [];
+            // Store the impact rating for this specific delay bucket
+            impactsByDelay[minutes] = data.delay_impact; 
+          }
+          requestsByDelay[minutes].push(data.request_id);
+        });
+
+        await this.handle_pending_requests(requestsByDelay, impactsByDelay, stop_ref);
+
       }
     } catch (error) {
       console.error('DB Query of all requests failed:', error);
@@ -97,6 +100,7 @@ export class W4MDriverService {
           // If the bucket is now empty, remove the delay key entirely
           if (updatedStopData[delay].length === 0) {
             delete updatedStopData[delay];
+            this.cleanupStopData(stop_ref, delay);
           }
         }
       });
@@ -132,9 +136,11 @@ export class W4MDriverService {
   }
 
   private async handle_pending_requests(
-    requestsByDelay: { [key: number]: string[] },
-    stop_ref: string,
+    requestsByDelay: { [key: number]: string[] }, 
+    impactsByDelay: { [key: number]: string }, 
+    stop_ref: string
   ) {
+
     // handle pending requests by comparing to already handled delays
     for (const delayStr of Object.keys(requestsByDelay)) {
       const delay = Number(delayStr);
@@ -188,6 +194,12 @@ export class W4MDriverService {
         // CREATE: New entry for this stop
         newState[stop_ref] = requestsByDelay;
       }
+      return newState;
+    });
+
+    this.delayImpactRating.update(state => {
+      const newState = { ...state };
+      newState[stop_ref] = { ...(newState[stop_ref] ?? {}), ...impactsByDelay };
       return newState;
     });
 
@@ -248,6 +260,7 @@ export class W4MDriverService {
       const newState = { ...state };
       const newStopMap = { ...newState[stopRef] };
       delete newStopMap[delay];
+      this.cleanupStopData(stopRef, delay);
       newState[stopRef] = newStopMap;
       return newState;
     });
@@ -332,4 +345,32 @@ export class W4MDriverService {
     await this.closeEditMode();
     return;
   }
+
+  private cleanupStopData(stop_ref: string, delay: number) {
+    // Remove impact rating if no IDs remain for that delay
+    this.delayImpactRating.update(state => {
+      if (!state[stop_ref] || state[stop_ref][delay] === undefined) return state;
+      
+      const newState = { ...state };
+      const updatedStopImpacts = { ...newState[stop_ref] };
+      
+      // Check if there are still active requests for this delay
+      const remainingRequests = this.requestIds()[stop_ref]?.[delay] || [];
+      if (remainingRequests.length === 0) {
+        delete updatedStopImpacts[delay];
+      }
+      
+      if (Object.keys(updatedStopImpacts).length === 0) {
+        delete newState[stop_ref];
+      } else {
+        newState[stop_ref] = updatedStopImpacts;
+      }
+      return newState;
+    });
+  }
+
+  get_delay_impact_rating(stopRef: string, delay: number) : string {
+    return this.delayImpactRating()[stopRef][delay];
+  }
+  
 }

@@ -48,6 +48,7 @@ export type CriticalTransfer = {
   incomingJourneyRef: string;
   outgoingJourneyRef: string;
   transferStopRef: number;
+  actualOutgoingDeparture: Date;
   scheduledOutgoingDeparture: Date;
   requestedDelay: Duration;
 };
