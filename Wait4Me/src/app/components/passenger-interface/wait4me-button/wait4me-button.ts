@@ -140,7 +140,6 @@ export class Wait4MeButton {
     }
 
     cancel_request() {
-        // TODO: Pop Up asking if user is sure
         console.log('user wants to cancel');
         this.w4mService.cancel_request();
     }

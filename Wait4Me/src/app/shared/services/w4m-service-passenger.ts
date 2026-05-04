@@ -51,8 +51,6 @@ export class W4MPassengerService {
       return;
     }
     // TODO: geofencing
-    // TODO: also check DB to see if there is already a denied request for this transferstop and outgoing service for the same or a smaller delay.
-    // TODO: aslo check if its in the past
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
     this.trip = trip;
@@ -61,11 +59,10 @@ export class W4MPassengerService {
   }
 
   disable_if_not_active() {
-    // TODO: what to do with accepted request?
     if (this.status()==='pending') {
       return;
     }
-    // else if status is inactive / enabled / declined / expired, reset to inactive
+    // else if status is inactive / enabled / accepted / declined / expired, reset to inactive so that a new request can be sent
     this.status.set('inactive');
   }
 
