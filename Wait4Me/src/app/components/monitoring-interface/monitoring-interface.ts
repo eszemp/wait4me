@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { StationStatisticsLayerComponent } from './station-statistics/station-statistics-layer';
 import { DelayEffectsOnLinesLayerComponent } from './delay-effects/delay-effects-on-lines-layer';
 
@@ -21,5 +22,15 @@ export class MonitoringInterface {
     { id: 'station-statistics', label: 'Station statistics' },
   ];
 
+  stopRef: string | null = null;
+  depTime: string | Date | null = null;
   selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';
+
+  constructor(private router: Router) {
+    const navigation = this.router.currentNavigation();
+    this.stopRef = navigation?.extras.state?.['stopRef'] ?? null;
+    this.depTime = navigation?.extras.state?.['depTime'] ?? null;
+  }
+
+  
 }

@@ -14,7 +14,10 @@
         <app-station-statistics-layer />
       }
       @case ('delay-effects-on-lines') {
-        <app-delay-effects-on-lines-layer />
+        <app-delay-effects-on-lines-layer
+          [initialStopRef]="stopRef"
+          [initialDepartureTime]="depTime"
+        />
       }
     }
   </div>

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, ViewChild } from '@angular/core';
 import maplibregl from 'maplibre-gl';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -46,6 +46,9 @@ type TrackStationStop = {
  * without transfer data (OJP-only) so they can be styled differently.
  */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
+  @Input() initialStopRef: string | null = null;
+  @Input() initialDepartureTime: string | Date | null = null;
+
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   selectedDelayMinutes = 0;

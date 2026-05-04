@@ -1,4 +1,5 @@
 import { Component, inject, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
@@ -14,6 +15,7 @@ import { Wait4MeRequest } from '../../../shared/types/Wait4MeRequest';
 })
 export class Wait4MeEditBar {
   public w4mService = inject(W4MDriverService);
+  private router = inject(Router);
 
   public number_of_requests(): String {
     const delay_in_edit =
@@ -29,5 +31,11 @@ export class Wait4MeEditBar {
 
   open_delay_impact_analysis(): void {
     console.log("show delay impact analysis")
+    this.router.navigate(['/monitoring'], {
+      state: { 
+        stopRef : this.w4mService.activeStopRef(),
+        depTime : null // get from driver connection details
+       },
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, OnDestroy, Output, signal } from '@angular/core';
+import { Component, EventEmitter, inject, OnDestroy, Input, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { OJPStopEvent } from '../../../shared/services/ojp-stop-event';
 import type { StopLookupResult, DepartureLine } from '../../../shared/types/DriverDeparturesTypes';
@@ -25,6 +25,9 @@ export type SelectedConnectionPayload = {
 export class LineSearchComponent implements OnDestroy {
   private readonly ojpStopEvent = inject(OJPStopEvent);
 
+  @Input() initialStopRef: string | null = null;
+  @Input() initialDepartureTime: string | Date | null = null;
+
   stationQuery = '';
   stationSuggestions = signal<StopLookupResult[]>([]);
   showStationSuggestions = false;
@@ -41,6 +44,7 @@ export class LineSearchComponent implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   @Output() lineSelected = new EventEmitter<SelectedConnectionPayload | null>();
+
 
   constructor() {
     this.searchSubject
