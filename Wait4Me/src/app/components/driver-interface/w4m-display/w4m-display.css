@@ -46,6 +46,7 @@
   gap: 10px;
   height: calc(100% - 10px);
   margin: 5px 0;
+  cursor: pointer;
 }
 
 .open.stacked-back {
