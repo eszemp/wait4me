@@ -26,4 +26,8 @@ export class Wait4MeEditBar {
     }
     return String(this.w4mService.activeRequestIds()[delay_in_edit].length);
   }
+
+  open_delay_impact_analysis(): void {
+    console.log("show delay impact analysis")
+  }
 }

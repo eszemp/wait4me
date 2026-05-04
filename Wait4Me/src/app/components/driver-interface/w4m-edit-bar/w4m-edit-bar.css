@@ -16,6 +16,8 @@
   box-sizing: border-box;
   align-items: stretch;
   min-height: 120px;
+  align-items: end; /* Aligns both columns to the bottom */
+  min-height: auto; /* Allows the bar to grow if needed */
 }
 
 .edit-actions {
@@ -38,6 +40,7 @@
   font-size: 28px;
   font-weight: bold;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
 }
 
 .decline {
@@ -53,6 +56,7 @@
   font-size: 28px;
   font-weight: bold;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
 }
 
 .total-requests {
@@ -69,4 +73,27 @@
   line-height: 70px;
   text-align: center;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Container to stack the button above the count */
+.request-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Space between the button and the requested box */
+  width: 100%;
+}
+
+/* New button styling - inheriting styles from .total-requests */
+.delay-impact-btn {
+  display: block;
+  height: 70px;
+  width: 100%; /* Forces it to match the column width */
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  background: white;
+  color: var(--fir-green);
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.2s;
 }
