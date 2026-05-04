@@ -48,11 +48,9 @@ export class ConnectionDetails {
 
       if (firstTimedLeg) {
         this.tripService.originName.set(firstTimedLeg.boardStopName);
-        this.tripService.originId.set(null);
       }
       if (lastTimedLeg) {
         this.tripService.destinationName.set(lastTimedLeg.alightStopName);
-        this.tripService.destinationId.set(null);
       }
     });
 
