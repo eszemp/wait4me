@@ -93,7 +93,6 @@
 
 
 /* SMALL: First dot Green */
-/*TODO: green dot is not yet displayed... plus still show dot colors after acceptance of request.*/
 .rating-small .request-dot:nth-child(1) {
   background-color: #28a745;
 }
