@@ -63,6 +63,15 @@ export class W4MPassengerService {
     this.status.set('inactive');
   }
 
+  clean_up() {
+    this.status.set('inactive');
+    this.stopStatusPolling();
+    this.request_id = null;
+    this.requested_delay = null;
+    this.trip = null;
+    this.transfer = null;
+  }
+
   async click_on_button() {
     console.log('Initial status: ', this.status());
     switch (this.status()) {

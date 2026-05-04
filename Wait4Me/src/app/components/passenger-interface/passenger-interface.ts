@@ -1,12 +1,14 @@
-import { Component, inject, DestroyRef } from '@angular/core';
+import { Component, inject, DestroyRef, OnDestroy } from '@angular/core';
 import { timer } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationStart, Event as RouterEvent } from '@angular/router';
 import { RouteFormComponent } from './route-form/route-form.component';
 import { Wait4MeButton } from './wait4me-button/wait4me-button';
 import { OJPTrip } from '../../shared/services/ojp-trip';
+import { W4MPassengerService } from '../../shared/services/w4m-service-passenger';
 import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
 
 @Component({
@@ -15,10 +17,12 @@ import { PassengerTrip } from '../../shared/types/PassengerTripTypes';
   templateUrl: './passenger-interface.html',
   styleUrls: ['../../app.css', './passenger-interface.css'],
 })
-export class PassengerInterface {
+export class PassengerInterface implements OnDestroy {
   public tripService = inject(OJPTrip);
+  private w4mService = inject(W4MPassengerService);
   private readonly destroyRef = inject(DestroyRef);
   private router = inject(Router);
+  private isNavigatingToDetails = false;
 
   constructor() {
     // clear saved values if component is newly loaded
@@ -55,6 +59,23 @@ export class PassengerInterface {
     .subscribe(() => {
       this.refreshTrips();
     });
+
+    this.router.events.pipe(
+      filter((event: RouterEvent): event is NavigationStart => event instanceof NavigationStart),
+      takeUntilDestroyed()
+    ).subscribe((event: NavigationStart) => {
+      this.isNavigatingToDetails = event.url.includes('connection-details');
+    });
+
+  }
+
+  ngOnDestroy() {
+    if (!this.isNavigatingToDetails) {
+      console.log('Performing full cleanup...');
+      this.w4mService.clean_up();
+    } else {
+      console.log('Skipping cleanup: moving to details.');
+    }
   }
 
   private refreshTrips() : void {
