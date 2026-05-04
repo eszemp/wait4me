@@ -143,7 +143,7 @@ export class W4MPassengerService {
         this.stopStatusPolling();
         this.request_id = null;
         this.requested_delay = null;
-        this.status.set('enabled');
+        this.status.set('inactive');
         return;
       }
 
