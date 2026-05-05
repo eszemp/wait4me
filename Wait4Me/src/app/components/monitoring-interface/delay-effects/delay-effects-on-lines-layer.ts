@@ -47,7 +47,7 @@ type TrackStationStop = {
  */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
   @Input() initialStopRef: string | null = null;
-  @Input() initialDepartureTime: string | Date | null = null;
+  @Input() initialDepartureTime: string | null = null;
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 

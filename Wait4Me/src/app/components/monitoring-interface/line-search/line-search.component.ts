@@ -26,7 +26,7 @@ export class LineSearchComponent implements OnDestroy {
   private readonly ojpStopEvent = inject(OJPStopEvent);
 
   @Input() initialStopRef: string | null = null;
-  @Input() initialDepartureTime: string | Date | null = null;
+  @Input() initialDepartureTime: string | null = null;
 
   stationQuery = '';
   stationSuggestions = signal<StopLookupResult[]>([]);
@@ -56,6 +56,13 @@ export class LineSearchComponent implements OnDestroy {
           this.stationSuggestions.set([]);
         }
       });
+
+    if (this.initialDepartureTime) {
+      this.selectedTime.set(this.initialDepartureTime)
+    }  
+    if (this.initialStopRef) {
+      this.searchStations(this.initialStopRef);
+    }
   }
 
   /** Starts debounced station lookup for the current input value. */
