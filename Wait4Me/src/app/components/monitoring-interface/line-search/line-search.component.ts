@@ -127,7 +127,7 @@ export class LineSearchComponent implements OnDestroy {
   private parseDateTime(time: string): Date {
     const [hours, minutes] = time.split(':').map(Number);
     // Fixed date for the monitoring use case.
-    return new Date(2026, 3, 15, hours, minutes, 0);
+    return new Date(2026, 11, 9, hours, minutes, 0);
   }
 
   /** Stores the selected departure line and collapses the dropdown. */
