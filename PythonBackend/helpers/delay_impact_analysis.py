@@ -5,13 +5,15 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import geopandas as gpd
-from shapely.geometry import Point
 from pyproj import Transformer
+from pathlib import Path
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 API_URL = 'https://odpch-api.clients.liip.ch/ojp20-beta'
 NO_OF_CONSIDERED_STOPS = 20
+BASE_DIR = Path(__file__).resolve().parent
+gpkg_path = BASE_DIR / ".." / ".." / ".." / "data" / "stop-places-schweiz-with-buffers.gpkg"
 
 def get_delay_impact_rating(data):
     depStopRef = data['transfer_stop_ref']
