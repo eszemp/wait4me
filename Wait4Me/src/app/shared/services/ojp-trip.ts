@@ -700,10 +700,18 @@ export class OJPTrip extends OJPBase {
       id: legId,
       duration: legDuration,
       boardTimeTimetable: new Date(this.asString(board?.serviceDeparture?.timetabledTime)),
-      boardTimeEstimated: new Date(this.asString(board?.serviceDeparture?.estimatedTime)),
+      boardTimeEstimated: new Date(
+        this.asString(
+          board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime
+        )
+      ),
       boardDelay: boardDelay,
       alightTimeTimetable: new Date(this.asString(alight?.serviceArrival?.timetabledTime)),
-      alightTimeEstimated: new Date(this.asString(alight?.serviceArrival?.estimatedTime)),
+      alightTimeEstimated: new Date(
+        this.asString(
+          alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime
+        )
+      ),
       alightDelay: alightDelay,
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
@@ -820,13 +828,16 @@ export class OJPTrip extends OJPBase {
       else {
         departure = following_leg?.boardTimeTimetable;
       }
-      console.log("CRITICAL TRANSFER CHECK");
-      console.log(arrival)
-      console.log(departure)
-      console.log(transferLeg.duration)
       if (!arrival || !departure) return false; // Safety fallback
-      console.log(transferLeg.duration.addToDate(arrival));
-      console.log(departure)
+      if (transferLeg.duration.addToDate(arrival) > departure) {
+        console.log("CRITICAL TRANSFER SANITY CHECK");
+        console.log("Incoming Service Arrival Time", arrival)
+        console.log("Outgoing Service Departure Time", departure)
+        console.log("Transfer Duration", transferLeg.duration)
+        console.log("-> Passenger arrives at outgoing stop at", transferLeg.duration.addToDate(arrival));
+        console.log("-> Outgoing Service departs at", departure)
+      }
+      
       return transferLeg.duration.addToDate(arrival) > departure;
     }
     return false;
