@@ -34,24 +34,31 @@
         <div class="legend-items">
           <div class="legend-item">
             <div class="legend-color" style="background: #ff5555"></div>
-            <div class="legend-label">No transfer buffer time available</div>
+            <div class="legend-label">Broken connection</div>
           </div>
           <div class="legend-item">
             <div class="legend-color" style="background: #ffd1d1"></div>
-            <div class="legend-label">Only transfer time available</div>
+            <div class="legend-label">Tight transfer (Buffer=0)</div>
           </div>
           <div class="legend-item">
             <div class="legend-color" style="background: #d1ffed"></div>
-            <div class="legend-label">Enough transfer time available</div>
+            <div class="legend-label">Sufficient transfer time (Buffer>0)</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #395148"></div>
+            <div class="legend-label">No transfers</div>
           </div>
         </div>
         <div class="legend-description">
-          All this data was calculated for the 09.12.2026 (typical weekday), you can search any line
-          to a given time at this date. When one is selected, its displayed on the map. Additionaly
-          can with the slider a delay be added and the effect on the following stations is
-          visualised. The colur indicates the reamining transfer buffer time. The transfer buffer
-          time is the addinional time available to the requiered transfer time. For additional
-          information can one click on stations.
+          You can search for any line departing from any station at any time of day and it will be 
+          displayed on the map once its selected. By moving the slider you can see the impact any added 
+          delay will have on transfers at onward stops. The colors symbolize how much "transfer buffer 
+          time" remains with this specific delay. This buffer time is defined as the difference between 
+          arrival time of the service plus the time it takes to transfer at this stop and the earliest 
+          departure of a different service from this stop. If this difference becomes negative, the 
+          connection to that departing service is broken. Additional information about buffer times 
+          can be revealed by clicking on the stations. All this data was calculated for the 09.12.2026 
+          (typical weekday).
         </div>
       }
     </div>

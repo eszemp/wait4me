@@ -21,8 +21,8 @@
   left: 20px;
   bottom: 20px;
   z-index: 3;
-  min-width: 290px;
-  max-width: 290px;
+  min-width: 320px;
+  max-width: 320px;
   padding: 10px 12px;
   border-radius: 12px;
   background: white;
@@ -115,7 +115,7 @@
   margin-top: 8px;
   padding-top: 8px;
   hyphens: auto;
-  max-width: 250px;
+  max-width: 300px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
