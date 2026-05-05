@@ -22,8 +22,9 @@ export class MonitoringInterface {
     { id: 'station-statistics', label: 'Station statistics' },
   ];
 
-  stopRef: string | null = null;
+  stopName: string | null = null;
   depTime: string | null = null;
+  delay: number | null = null;
   selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';
 
   constructor(
@@ -31,10 +32,11 @@ export class MonitoringInterface {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     // If data exists (Modal mode), assign values. 
-    // If not (Router mode), stopRef and depTime remain null.
+    // If not (Router mode), vars remain null.
     if (this.data) {
-      this.stopRef = this.data.stopRef ?? null;
+      this.stopName = this.data.stopName ?? null;
       this.depTime = this.data.depTime ?? null;
+      this.delay = this.data.delay ?? null;
     }
   }
 

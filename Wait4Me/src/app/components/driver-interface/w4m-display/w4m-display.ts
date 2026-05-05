@@ -13,6 +13,7 @@ import { OJPLocation } from '../../../shared/services/ojp-location';
 })
 export class Wait4MeDisplay {
   @Input({ required: true }) stopName!: string;
+  @Input({ required: true }) depTime!: Date;
   @Input({ required: true }) serviceJourneyRef!: string;
 
   stopRef: string = '';
@@ -104,8 +105,7 @@ export class Wait4MeDisplay {
   }
 
   async process_requests_for_this_stop(): Promise<void> {
-    this.w4mService.openEditMode(this.stopRef);
-    console.log('enabled edit mode for requests at stop', this.stopName);
+    this.w4mService.openEditMode(this.stopRef, this.stopName, this.depTime);
     while (this.w4mService.editMode()) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }

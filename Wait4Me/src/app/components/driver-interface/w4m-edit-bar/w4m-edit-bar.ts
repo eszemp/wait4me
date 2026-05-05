@@ -1,11 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
-import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
-import { OJPLocation } from '../../../shared/services/ojp-location';
-import { Wait4MeRequest } from '../../../shared/types/Wait4MeRequest';
 import { MonitoringInterface } from '../../monitoring-interface/monitoring-interface';
 
 @Component({
@@ -34,14 +30,20 @@ export class Wait4MeEditBar {
   open_delay_impact_analysis(): void {
     console.log("Opening delay impact analysis in overlay");
 
+    const date = this.w4mService.currentDepTime()!;
+    const time_string = formatDate(date!, 'HH:mm', 'en-US');
+    const delay = this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!];
+
+
     this.dialog.open(MonitoringInterface, {
       width: '80vw',     
       height: '80vh', 
       maxWidth: '100vw', 
       maxHeight: '100vw', 
       data: {            
-        stopRef: this.w4mService.activeStopRef(),
-        depTime: null // TODO get from driver connection details
+        stopName: this.w4mService.activeStopName(),
+        depTime: time_string,
+        delay: delay
       },
       panelClass: 'custom-modal-container'
     });

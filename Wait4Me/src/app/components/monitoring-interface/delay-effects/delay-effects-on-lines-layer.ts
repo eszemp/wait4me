@@ -46,8 +46,9 @@ type TrackStationStop = {
  * without transfer data (OJP-only) so they can be styled differently.
  */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
-  @Input() initialStopRef: string | null = null;
+  @Input() initialStopName: string | null = null;
   @Input() initialDepartureTime: string | null = null;
+  @Input() delay: number | null = null;
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
@@ -100,6 +101,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       void this.loadStationTransferDataset();
       this.ensureTrackLayer();
     });
+
+    console.log("delay effects initialized with", this.initialStopName, this.initialDepartureTime)
+
+    if(this.delay) {
+      this.selectedDelayMinutes = this.delay;
+    }
   }
 
   /**

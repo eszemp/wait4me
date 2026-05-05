@@ -1,8 +1,8 @@
 <div class="map-wrapper">
   <div #mapContainer class="monitoring-map"></div>
   <app-line-search
-    [initialStopRef]="initialStopRef"
-    [initialDepartureTime]="initialDepartureTime"
+    [initialStopName]="this.initialStopName"
+    [initialDepartureTime]="this.initialDepartureTime"
     (lineSelected)="onLineSelected($event)"
   ></app-line-search>
   <div class="delay-slider-panel" aria-label="Delay selection">

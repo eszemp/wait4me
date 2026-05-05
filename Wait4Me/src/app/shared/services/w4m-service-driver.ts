@@ -10,6 +10,8 @@ export type IncomingRequestState = { [stopRef: string]: MapRequestIdsToDelays };
 export class W4MDriverService {
   public requestIds: WritableSignal<IncomingRequestState> = signal({});
   public activeStopRef: WritableSignal<string | null> = signal(null);
+  public activeStopName: WritableSignal<string | null> = signal(null);
+  public currentDepTime: WritableSignal<Date | null> = signal(null);
   public editMode: WritableSignal<Boolean> = signal(false);
   public hideEditMode: WritableSignal<Boolean> = signal(false);
   public busy: WritableSignal<Boolean> = signal(false);
@@ -216,12 +218,15 @@ export class W4MDriverService {
     });
   }
 
-  public async openEditMode(stopRef: string) {
+  public async openEditMode(stopRef: string, stopName: string, depTime: Date) {
     while (this.busy()) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     this.activeStopRef.set(stopRef);
+    this.activeStopName.set(stopName);
+    this.currentDepTime.set(depTime);
     this.editMode.set(true);
+    console.log('enabled edit mode for requests at stop', this.activeStopName(), "with ref", this.activeStopRef(), "departing at", this.currentDepTime());
   }
 
   public async closeEditMode(): Promise<void> {
