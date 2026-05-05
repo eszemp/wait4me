@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   DepartureLine,
@@ -63,6 +63,10 @@ export class DriverConnectionDetails {
       window.clearInterval(refreshTimer);
     });
 
+  }
+
+  ngOnDestroy() {
+    this.w4mService.closeEditMode();
   }
 
   get lineLabel(): string {
