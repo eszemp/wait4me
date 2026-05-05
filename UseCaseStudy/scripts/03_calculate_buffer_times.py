@@ -271,9 +271,9 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
         Returns empty DataFrame on persistent API failure.
     """
 
-    # look at 15th April (typical weekday)
-    start_time = datetime(year=2026, month=4, day=15, hour=0, minute=0, second=0)
-    end_time = datetime(year=2026, month=4, day=16, hour=3, minute=0, second=0)
+    # look at 9th December (typical weekday)
+    start_time = datetime(year=2026, month=12, day=9, hour=0, minute=0, second=0)
+    end_time = datetime(year=2026, month=12, day=10, hour=3, minute=0, second=0)
     current_time = start_time
 
     results = []
