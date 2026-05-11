@@ -43,6 +43,20 @@ export class DriverInterface {
       history.replaceState({}, '');
     }
 
+    // If NOT returning from connection-details, reset date/time to current
+    if (!state?.preserveSelection) {
+      sessionStorage.removeItem('selected_date');
+      sessionStorage.removeItem('selected_time');
+      this.selectedDate.set(this.formatDate(new Date()));
+      this.selectedTime.set(this.formatTime(new Date()));
+    } else {
+      // Restore from storage when returning from connection-details
+      const persistedDate = sessionStorage.getItem('selected_date');
+      const persistedTime = sessionStorage.getItem('selected_time');
+      if (persistedDate) this.selectedDate.set(persistedDate);
+      if (persistedTime) this.selectedTime.set(persistedTime);
+    }
+
     const clockTimer = window.setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
@@ -147,6 +161,7 @@ export class DriverInterface {
 
   onSelectedDateChange(date: string): void {
     this.selectedDate.set(date);
+    sessionStorage.setItem('selected_date', date);
     if (this.selectedStopRef()) {
       this.refreshDepartures();
     }
@@ -154,6 +169,7 @@ export class DriverInterface {
 
   onSelectedTimeChange(time: string): void {
     this.selectedTime.set(time);
+    sessionStorage.setItem('selected_time', time);
     if (this.selectedStopRef()) {
       this.refreshDepartures();
     }

@@ -32,7 +32,7 @@
             <span class="dot"></span>
             @if (!isLast) {
               <span class="line-solid"></span>
-            } @else {
+            } @else if (visibleStops.length < stops.length) {
               <span class="line-dashed"></span>
             }
           </div>
