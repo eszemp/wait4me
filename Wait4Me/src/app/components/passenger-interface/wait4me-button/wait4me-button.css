@@ -15,6 +15,7 @@
 
 .w4m-button.is_enabled {
   background: var(--mint);
+  cursor: pointer;
 }
 
 .w4m-button-shell {
