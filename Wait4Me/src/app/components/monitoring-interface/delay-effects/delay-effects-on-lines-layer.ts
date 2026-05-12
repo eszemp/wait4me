@@ -53,7 +53,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   selectedDelayMinutes = 0;
-  legendExpanded = false;
+  legendExpanded = true;
 
   private readonly ojpTrip = inject(OJPTrip);
   private readonly destroy$ = new Subject<void>();

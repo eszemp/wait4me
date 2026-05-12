@@ -125,3 +125,15 @@
   line-height: 1.4;
   padding-top: 8px;
 }
+
+/* Header row inside the description: title on the left, toggle aligned right */
+.delay-slider-panel .legend-description .legend-desc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.delay-slider-panel .legend-description .legend-desc-content {
+  margin-top: 8px;
+}
