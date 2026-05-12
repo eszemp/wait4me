@@ -11,6 +11,7 @@ export class W4MPassengerService {
   readonly status: WritableSignal<
     'inactive' | 'enabled' | 'pending' | 'accepted' | 'declined' | 'expired'
   > = signal('inactive');
+  readonly acceptedStatusBarDismissed = signal(false);
   // possible values:
   // 'inactive':  no critical transfer selected where a request could be sent
   // 'enabled':   this.transfer is not null, but no request has been sent yet or the request has been cancelled
@@ -56,15 +57,20 @@ export class W4MPassengerService {
   }
 
   disable_if_not_active() {
-    if (this.status()==='pending') {
+    if (this.status() === 'pending' || this.status() === 'accepted') {
       return;
     }
-    // else if status is inactive / enabled / accepted / declined / expired, reset to inactive so that a new request can be sent
+    // else if status is inactive / enabled / declined / expired, reset to inactive so that a new request can be sent
     this.status.set('inactive');
+  }
+
+  dismissAcceptedStatusBar() {
+    this.acceptedStatusBarDismissed.set(true);
   }
 
   clean_up() {
     this.status.set('inactive');
+    this.acceptedStatusBarDismissed.set(false);
     this.stopStatusPolling();
     this.request_id = null;
     this.requested_delay = null;
@@ -120,6 +126,7 @@ export class W4MPassengerService {
     if (response.api_status === 'created') {
       this.request_id = response.request_id ?? null;
       this.requested_delay = this.transfer?.requestedDelay.totalMinutes ?? null;
+      this.acceptedStatusBarDismissed.set(false);
       this.status.set('pending');
       this.startStatusPolling();
     }
@@ -143,6 +150,7 @@ export class W4MPassengerService {
         this.stopStatusPolling();
         this.request_id = null;
         this.requested_delay = null;
+        this.acceptedStatusBarDismissed.set(false);
         this.status.set('inactive');
         return;
       }
@@ -188,6 +196,7 @@ export class W4MPassengerService {
           }
 
           if (response.request_status === 'accepted') {
+            this.acceptedStatusBarDismissed.set(false);
             this.status.set('accepted');
             console.log('request status changed from pending to ', this.status());
             this.stopStatusPolling();

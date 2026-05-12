@@ -95,6 +95,10 @@ export class Wait4MeButton {
         this.showRequestDetails = false;
     }
 
+    close_accepted_status_bar() {
+        this.w4mService.dismissAcceptedStatusBar();
+    }
+
     get request_details_status_text(): string {
         switch (this.w4mService.status()) {
         case 'accepted':
