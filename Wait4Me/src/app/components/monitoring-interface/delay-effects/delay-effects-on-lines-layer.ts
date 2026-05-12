@@ -22,14 +22,6 @@ type StationTransferDataset = {
   transferSeries: StationTransferSeriesEntry[];
 };
 
-type TrackStationStop = {
-  stopRef: string;
-  stopName: string;
-  stopRole: 'board' | 'intermediate' | 'alight';
-  arrivalTime: string;
-  coordinates?: [number, number] | null;
-};
-
 @Component({
   selector: 'app-delay-effects-on-lines-layer',
   templateUrl: './delay-effects-on-lines-layer.html',
@@ -355,129 +347,66 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   /**
    * Enriches connection features with station transfer metrics used for styling and popup details.
    *
-   * Produces point features for stations when coordinates are available
-   * (either from the transfer dataset or from OJP-provided coordinates) and
-   * annotates them with `hasTransferData` so the layer paint can visually
-   * distinguish OJP-only stations.
+   * Annotates existing OJP point features with transfer data from the
+   * transfer GeoJSON dataset so stations are shown exactly once.
    */
   private enrichStationFeatures(geojson: { type: 'FeatureCollection'; features: unknown[] }): {
     type: 'FeatureCollection';
     features: unknown[];
   } {
-    const generatedStationFeatures: unknown[] = [];
-    const generatedFeatureKeys = new Set<string>();
-
-    for (const feature of geojson.features) {
-      const typedFeature = feature as {
-        geometry?: { type?: string };
-        properties?: Record<string, unknown>;
-      };
-
-      if (typedFeature.geometry?.type !== 'LineString' || !typedFeature.properties) {
-        continue;
-      }
-
-      const stationStops = this.readStationStops(typedFeature.properties['stationStops']);
-      const line = this.toSafeString(typedFeature.properties['line']) ?? '';
-
-      for (const stationStop of stationStops) {
-        const dataset = this.findDatasetForStation(stationStop.stopRef, stationStop.stopName);
-        const coordinates = dataset?.coordinates ?? stationStop.coordinates ?? null;
-        if (!coordinates) {
-          continue;
-        }
-
-        const selectedTransfer = dataset
-          ? this.findTransferForArrival(dataset.transferSeries, stationStop.arrivalTime)
-          : null;
-        const remainingBufferMinutes = selectedTransfer
-          ? selectedTransfer.minutes - this.selectedDelayMinutes
-          : null;
-        const featureKey = `${stationStop.stopRef}__${stationStop.arrivalTime}`;
-        if (generatedFeatureKeys.has(featureKey)) {
-          continue;
-        }
-
-        generatedFeatureKeys.add(featureKey);
-        generatedStationFeatures.push({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates,
-          },
-          properties: {
-            line,
-            featureType: 'station',
-            stopRef: stationStop.stopRef,
-            stopName: stationStop.stopName || dataset?.stopName || '',
-            stopRole: stationStop.stopRole,
-            arrivalTime: stationStop.arrivalTime,
-            transferSeries: dataset?.transferSeries ?? null,
-            transferTimeMinutes: selectedTransfer?.minutes ?? null,
-            transferTimeMatchedAt: selectedTransfer?.time ?? null,
-            remainingBufferMinutes,
-            hasTransferData: !!dataset,
-          },
-        });
-      }
-    }
-
     return {
       ...geojson,
-      features: [
-        ...geojson.features.map((feature) => {
-          const typedFeature = feature as {
-            geometry?: { type?: string };
-            properties?: Record<string, unknown>;
-          };
-          if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
-            return feature;
-          }
+      features: geojson.features.map((feature) => {
+        const typedFeature = feature as {
+          geometry?: { type?: string };
+          properties?: Record<string, unknown>;
+        };
+        if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
+          return feature;
+        }
 
-          const stopRef = this.normalizeStopRef(typedFeature.properties['stopRef']);
-          const stopName = this.toSafeString(typedFeature.properties['stopName']) ?? '';
-          const arrivalTime = this.toSafeString(typedFeature.properties['arrivalTime']) ?? '';
+        const stopRef = this.normalizeStopRef(typedFeature.properties['stopRef']);
+        const stopName = this.toSafeString(typedFeature.properties['stopName']) ?? '';
+        const arrivalTime = this.toSafeString(typedFeature.properties['arrivalTime']) ?? '';
 
-          if (!stopRef && !stopName) {
-            return feature;
-          }
+        if (!stopRef && !stopName) {
+          return feature;
+        }
 
-          const dataset = this.findDatasetForStation(stopRef, stopName);
-          if (!dataset) {
-            return {
-              ...typedFeature,
-              properties: {
-                ...typedFeature.properties,
-                stopName: typedFeature.properties['stopName'] ?? '',
-                transferSeries: null,
-                transferTimeMinutes: null,
-                transferTimeMatchedAt: null,
-                remainingBufferMinutes: null,
-                hasTransferData: false,
-              },
-            };
-          }
-
-          const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
-          const remainingBufferMinutes = selectedTransfer
-            ? selectedTransfer.minutes - this.selectedDelayMinutes
-            : null;
-
+        const dataset = this.findDatasetForStation(stopRef, stopName);
+        if (!dataset) {
           return {
             ...typedFeature,
             properties: {
               ...typedFeature.properties,
-              stopName: typedFeature.properties['stopName'] ?? dataset.stopName,
-              transferSeries: dataset.transferSeries,
-              transferTimeMinutes: selectedTransfer?.minutes ?? null,
-              transferTimeMatchedAt: selectedTransfer?.time ?? null,
-              remainingBufferMinutes,
-              hasTransferData: true,
+              stopName: typedFeature.properties['stopName'] ?? '',
+              transferSeries: null,
+              transferTimeMinutes: null,
+              transferTimeMatchedAt: null,
+              remainingBufferMinutes: null,
+              hasTransferData: false,
             },
           };
-        }),
-        ...generatedStationFeatures,
-      ],
+        }
+
+        const selectedTransfer = this.findTransferForArrival(dataset.transferSeries, arrivalTime);
+        const remainingBufferMinutes = selectedTransfer
+          ? selectedTransfer.minutes - this.selectedDelayMinutes
+          : null;
+
+        return {
+          ...typedFeature,
+          properties: {
+            ...typedFeature.properties,
+            stopName: typedFeature.properties['stopName'] ?? dataset.stopName,
+            transferSeries: dataset.transferSeries,
+            transferTimeMinutes: selectedTransfer?.minutes ?? null,
+            transferTimeMatchedAt: selectedTransfer?.time ?? null,
+            remainingBufferMinutes,
+            hasTransferData: true,
+          },
+        };
+      }),
     };
   }
 
@@ -495,9 +424,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
     const properties = feature.properties as Record<string, unknown>;
     const coordinates = feature.geometry.coordinates as [number, number];
-    const stopName = this.escapeHtml(
-      this.toSafeString(properties['stopName']) ?? this.toSafeString(properties['Name']) ?? 'Stop',
-    );
+    const stopName = this.escapeHtml(this.toSafeString(properties['stopName']) ?? 'Stop');
     const arrivalTimeIso = this.toSafeString(properties['arrivalTime']) ?? '';
     const arrivalTimeText = this.escapeHtml(this.formatIsoForPopup(arrivalTimeIso));
     const transferMinutesValue = properties['transferTimeMinutes'];
@@ -670,54 +597,6 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     }
 
     return [lng, lat];
-  }
-
-  /**
-   * Reads station stop descriptors from OJP track properties.
-   *
-   * The OJP track may include minimal stop metadata — this helper extracts
-   * the expected fields and optionally parses coordinates when present.
-   */
-  private readStationStops(value: unknown): TrackStationStop[] {
-    if (!Array.isArray(value)) {
-      return [];
-    }
-    const out: TrackStationStop[] = [];
-    for (const entry of value) {
-      const raw = entry as Record<string, unknown>;
-      const stopRef = this.toSafeString(raw['stopRef'])?.trim() ?? '';
-      const stopName = this.toSafeString(raw['stopName']) ?? '';
-      const rawStopRole = this.toSafeString(raw['stopRole']) ?? 'intermediate';
-      const stopRole: TrackStationStop['stopRole'] =
-        rawStopRole === 'board' || rawStopRole === 'intermediate' || rawStopRole === 'alight'
-          ? rawStopRole
-          : 'intermediate';
-      const arrivalTime = this.toSafeString(raw['arrivalTime']) ?? '';
-
-      let coordinates: [number, number] | null = null;
-      const rawCoords = raw['coordinates'];
-      if (Array.isArray(rawCoords) && rawCoords.length >= 2) {
-        const lng = Number(rawCoords[0]);
-        const lat = Number(rawCoords[1]);
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-          coordinates = [lng, lat];
-        }
-      }
-
-      if (!stopRef && !stopName && !coordinates) {
-        continue;
-      }
-
-      out.push({
-        stopRef,
-        stopName,
-        stopRole,
-        arrivalTime,
-        coordinates,
-      });
-    }
-
-    return out;
   }
 
   /**
