@@ -134,7 +134,9 @@ export class DriverConnectionDetails {
   }
 
   backToDriver(): void {
-    this.router.navigate(['/driver']);
+    this.router.navigate(['/driver'], {
+      state: { preserveSelection: true },
+    });
   }
 
   disable_edit_mode_when_active(event: Event): void {
