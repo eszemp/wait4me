@@ -321,15 +321,24 @@
 }
 
 .w4m-status-icon {
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
 }
 
 .w4m-status-icon--status,
 .w4m-status-icon--info {
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
+}
+
+.w4m-status-icon--status[src$='close.svg'] {
+  width: 17px;
+  height: 17px;
+}
+
+.w4m-status--success .w4m-status-icon--status {
+  margin-right: 5px;
 }
 
 .w4m-status-action-icon {
@@ -337,5 +346,5 @@
   height: 17px;
   flex-shrink: 0;
   margin-left: 7px;
-  margin-right: 3px;
+  margin-right: 7px;
 }
