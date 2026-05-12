@@ -860,7 +860,7 @@ export class OJPTrip extends OJPBase {
       }
     }
 
-    return '';
+    return null;
   }
 
   /**

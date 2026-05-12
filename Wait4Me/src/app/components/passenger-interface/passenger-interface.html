@@ -46,7 +46,9 @@
         </div>
 
         <div class="meta-column">
-          <span class="platform"> {{ trip.departurePlatform }}</span>
+          @if (trip.departurePlatform) {
+            <span class="platform"> {{ trip.departurePlatform }}</span>
+          }
           <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
           <span> </span>
         </div>

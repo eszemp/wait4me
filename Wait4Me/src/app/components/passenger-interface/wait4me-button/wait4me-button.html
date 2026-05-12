@@ -80,7 +80,7 @@
     >
       <p class="w4m-confirm-title">You have sent a Wait4Me request for {{this.w4mService.requested_delay}} min to this connection:</p>
 
-      @if (this.w4mService.trip) {
+      @if (this.waiting_connection_leg; as waitingLeg) {
         <div class="w4m-request-trip-card">
           <div class="w4m-request-trip-timeline">
             <span class="w4m-request-trip-dot w4m-request-trip-dot--top"></span>
@@ -90,21 +90,21 @@
           <div class="w4m-request-trip-locations">
             <div class="w4m-request-trip-row">
               <span class="w4m-request-trip-time">{{
-                this.w4mService.trip.scheduledStart | date: 'HH:mm'
+                waitingLeg.boardTimeTimetable | date: 'HH:mm'
               }}</span>
-              <span class="w4m-request-trip-stop">{{ this.request_details_origin_name }}</span>
+              <span class="w4m-request-trip-stop">{{ waitingLeg.boardStopName }}</span>
             </div>
             <div class="w4m-request-trip-row">
               <span class="w4m-request-trip-time">{{
-                this.w4mService.trip.scheduledEnd | date: 'HH:mm'
+                waitingLeg.alightTimeTimetable | date: 'HH:mm'
               }}</span>
-              <span class="w4m-request-trip-stop">{{ this.request_details_destination_name }}</span>
+              <span class="w4m-request-trip-stop">{{ waitingLeg.alightStopName }}</span>
             </div>
           </div>
 
           <div class="w4m-request-trip-meta">
-            <span>{{ this.w4mService.trip.departurePlatform }}</span>
-            <span>{{ this.w4mService.trip.duration.formatWithMinH() }}</span>
+            <span>{{ waitingLeg.boardPlatform }}</span>
+            <span>{{ waitingLeg.duration.formatWithMinH() }}</span>
           </div>
         </div>
       }
@@ -157,26 +157,36 @@
     </div>
   }
 
-  @if (this.w4mService.status() === 'accepted') {
+  @if (this.w4mService.status() === 'accepted' && !this.w4mService.acceptedStatusBarDismissed()) {
     <div
       class="w4m-status w4m-status--success w4m-status--clickable"
       role="button"
       tabindex="0"
       (click)="this.open_request_details()"
     >
-      <img
-        class="w4m-status-icon w4m-status-icon--status"
-        src="/check-mark.svg"
-        alt=""
-        aria-hidden="true"
-      />
-      <img
-        class="w4m-status-icon w4m-status-icon--info"
-        src="/circle-information-extra-small.svg"
-        alt=""
-        aria-hidden="true"
-      />
-      <span>Accepted.</span>
+      <div class="w4m-status-message">
+        <img
+          class="w4m-status-icon w4m-status-icon--status"
+          src="/check-mark.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          class="w4m-status-icon w4m-status-icon--info"
+          src="/circle-information-extra-small.svg"
+          alt=""
+          aria-hidden="true"
+        />
+        <span>Accepted.</span>
+      </div>
+      <button
+        type="button"
+        class="w4m-status-action"
+        (click)="$event.stopPropagation(); this.close_accepted_status_bar()"
+        aria-label="Close accepted status"
+      >
+        <img class="w4m-status-action-icon" src="/close.svg" alt="" aria-hidden="true" />
+      </button>
     </div>
   }
 

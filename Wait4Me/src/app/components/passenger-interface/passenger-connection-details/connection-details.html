@@ -43,7 +43,9 @@
     </div>
 
     <div class="meta-column">
-      <span class="platform"> {{ trip.departurePlatform }}</span>
+      @if (trip.departurePlatform) {
+        <span class="platform"> {{ trip.departurePlatform }}</span>
+      }
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
       <span class="date">{{ trip.startTime | date: 'dd.MM.yyyy' }}</span>
     </div>
@@ -93,7 +95,9 @@
           </div>
 
           <div class="meta-column">
-            <span class="platform"> {{ leg.boardPlatform }}</span>
+            @if (leg.boardPlatform) {
+              <span class="platform"> {{ leg.boardPlatform }}</span>
+            }
             <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
           </div>
         </div>
@@ -122,7 +126,12 @@
             </div>
           </div>
         }
-        <div class="leg transfer-leg">
+        <button
+          type="button"
+          class="leg transfer-leg"
+          (click)="popup_walking_route(leg)"
+          aria-label="Open walking route details"
+        >
           <div class="time-column">
             <img class="walking-icon" src="/walk-small.svg" alt="" aria-hidden="true" />
           </div>
@@ -130,16 +139,9 @@
           <div class="time-and-location-column">{{ leg.duration.formatWithMinH() }} Walk</div>
 
           <div class="info-col">
-            <button
-              type="button"
-              class="arrow-right-button"
-              (click)="popup_walking_route(leg)"
-              aria-label="Open walking route details"
-            >
-              <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
-            </button>
+            <img class="arrow-right-icon" src="/return-back.svg" alt="" aria-hidden="true" />
           </div>
-        </div>
+        </button>
       } @else {
         <p>Error</p>
       }
