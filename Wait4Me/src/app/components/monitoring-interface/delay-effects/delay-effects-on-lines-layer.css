@@ -11,8 +11,11 @@
 .monitoring-map {
   border: 2px solid var(--fir-green);
   width: 100%;
-  height: calc(100vh - 70px);
+  max-width: 100%;
+  height: calc(100dvh - 70px);
+  margin-bottom: 0;
   border-radius: 20px;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
