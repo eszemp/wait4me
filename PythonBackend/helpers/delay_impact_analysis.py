@@ -90,7 +90,6 @@ def find_stop_by_coord(gpkg_path, lon, lat, ref, name, buffer_m=500):
 
 
 def get_buffer_time_per_stop(service_name, onward_stops):
-    gpkg_path = '../UseCaseStudy/data/stop-places-schweiz/stop-places-schweiz-with-buffers.gpkg'
     results = []
     for s in onward_stops:
         stop = find_stop_by_coord(gpkg_path, 
