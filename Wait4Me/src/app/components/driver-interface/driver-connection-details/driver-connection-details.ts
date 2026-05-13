@@ -158,6 +158,6 @@ export class DriverConnectionDetails {
   }
 
   has_delay(stop_delay: Duration): Boolean {
-    return stop_delay.totalMinutes > 0;
+    return stop_delay.isBiggerThanZero();
   }
 }
