@@ -117,6 +117,11 @@ export class Wait4MeDisplay {
 
   getImpactRating(): string {
       const delay = this.w4mService.smallestRequestedDelays()[this.stopRef];
-      return this.w4mService.get_delay_impact_rating(this.stopRef, delay);
+      if (delay === undefined) {
+        return 'small';
+      }
+
+      const rating = this.w4mService.get_delay_impact_rating(this.stopRef, delay);
+      return rating || 'small';
   }
 }

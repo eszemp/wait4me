@@ -14,7 +14,15 @@
         <span class="line">{{ lineLabel }}</span>
         <span class="course">{{ courseLabel }}</span>
       </div>
-      <div class="destination">{{ destinationLabel }}</div>
+      <div class="destination">
+        {{ destinationLabel }}
+        <span class="arrival-time">
+          {{ (departure?.arrivalEstimated || departure?.arrivalTimetable) | date: 'HH:mm:ss' }}
+        </span>
+        @if (departure?.arrivalDelay?.isBiggerThanZero()) {
+          <span class="time-delay"> +{{ departure?.arrivalDelay?.format() }} </span>
+        }
+      </div>
     </article>
 
     <article class="input-section" id="time">
