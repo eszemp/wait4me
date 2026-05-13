@@ -23,6 +23,7 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   backdrop-filter: blur(4px);
+  margin: 2px;
 }
 
 .statistics-spinner {
@@ -37,8 +38,11 @@
 .monitoring-map {
   border: 2px solid var(--fir-green);
   width: 100%;
-  height: calc(100vh - 70px);
+  max-width: 100%;
+  height: calc(100dvh - 70px);
+  margin-bottom: 0;
   border-radius: 20px;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -90,7 +94,7 @@
   margin-top: 8px;
   padding-top: 8px;
   hyphens: auto;
-  max-width: 130px;
+  width: 200px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;

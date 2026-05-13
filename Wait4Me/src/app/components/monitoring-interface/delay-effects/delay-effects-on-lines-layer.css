@@ -11,8 +11,11 @@
 .monitoring-map {
   border: 2px solid var(--fir-green);
   width: 100%;
-  height: calc(100vh - 70px);
+  max-width: 100%;
+  height: calc(100dvh - 70px);
+  margin-bottom: 0;
   border-radius: 20px;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -100,7 +103,16 @@
 .delay-slider-panel .legend-color {
   width: 16px;
   height: 16px;
+  border-radius: 8px;
+  border: 2px solid var(--fir-green);
+  flex-shrink: 0;
+}
+
+.legend-color_start {
+  width: 16px;
+  height: 16px;
   border-radius: 2px;
+  border: 2px solid var(--fir-green);
   flex-shrink: 0;
 }
 
@@ -121,4 +133,16 @@
   white-space: normal;
   line-height: 1.4;
   padding-top: 8px;
+}
+
+/* Header row inside the description: title on the left, toggle aligned right */
+.delay-slider-panel .legend-description .legend-desc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.delay-slider-panel .legend-description .legend-desc-content {
+  margin-top: 8px;
 }

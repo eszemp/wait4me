@@ -27,7 +27,7 @@
   background: white;
   height: var(--control-height);
   border-radius: 12px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.25);
   overflow: visible;
   box-sizing: border-box;
 }
@@ -41,6 +41,18 @@
   width: 200px;
   height: var(--control-height);
   flex-shrink: 0;
+}
+
+/* Position the clear button inside the station input on the same line, right-aligned */
+.station-input-wrap .clear-line-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0;
+  padding: 0 6px;
+  width: auto;
+  height: 18px;
 }
 
 .search-input {
@@ -58,29 +70,6 @@
   box-sizing: border-box;
 }
 
-.clear-search-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #707070;
-  cursor: pointer;
-}
-
-.clear-search-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.clear-search-btn:hover {
-  color: var(--fir-green);
-}
 
 .search-input:focus {
   border-color: transparent;
@@ -88,7 +77,7 @@
 }
 
 .search-input::placeholder {
-  color: #565656;
+  color: var(--grey);
   opacity: 1;
 }
 
@@ -127,7 +116,7 @@
   border-radius: 12px;
   max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.25);
   z-index: 140;
   min-width: 300px;
 }
