@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  Input,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import maplibregl from 'maplibre-gl';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -32,10 +40,11 @@ type StationTransferDataset = {
 /**
  * Hosts the delay-effects map and overlays the line search control.
  *
- * This component renders a MapLibre map showing a selected connection's
- * track and station points. It augments OJP-provided station stops with
- * transfer buffer data from a local GeoJSON dataset and marks stations
- * without transfer data (OJP-only) so they can be styled differently.
+ * This component renders a MapLibre map showing a selected OJP connection
+ * as a track line with station stop points. The start station displays as
+ * a square; other stations are circles colored by transfer buffer availability.
+ * Transfer buffer data is loaded from a local GeoJSON dataset for stations
+ * that match by reference or name.
  */
 export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestroy {
   @Input() initialStopName: string | null = null;
@@ -53,7 +62,9 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   private readonly trackSourceId = 'selected-connection-track-source';
   private readonly trackLayerId = 'selected-connection-track-layer';
   private readonly trackStationsLayerId = 'selected-connection-track-stations-layer';
+  private readonly trackStartStationLayerId = 'selected-connection-track-start-station-layer';
   private readonly stationTransferDatasetUrl = '/map-data/stop_histogram_schweiz.geojson';
+  private readonly startStationIconId = 'start-station-square-icon';
 
   private map: maplibregl.Map | null = null;
   private readonly stationTransferByRef = new Map<string, StationTransferDataset>();
@@ -90,13 +101,12 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       this.map?.setTerrain(null);
       this.map?.dragRotate.disable();
       this.map?.touchZoomRotate.disableRotation();
+      this.addStartStationIcon();
       void this.loadStationTransferDataset();
       this.ensureTrackLayer();
     });
 
-    console.log("delay effects initialized with", this.initialStopName, this.initialDepartureTime)
-
-    if(this.delay) {
+    if (this.delay) {
       this.selectedDelayMinutes = this.delay;
     }
   }
@@ -157,11 +167,42 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   }
 
   /**
+   * Adds a custom square icon to the map for start station rendering.
+   *
+   * Creates a 15×15px canvas-drawn square filled with #395148 and registers
+   * it as a MapLibre GL image for use in the start station symbol layer.
+   */
+  private addStartStationIcon(): void {
+    const map = this.map;
+    if (!map || map.hasImage(this.startStationIconId)) {
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 15;
+    canvas.height = 15;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    ctx.fillStyle = '#395148';
+    ctx.fillRect(0, 0, 15, 15);
+
+    const imageData = ctx.getImageData(0, 0, 15, 15);
+    map.addImage(this.startStationIconId, imageData, { sdf: false });
+  }
+
+  /**
    * Ensures the dedicated source/layer pair for the selected connection track exists.
    *
-   * Adds a GeoJSON source and layers for track lines and station circles when
-   * they are not already present. Also registers simple cursor and click
-   * interactions for station features.
+   * Adds a GeoJSON source and layers for:
+   * - Track lines (LineString features)
+   * - Station circles (Point features excluding board stops)
+   * - Start station square (Point features with stopRole='board')
+   *
+   * Registers cursor and click interactions for station circle features.
    */
   private ensureTrackLayer(): void {
     const map = this.map;
@@ -199,7 +240,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         id: this.trackStationsLayerId,
         type: 'circle',
         source: this.trackSourceId,
-        filter: ['==', ['geometry-type'], 'Point'],
+        filter: [
+          'all',
+          ['==', ['geometry-type'], 'Point'],
+          ['!=', ['get', 'stopRole'], 'board'],
+        ] as any,
         paint: {
           'circle-color': [
             'case',
@@ -233,13 +278,31 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           return;
         }
 
-        // Only show popups for stations with transfer data
         const hasTransferData = (feature.properties as Record<string, unknown>)['hasTransferData'];
         if (!hasTransferData) {
           return;
         }
 
         this.showStationPopup(feature);
+      });
+    }
+
+    if (!map.getLayer(this.trackStartStationLayerId)) {
+      map.addLayer({
+        id: this.trackStartStationLayerId,
+        type: 'symbol',
+        source: this.trackSourceId,
+        filter: [
+          'all',
+          ['==', ['geometry-type'], 'Point'],
+          ['==', ['get', 'stopRole'], 'board'],
+        ] as any,
+        layout: {
+          'icon-image': this.startStationIconId,
+          'icon-size': 1,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
       });
     }
   }
@@ -531,6 +594,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     });
   }
 
+  /** Normalize stop reference by extracting digits or returning the original value. */
   private normalizeStopRef(value: unknown): string {
     const raw = this.toSafeString(value)?.trim() ?? '';
     if (!raw) {
@@ -541,6 +605,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     return digitsOnly || raw;
   }
 
+  /** Normalize stop name: lowercase, remove accents, compress whitespace. */
   private normalizeStopName(value: unknown): string {
     const raw = this.toSafeString(value)?.trim().toLowerCase() ?? '';
     if (!raw) {
@@ -561,6 +626,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       .replace(/\s+/g, ' ');
   }
 
+  /** Look up transfer dataset for a station by reference or normalized name. */
   private findDatasetForStation(stopRef: string, stopName: string): StationTransferDataset | null {
     if (stopRef) {
       const byRef = this.stationTransferByRef.get(stopRef);

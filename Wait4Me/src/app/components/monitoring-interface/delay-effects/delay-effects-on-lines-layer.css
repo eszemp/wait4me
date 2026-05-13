@@ -103,7 +103,16 @@
 .delay-slider-panel .legend-color {
   width: 16px;
   height: 16px;
+  border-radius: 8px;
+  border: 2px solid var(--fir-green);
+  flex-shrink: 0;
+}
+
+.legend-color_start {
+  width: 16px;
+  height: 16px;
   border-radius: 2px;
+  border: 2px solid var(--fir-green);
   flex-shrink: 0;
 }
 
