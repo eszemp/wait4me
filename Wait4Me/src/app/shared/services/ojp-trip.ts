@@ -181,6 +181,8 @@ export class OJPTrip extends OJPBase {
     try {
       const request = TripRefineRequest.initWithTrip(selected.rawTrip);
       const response = await request.fetchResponse(this.sdk);
+      console.log("DEBUG Trip for Refinement:", request.payload.tripResult.trip);
+      console.log("DEBUG Request for Refinement:", request);
       if (response.ok && response.value.tripResult?.[0]) {
         const refinedTrip = await this.toPassengerTrip(response.value.tripResult[0]);
         if (refinedTrip) {
@@ -759,12 +761,13 @@ export class OJPTrip extends OJPBase {
       this.locationService.getLocationInformation(transferStopName, 1),
     );
     const transferStopRef = suggestions[0]?.stopPlaceRef ?? '';
+    console.log("DEBUG TRANSFER STOPREF:", transferStopName, transferStopRef);
     const incomingServiceRef = prev_leg.journeyRef;
     const outgoingServiceRef = next_leg.journeyRef;
     return {
       incomingJourneyRef: incomingServiceRef ?? '',
       outgoingJourneyRef: outgoingServiceRef ?? '',
-      transferStopRef: Number(transferStopRef),
+      transferStopRef: transferStopRef,
       scheduledOutgoingDeparture: departure_timetable,
       actualOutgoingDeparture: departure,
       requestedDelay: Duration.initFromTotalMinutes(req_delay_min),
