@@ -36,10 +36,10 @@ export class Wait4MeEditBar {
 
 
     this.dialog.open(MonitoringInterface, {
-      width: '80vw',     
-      height: '80vh', 
+      width: '90vw',     
+      height: 'calc(100dvh - 70px)', 
       maxWidth: '100vw', 
-      maxHeight: '100vw', 
+      maxHeight: '100vh', 
       data: {            
         stopName: this.w4mService.activeStopName(),
         depTime: time_string,
