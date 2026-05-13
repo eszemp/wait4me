@@ -619,15 +619,15 @@ export class OJPTrip extends OJPBase {
       .map((leg, index) => this.toPassengerLeg(leg, index))
       .filter((leg): leg is PassengerLeg => leg !== null);
 
-    let initialWalkTime = Duration.initFromTotalMinutes(0);
-    let finalWalkTime = Duration.initFromTotalMinutes(0);
+    let initialWalkTime = Duration.initFromTotalSeconds(0);
+    let finalWalkTime = Duration.initFromTotalSeconds(0);
 
     if (legs.at(0)?.kind == 'transfer') {
-      initialWalkTime = legs.at(0)?.duration || Duration.initFromTotalMinutes(0);
+      initialWalkTime = legs.at(0)?.duration || Duration.initFromTotalSeconds(0);
     }
 
     if (legs.at(-1)?.kind == 'transfer') {
-      finalWalkTime = legs.at(-1)?.duration || Duration.initFromTotalMinutes(0);
+      finalWalkTime = legs.at(-1)?.duration || Duration.initFromTotalSeconds(0);
     }
 
     // filter out transfers and timed legs
@@ -688,14 +688,14 @@ export class OJPTrip extends OJPBase {
   ): PassengerTimedLeg {
     const board = timedLeg.legBoard;
     const alight = timedLeg.legAlight;
-    const boardDelay = this.calculateDelay(
-      board?.serviceDeparture?.timetabledTime,
-      board?.serviceDeparture?.estimatedTime,
-    );
-    const alightDelay = this.calculateDelay(
-      alight?.serviceArrival?.timetabledTime,
-      alight?.serviceArrival?.estimatedTime,
-    );
+
+    //console.log("DEBUG ALIGHT/BOARD DELAYS");
+    //console.log("BOARD TIMETABLE", board?.serviceDeparture?.timetabledTime);
+    //console.log("BOARD ACTUAL", board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime);
+    //console.log("BOARD DELAY", this.calculateDelay(board?.serviceDeparture?.timetabledTime, board?.serviceDeparture?.estimatedTime));
+    //console.log("ALIGHT TIMETABLE", alight?.serviceArrival?.timetabledTime);
+    //console.log("ALIGHT ACTUAL", alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime);
+    //console.log("ALIGHT DELAY", this.calculateDelay(alight?.serviceArrival?.timetabledTime, alight?.serviceArrival?.estimatedTime));
 
     return {
       kind: 'timed',
@@ -707,14 +707,14 @@ export class OJPTrip extends OJPBase {
           board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime
         )
       ),
-      boardDelay: boardDelay,
+      boardDelay: this.calculateDelay(board?.serviceDeparture?.timetabledTime, board?.serviceDeparture?.estimatedTime),
       alightTimeTimetable: new Date(this.asString(alight?.serviceArrival?.timetabledTime)),
       alightTimeEstimated: new Date(
         this.asString(
           alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime
         )
       ),
-      alightDelay: alightDelay,
+      alightDelay: this.calculateDelay(alight?.serviceArrival?.timetabledTime, alight?.serviceArrival?.estimatedTime),
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
       boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
@@ -753,9 +753,18 @@ export class OJPTrip extends OJPBase {
     const departure = next_leg.boardTimeEstimated;
     const departure_timetable = next_leg.boardTimeTimetable;
     // TODO: maybe adjust so its rounded up to the nearest half minute (later)
-    const req_delay_min = Math.ceil(
-      Math.abs(actual_arrival.getTime() - departure.getTime()) / (1000 * 60),
-    );
+    const exact_delay_sec = (actual_arrival.getTime() - departure.getTime()) / 1000;
+    console.log("actual arrival", transfer_leg.duration.addToDate(arrival));
+    console.log("departure", next_leg.boardTimeEstimated)
+    console.log("required delay", exact_delay_sec);
+    let req_delay_sec : number;
+    if (exact_delay_sec % 60 < 30) {
+      req_delay_sec = exact_delay_sec - exact_delay_sec % 60;
+    }
+    else {
+      req_delay_sec = exact_delay_sec + (60 - exact_delay_sec % 60);
+    }
+    console.log("requested (rounded)", req_delay_sec);
     const transferStopName = next_leg.boardStopName;
     const suggestions = await firstValueFrom(
       this.locationService.getLocationInformation(transferStopName, 1),
@@ -770,7 +779,7 @@ export class OJPTrip extends OJPBase {
       transferStopRef: transferStopRef,
       scheduledOutgoingDeparture: departure_timetable,
       actualOutgoingDeparture: departure,
-      requestedDelay: Duration.initFromTotalMinutes(req_delay_min),
+      requestedDelay: Duration.initFromTotalSeconds(req_delay_sec),
     };
   }
 
@@ -778,14 +787,19 @@ export class OJPTrip extends OJPBase {
    * Calculates the delay between planned and estimated timestamps in minutes.
    */
   private calculateDelay(timetabledTime: unknown, estimatedTime: unknown): Duration {
+    if (!estimatedTime) {
+      return Duration.initFromTotalSeconds(0);
+    }
     // times have format: 2026-03-30T10:11:18Z
     const scheduled = new Date(this.asString(timetabledTime)).getTime();
     const estimated = new Date(this.asString(estimatedTime)).getTime();
 
     const diffInMs = estimated - scheduled; // in ms
-    const delayInMinutes = Math.ceil(diffInMs / (1000 * 60)); // TODO: minutes no rounding here: rounding up and rounding down leads to errors
-
-    return Duration.initFromTotalMinutes(delayInMinutes);
+    if (diffInMs <= 0) {
+      return Duration.initFromTotalSeconds(0);
+    }
+    const delayInSeconds = (diffInMs / 1000);
+    return Duration.initFromTotalSeconds(delayInSeconds);
   }
 
   /**
@@ -823,25 +837,31 @@ export class OJPTrip extends OJPBase {
     if (!(transferLeg.id === 1 || transferLeg.id === totalLegs)) {
       const previous_leg = timedLegs.find((leg) => leg.id === transferLeg.id - 1);
       const following_leg = timedLegs.find((leg) => leg.id === transferLeg.id + 1);
-      const arrival = previous_leg?.alightTimeEstimated ? previous_leg.alightTimeEstimated : previous_leg?.alightTimeTimetable;
-      let departure = null;
-      if (following_leg!.boardTimeEstimated.getMilliseconds() > following_leg!.boardTimeTimetable.getMilliseconds()) {
-        departure = following_leg?.boardTimeEstimated;
+      const incoming_delay = this.calculateDelay(previous_leg?.alightTimeTimetable, previous_leg?.alightTimeEstimated);
+      if (incoming_delay.totalSeconds<30) {
+        return false; // TODO: justify this assumption
       }
-      else {
+      const arrival = previous_leg?.alightTimeEstimated ? previous_leg.alightTimeEstimated : previous_leg?.alightTimeTimetable;
+      const outgoing_delay = this.calculateDelay(following_leg?.boardTimeTimetable, following_leg?.boardTimeEstimated);
+      let departure = following_leg?.boardTimeEstimated ? following_leg.boardTimeEstimated : following_leg?.boardTimeTimetable;
+      if (outgoing_delay.totalSeconds === 0) {
+        // In case of earlier estimated departure -> treat as if departure like in timetable (TODO: justify decision)
         departure = following_leg?.boardTimeTimetable;
       }
       if (!arrival || !departure) return false; // Safety fallback
-      if (transferLeg.duration.addToDate(arrival) > departure) {
-        console.log("CRITICAL TRANSFER SANITY CHECK");
-        console.log("Incoming Service Arrival Time", arrival)
-        console.log("Outgoing Service Departure Time", departure)
-        console.log("Transfer Duration", transferLeg.duration)
-        console.log("-> Passenger arrives at outgoing stop at", transferLeg.duration.addToDate(arrival));
-        console.log("-> Outgoing Service departs at", departure)
+
+      const passengerArrivalTimeAtPlatform = transferLeg.duration.addToDate(arrival);
+      const latenessMs = passengerArrivalTimeAtPlatform.getTime() - departure.getTime();
+      const IS_SIGNIFICANTLY_LATE = latenessMs >= 30000; // delay of at least 30 seconds
+
+      if (latenessMs > 0) {
+        console.log("CRITICAL TRANSFER DETECTED:", IS_SIGNIFICANTLY_LATE);
+        console.log("Passenger Arrival at Platform:", passengerArrivalTimeAtPlatform);
+        console.log("Vehicle Departure:", departure);
+        console.log(`Lateness: ${latenessMs / 1000} seconds`);
       }
-      
-      return transferLeg.duration.addToDate(arrival) > departure;
+
+      return IS_SIGNIFICANTLY_LATE;
     }
     return false;
   }

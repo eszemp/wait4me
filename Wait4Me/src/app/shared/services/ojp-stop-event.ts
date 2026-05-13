@@ -82,9 +82,9 @@ export class OJPStopEvent extends OJPBase {
             const departureEstimated = new Date(
               this.asString(callAtStop?.serviceDeparture?.estimatedTime),
             );
-            const departureDelayInMinutes =
-              departureEstimated.getMinutes() - departureTimetable.getMinutes();
-            const departureDelay = Duration.initFromTotalMinutes(departureDelayInMinutes);
+            const departureDelayInSeconds =
+              departureEstimated.getSeconds() - departureTimetable.getSeconds();
+            const departureDelay = Duration.initFromTotalSeconds(departureDelayInSeconds);
             //const arrival = this.asString(
             //  lastOnwardCall?.serviceArrival?.estimatedTime ??
             //    lastOnwardCall?.serviceArrival?.timetabledTime ??
@@ -99,9 +99,9 @@ export class OJPStopEvent extends OJPBase {
             const arrivalEstimated = new Date(
               this.asString(lastOnwardCall?.serviceArrival?.estimatedTime),
             );
-            const arrivalDelayInMinutes =
-              arrivalEstimated.getMinutes() - arrivalTimetable.getMinutes();
-            const arrivalDelay = Duration.initFromTotalMinutes(arrivalDelayInMinutes);
+            const arrivalDelayInSeconds =
+              arrivalEstimated.getSeconds() - arrivalTimetable.getSeconds();
+            const arrivalDelay = Duration.initFromTotalSeconds(arrivalDelayInSeconds);
             const departurePlatformOrStop =
               this.getQuayText(callAtStop?.estimatedQuay) ??
               this.getQuayText(callAtStop?.plannedQuay);
@@ -117,9 +117,9 @@ export class OJPStopEvent extends OJPBase {
             const currentStopTimeEstimated = new Date(
               this.asString(callAtStop?.serviceDeparture?.estimatedTime),
             );
-            const currentStopDelayInMinutes =
-              currentStopTimeEstimated.getMinutes() - currentStopTimeTimetable.getMinutes();
-            const currentStopDelay = Duration.initFromTotalMinutes(currentStopDelayInMinutes);
+            const currentStopDelayInSeconds =
+              currentStopTimeEstimated.getSeconds() - currentStopTimeTimetable.getSeconds();
+            const currentStopDelay = Duration.initFromTotalSeconds(currentStopDelayInSeconds);
 
             const onwardStopsPromises = onwardCalls.map(async (onwardCall) => {
               const onwardStop = onwardCall.callAtStop;
@@ -134,9 +134,9 @@ export class OJPStopEvent extends OJPBase {
               const stopTimeEstimated = new Date(
                 this.asString(onwardStop?.serviceDeparture?.estimatedTime),
               );
-              const stopDelayInMinutes =
-                stopTimeEstimated.getMinutes() - stopTimeTimetable.getMinutes();
-              const stopDelay = Duration.initFromTotalMinutes(stopDelayInMinutes);
+              const stopDelayInSeconds =
+                stopTimeEstimated.getSeconds() - stopTimeTimetable.getSeconds();
+              const stopDelay = Duration.initFromTotalSeconds(stopDelayInSeconds);
               if (!stopName) {
                 return null;
               }
