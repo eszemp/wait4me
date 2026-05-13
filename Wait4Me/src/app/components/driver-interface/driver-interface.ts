@@ -13,7 +13,7 @@ import { DriverStatusComponent } from './driver-status/driver-status';
   styleUrl: './driver-interface.css',
 })
 export class DriverInterface {
-  private static readonly OWN_POSITION_PLACEHOLDER = 'Own Position';
+  private static readonly OWN_POSITION_PLACEHOLDER = 'Nearest Station';
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -153,7 +153,7 @@ export class DriverInterface {
   }
 
   onOwnPositionClick(): void {
-    this.stationQuery.set('');
+    // Keep the existing search text visible; clear suggestions while resolving position.
     this.stationSuggestions.set([]);
     this.showSuggestions.set(false);
     this.fetchCurrentPositionStop();
@@ -284,8 +284,11 @@ export class DriverInterface {
   private persistOwnPositionStop(stop: StopLookupResult): void {
     this.selectedStopRef.set(stop.stopPlaceRef);
     this.selectedOriginName.set(stop.stopPlaceName);
-    this.actualPosition.set(stop.stopPlaceName);
-    this.stationQuery.set('');
+    // Do not change the appearance/text of the own-position button.
+    this.actualPosition.set(DriverInterface.OWN_POSITION_PLACEHOLDER);
+    // Write the resolved stop name into the search field so the user can clear it
+    // with the existing clear-cross control.
+    this.stationQuery.set(stop.stopPlaceName);
     this.loadError.set(null);
 
     sessionStorage.setItem('origin_name', stop.stopPlaceName);
