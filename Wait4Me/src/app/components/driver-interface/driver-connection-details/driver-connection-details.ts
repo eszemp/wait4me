@@ -154,10 +154,10 @@ export class DriverConnectionDetails {
   }
 
   calculate_new_delay(stop : DepartureStop): string {
-    return stop.delay.plus(Duration.initFromTotalMinutes(this.w4mService.additionalDelaysAnySource()[stop.id])).format();
+    return stop.delay.plus(Duration.initFromTotalSeconds(this.w4mService.additionalDelaysAnySource()[stop.id]*60)).format();
   }
 
   has_delay(stop_delay: Duration): Boolean {
-    return stop_delay.totalMinutes > 0;
+    return stop_delay.isBiggerThanZero();
   }
 }

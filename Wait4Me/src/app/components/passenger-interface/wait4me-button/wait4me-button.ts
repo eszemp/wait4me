@@ -161,7 +161,7 @@ export class Wait4MeButton {
         this.tripService.destinationId.set(null);
 
         const rawDuration = this.w4mService.trip!.criticalTransfer?.requestedDelay;
-        const requestedDelay = Duration.initFromTotalMinutes(rawDuration!.totalMinutes);
+        const requestedDelay = Duration.initFromTotalSeconds(rawDuration!.totalSeconds);
 
         const new_departure = requestedDelay.addToDate(
             this.w4mService.trip!.criticalTransfer!.scheduledOutgoingDeparture

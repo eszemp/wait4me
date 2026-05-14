@@ -17,9 +17,9 @@
       <div class="destination">
         {{ destinationLabel }}
         <span class="arrival-time">
-          {{ (departure?.arrivalEstimated || departure?.arrivalTimetable) | date: 'HH:mm:ss' }}
+          {{ departure?.arrivalTimetable | date: 'HH:mm:ss' }}
         </span>
-        @if (departure?.arrivalDelay?.isBiggerThanZero()) {
+        @if (has_delay(departure!.arrivalDelay!)) {
           <span class="time-delay"> +{{ departure?.arrivalDelay?.format() }} </span>
         }
       </div>
@@ -47,14 +47,14 @@
 
           <span class="time">
             @if (idx === stops.length - 1) {
-              {{ (departure.arrivalEstimated || departure.arrivalTimetable) | date: 'HH:mm:ss' }}
+              {{ departure.arrivalTimetable | date: 'HH:mm:ss' }}
             } @else {
               {{ stop.timeTimetable | date: 'HH:mm:ss' }}
             }
             @if (idx === stops.length - 1) {
               @if (has_delay(departure.arrivalDelay)) {
                 <span class="time-delay">
-                  +{{ departure.arrivalDelay.totalMinutes }}
+                  +{{ departure.arrivalDelay.format()}}
                 </span>
               }
             } @else {
@@ -65,7 +65,7 @@
               }
               @else {
                 <span *ngIf="has_delay(stop.delay)" class="time-delay">
-                  +{{ stop.delay.totalMinutes }}
+                  +{{ stop.delay.format() }}
                 </span>
               }
             }
