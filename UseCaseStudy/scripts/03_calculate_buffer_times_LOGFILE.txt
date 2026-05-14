@@ -1,0 +1,183 @@
+Winterthur, Wylandbrücke (8591016) querying stop_refs: ('8591016', 'ch:1:sloid:91016')
+Winterthur, Wylandbrücke (8591016) has average buffer time: 358.4848484848485 seconds
+Winterthur, Wylandbrücke (8591016) processed.
+Visp, Lonzawerke (8501717) querying stop_refs: ('8501717', 'ch:1:sloid:1717')
+Visp, Lonzawerke (8501717) has average buffer time: 3666.8571428571427 seconds
+Visp, Lonzawerke (8501717) processed.
+Obersaxen, Tobel (8574998) querying stop_refs: ('8574998', 'ch:1:sloid:74998')
+Obersaxen, Tobel (8574998) has no transfers
+Le Prese (8509364) querying stop_refs: ('8509364', 'ch:1:sloid:9364')
+Le Prese (8509364) has average buffer time: 2375.5555555555557 seconds
+Le Prese (8509364) processed.
+Kippel, Dorf (8507761) querying stop_refs: ('8507761', 'ch:1:sloid:7761')
+Kippel, Dorf (8507761) has no transfers
+Rolle, Les Vernes (8582696) querying stop_refs: ('8582696', 'ch:1:sloid:82696')
+Rolle, Les Vernes (8582696) has no transfers
+Thalkirch, Abzw. Camana/Hof (8511073) querying stop_refs: ('8511073', 'ch:1:sloid:11073')
+Thalkirch, Abzw. Camana/Hof (8511073) has no transfers
+Dättwil (8502108) querying stop_refs: ('8502108',)
+Dättwil (8502108) has no services
+Heiligkreuz (Mels), Staatsstr. (8579881) querying stop_refs: ('8579881', 'ch:1:sloid:79881')
+Heiligkreuz (Mels), Staatsstr. (8579881) has average buffer time: 1035.0 seconds
+Heiligkreuz (Mels), Staatsstr. (8579881) processed.
+Burglauenen (8507382) querying stop_refs: ('8507382', 'ch:1:sloid:7382', 'ch:1:sloid:94492')
+Burglauenen (8507382) has average buffer time: 33482.769230769234 seconds
+Burglauenen (8507382) processed.
+Unterseen, Luegibrüggli (8507791) querying stop_refs: ('8507791', 'ch:1:sloid:7791')
+Unterseen, Luegibrüggli (8507791) has no transfers
+Schlossrued, Längenthal (8572649) querying stop_refs: ('8572649', 'ch:1:sloid:72649')
+Schlossrued, Längenthal (8572649) has no transfers
+Bristen (Talstation) (8530426) querying stop_refs: ('8530426',)
+Bristen (Talstation) (8530426) has no services
+Winterthur, Gewerbeschule (8580458) querying stop_refs: ('8580458', 'ch:1:sloid:80458')
+Winterthur, Gewerbeschule (8580458) has average buffer time: 61.56903765690377 seconds
+Winterthur, Gewerbeschule (8580458) processed.
+Saules BE, poste (8571952) querying stop_refs: ('8571952', 'ch:1:sloid:71952')
+Saules BE, poste (8571952) has no transfers
+St-Ursanne, Lorette (8572102) querying stop_refs: ('8572102', 'ch:1:sloid:72102')
+St-Ursanne, Lorette (8572102) has average buffer time: 3227.1428571428573 seconds
+St-Ursanne, Lorette (8572102) processed.
+Saules NE (8579635) querying stop_refs: ('8579635', 'ch:1:sloid:79635')
+Saules NE (8579635) has average buffer time: 10090.0 seconds
+Saules NE (8579635) processed.
+Biel/Bienne, Brunnenplatz/Place de la Fontaine (8576408) querying stop_refs: ('8576408',)
+Biel/Bienne, Brunnenplatz/Place de la Fontaine (8576408) has average buffer time: 106.83185840707965 seconds
+Biel/Bienne, Brunnenplatz/Place de la Fontaine (8576408) processed.
+Aigle, Orlons (8504422) querying stop_refs: ('8504422', 'ch:1:sloid:4422')
+Aigle, Orlons (8504422) has no transfers
+Estavayer-le-Lac, Tuillière (8588861) querying stop_refs: ('8588861', 'ch:1:sloid:88861')
+Estavayer-le-Lac, Tuillière (8588861) has no transfers
+Pura, Paese (8505781) querying stop_refs: ('8505781', 'ch:1:sloid:5781')
+Pura, Paese (8505781) has average buffer time: 1322.0 seconds
+Pura, Paese (8505781) processed.
+Anzère, Bisse d'Ayent (8570794) querying stop_refs: ('8570794', 'ch:1:sloid:70794')
+Anzère, Bisse d'Ayent (8570794) has no transfers
+Saxon, gare/Gottefrey (8511270) querying stop_refs: ('8511270',)
+Saxon, gare/Gottefrey (8511270) has no services
+Lufingen, Augwil (8573230) querying stop_refs: ('8573230', 'ch:1:sloid:73230')
+Lufingen, Augwil (8573230) has average buffer time: 271.6014234875445 seconds
+Lufingen, Augwil (8573230) processed.
+Minusio, Esplanade (8505604) querying stop_refs: ('8505604', 'ch:1:sloid:5604')
+Minusio, Esplanade (8505604) has average buffer time: 9040.843373493975 seconds
+Minusio, Esplanade (8505604) processed.
+Pfäfers, Grosswies (8574572) querying stop_refs: ('8574572', 'ch:1:sloid:74572')
+Pfäfers, Grosswies (8574572) has no transfers
+Bolken, Dorf (8500477) querying stop_refs: ('8500477', 'ch:1:sloid:477')
+Bolken, Dorf (8500477) has average buffer time: 1051.7142857142858 seconds
+Bolken, Dorf (8500477) processed.
+Biel/Bienne Leubringenbahn/Funi Evilard (8504350) querying stop_refs: ('8504350',)
+Biel/Bienne Leubringenbahn/Funi Evilard (8504350) has no transfers
+Fontaines NE, Les Bassins (8579606) querying stop_refs: ('8579606', 'ch:1:sloid:79606')
+Fontaines NE, Les Bassins (8579606) has average buffer time: 1132.6315789473683 seconds
+Fontaines NE, Les Bassins (8579606) processed.
+Fribourg/Freiburg Poya (8519133) querying stop_refs: ('8519133', 'ch:1:sloid:19133')
+Fribourg/Freiburg Poya (8519133) has no transfers
+Realp DFB (8530612) querying stop_refs: ('8530612', 'ch:1:sloid:30612')
+Realp DFB (8530612) has no services
+Sils/Segl Baselgia, Margna (8509312) querying stop_refs: ('8509312', 'ch:1:sloid:9312')
+Sils/Segl Baselgia, Margna (8509312) has no services
+Lutry, Brûlées (8592147) querying stop_refs: ('8592147', 'ch:1:sloid:92147')
+Lutry, Brûlées (8592147) has no transfers
+Rivera, Passo del Ceneri (8507230) querying stop_refs: ('8507230', 'ch:1:sloid:7230')
+Rivera, Passo del Ceneri (8507230) has no transfers
+Meiringen, Spitalstrasse (8581992) querying stop_refs: ('8581992', 'ch:1:sloid:81992')
+Meiringen, Spitalstrasse (8581992) has no transfers
+Spreitenbach, Altersheim (8591891) querying stop_refs: ('8591891', 'ch:1:sloid:91891')
+Spreitenbach, Altersheim (8591891) has no transfers
+Franziskus (Spw) (8516076) querying stop_refs: ('8516076',)
+Franziskus (Spw) (8516076) has no services
+Cham, Bahnhof (8577581) querying stop_refs: ('8577581', 'ch:1:sloid:2203', 'ch:1:sloid:77581')
+Cham, Bahnhof (8577581) has average buffer time: 136.13034623217922 seconds
+Cham, Bahnhof (8577581) processed.
+Treib (8508469) querying stop_refs: ('8508469', 'ch:1:sloid:8469')
+Treib (8508469) has no transfers
+Bachtele (Trimstein) (8516278) querying stop_refs: ('8516278',)
+Bachtele (Trimstein) (8516278) has no services
+Claro, Biv. per Scubiago (8587468) querying stop_refs: ('8587468', 'ch:1:sloid:87468')
+Claro, Biv. per Scubiago (8587468) has average buffer time: 4616.727272727273 seconds
+Claro, Biv. per Scubiago (8587468) processed.
+Mels (8509412) querying stop_refs: ('8509412', 'ch:1:sloid:79885', 'ch:1:sloid:9412')
+Mels (8509412) has average buffer time: 763.3663366336634 seconds
+Mels (8509412) processed.
+Münchenstein, Dorf (8500076) querying stop_refs: ('8500076', 'ch:1:sloid:76')
+Münchenstein, Dorf (8500076) has average buffer time: 531.1026615969582 seconds
+Münchenstein, Dorf (8500076) processed.
+Rickenbach SZ, Lauenen (8577493) querying stop_refs: ('8577493', 'ch:1:sloid:77493')
+Rickenbach SZ, Lauenen (8577493) has no transfers
+Benken SG, Giessen (8573882) querying stop_refs: ('8573882', 'ch:1:sloid:73882')
+Benken SG, Giessen (8573882) has no transfers
+Ecublens VD, EPFL (bus) (8579233) querying stop_refs: ('8579233', 'ch:1:sloid:1214')
+Ecublens VD, EPFL (bus) (8579233) has average buffer time: 265.4867256637168 seconds
+Ecublens VD, EPFL (bus) (8579233) processed.
+Otelfingen, Bahnhof (8576235) querying stop_refs: ('8576235', 'ch:1:sloid:3528', 'ch:1:sloid:76235')
+Otelfingen, Bahnhof (8576235) has average buffer time: 225.80645161290323 seconds
+Otelfingen, Bahnhof (8576235) processed.
+Ste-Croix, Rocher (8593788) querying stop_refs: ('8593788',)
+Ste-Croix, Rocher (8593788) has no services
+St. Stephan, Ried (8506439) querying stop_refs: ('8506439', 'ch:1:sloid:6439')
+St. Stephan, Ried (8506439) has no services
+Sumiswald, Post (8587245) querying stop_refs: ('8587245', 'ch:1:sloid:87245')
+Sumiswald, Post (8587245) has average buffer time: 985.925925925926 seconds
+Sumiswald, Post (8587245) processed.
+Bad Zurzach, Triumph (8582519) querying stop_refs: ('8582519', 'ch:1:sloid:82519')
+Bad Zurzach, Triumph (8582519) has no transfers
+Breitenbach, Margrieben (8582411) querying stop_refs: ('8582411', 'ch:1:sloid:82411')
+Breitenbach, Margrieben (8582411) has average buffer time: 6911.538461538462 seconds
+Breitenbach, Margrieben (8582411) processed.
+St-Blaise, gare CFF (8571911) querying stop_refs: ('8571911', 'ch:1:sloid:71911')
+St-Blaise, gare CFF (8571911) has no transfers
+Lyss, Oberfeldweg (8583037) querying stop_refs: ('8583037', 'ch:1:sloid:83037')
+Lyss, Oberfeldweg (8583037) has no transfers
+Neuchâtel, Plan (8579628) querying stop_refs: ('8579628', 'ch:1:sloid:79628')
+Neuchâtel, Plan (8579628) has average buffer time: 919.44 seconds
+Neuchâtel, Plan (8579628) processed.
+La Chaux-de-Fonds, Tête-de-Ran (8593642) querying stop_refs: ('8593642', 'ch:1:sloid:93642')
+La Chaux-de-Fonds, Tête-de-Ran (8593642) has no transfers
+Samnaun-Dorf, Post (8509873) querying stop_refs: ('8509873', 'ch:1:sloid:9873')
+Samnaun-Dorf, Post (8509873) has average buffer time: 849.75 seconds
+Samnaun-Dorf, Post (8509873) processed.
+Boveresse, Séchoir (8506930) querying stop_refs: ('8506930', 'ch:1:sloid:6930')
+Boveresse, Séchoir (8506930) has average buffer time: 3078.5714285714284 seconds
+Boveresse, Séchoir (8506930) processed.
+Oetwil am See, Holzhusen (8507330) querying stop_refs: ('8507330', 'ch:1:sloid:7330')
+Oetwil am See, Holzhusen (8507330) has no transfers
+Bürgenstock, Residenzen (8557029) querying stop_refs: ('8557029', 'ch:1:sloid:57029')
+Bürgenstock, Residenzen (8557029) has no transfers
+Maschwanden, Dorf (8502882) querying stop_refs: ('8502882', 'ch:1:sloid:2882')
+Maschwanden, Dorf (8502882) has no transfers
+Vouvry, Riond Vert (8579180) querying stop_refs: ('8579180', 'ch:1:sloid:79180')
+Vouvry, Riond Vert (8579180) has no transfers
+Bremgarten AG, West (8572643) querying stop_refs: ('8572643', 'ch:1:sloid:72643')
+Bremgarten AG, West (8572643) has no transfers
+La Large-Journée (8500180) querying stop_refs: ('8500180', 'ch:1:sloid:180')
+La Large-Journée (8500180) has no transfers
+Holderbank AG, Hauptstrasse/Bahnhof (8509435) querying stop_refs: ('8509435',)
+Holderbank AG, Hauptstrasse/Bahnhof (8509435) has no services
+Friltschen, Dorf (8506742) querying stop_refs: ('8506742', 'ch:1:sloid:6742')
+Friltschen, Dorf (8506742) has no transfers
+Hermiswil, Brücke (8587597) querying stop_refs: ('8587597', 'ch:1:sloid:87597')
+Hermiswil, Brücke (8587597) has no transfers
+Maroggia-Melano (8505303) querying stop_refs: ('8505303', 'ch:1:sloid:5303')
+Maroggia-Melano (8505303) has average buffer time: 1272.4137931034484 seconds
+Maroggia-Melano (8505303) processed.
+Fang (8505687) querying stop_refs: ('8505687', 'ch:1:sloid:5687')
+Fang (8505687) has no transfers
+Lichtensteig, Gurtberg (8506618) querying stop_refs: ('8506618', 'ch:1:sloid:6618')
+Lichtensteig, Gurtberg (8506618) has no transfers
+Bottenwil, Stäpflistrasse (8594282) querying stop_refs: ('8594282', 'ch:1:sloid:94282')
+Bottenwil, Stäpflistrasse (8594282) has no transfers
+Koblenz Dorf (8503411) querying stop_refs: ('8503411', 'ch:1:sloid:3411')
+Koblenz Dorf (8503411) has average buffer time: 1064.5945945945946 seconds
+Koblenz Dorf (8503411) processed.
+Premploz, village (8570721) querying stop_refs: ('8570721', 'ch:1:sloid:70721')
+Premploz, village (8570721) has no transfers
+Bürglen UR, Hartolfingen (8573117) querying stop_refs: ('8573117', 'ch:1:sloid:73117')
+Bürglen UR, Hartolfingen (8573117) has average buffer time: 998.2677165354331 seconds
+Bürglen UR, Hartolfingen (8573117) processed.
+Le Manège (8501084) querying stop_refs: ('8501084', 'ch:1:sloid:1084')
+Le Manège (8501084) has no transfers
+St-Sulpice VD, Pâqueret (8592227) querying stop_refs: ('8592227', 'ch:1:sloid:92227')
+St-Sulpice VD, Pâqueret (8592227) has no transfers
+Delémont, Morépont (8571966) querying stop_refs: ('8571966', 'ch:1:sloid:71966')
+Delémont, Morépont (8571966) has no transfers
+Winterthur, Brühleck (8590929) querying stop_refs: ('8590929', 'ch:1:sloid:90929')

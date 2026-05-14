@@ -11,6 +11,7 @@ from helpers.ojp_arrivals_and_departures import (
     AuthAccessDeniedError,
     MissingTokenError,
 )
+from helpers.ojp_transfer_windows import OJPStopInfoRequest, normalize_station_name
 from helpers.write_log import initialize_logfile, add_to_log
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -25,6 +26,32 @@ MAX_RETRIES = 3
 RETRY_DELAY = 2
 REQUEST_RATE_LIMIT = 0.02
 CHECKPOINT_SAVE_EVERY = 25
+
+
+@lru_cache(maxsize=1024)
+def get_station_cluster_refs(stop_name):
+    """Resolve all stop refs that belong to the same station cluster."""
+    ojp_info = OJPStopInfoRequest()
+    query_name = normalize_station_name(stop_name)
+
+    try:
+        places = ojp_info.fetch_places_by_name(query_name, number_of_results=25)
+    except Exception:
+        return tuple()
+
+    refs = []
+    seen = set()
+    for place in places:
+        if place.get("normalized_name") != query_name:
+            continue
+
+        for ref_key in ("stop_place_ref", "stop_point_ref"):
+            ref = place.get(ref_key)
+            if ref and ref not in seen:
+                seen.add(ref)
+                refs.append(ref)
+
+    return tuple(refs)
 
 
 def load_checkpoint():
@@ -128,14 +155,40 @@ def process_all_stops(stops):
     print(f"Processing entries... ({remaining_stops} remaining of {total_stops} total)")
     auth_denied_logged = False
     
+    cluster_cache = {}
+    
     try:
         for index, row in tqdm(stops.iterrows(), total=stops.shape[0], desc="Progress"):
-            # Skip if already processed
+            StopPlaceRef = str(row["Nummer"])
+            stop_name = row["Name"]
+            
+            station_refs = get_station_cluster_refs(stop_name)
+            if station_refs:
+                stop_refs = tuple(sorted(set([StopPlaceRef, *station_refs])))
+            else:
+                stop_refs = (StopPlaceRef,)
+
+            # Restore cached data for checkpoints efficiently
             if index in processed_indices:
+                if stop_refs not in cluster_cache:
+                    cluster_cache[stop_refs] = {"buffer_timeseries": stops.at[index, "buffer_timeseries"]}
+                continue
+
+            # Cache hit: Avoid making duplicate API requests for identical station clusters
+            if stop_refs in cluster_cache:
+                result = cluster_cache[stop_refs]
+                if result:
+                    stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
+                
+                add_to_log(LOG, f"{stop_name} ({StopPlaceRef}) used cached results for refs: {stop_refs}")
+                
+                processed_indices.add(index)
+                if len(processed_indices) % CHECKPOINT_SAVE_EVERY == 0:
+                    save_progress(stops, processed_indices)
                 continue
 
             try:
-                result = get_buffer_timeseries(row, OJPDepArr)
+                result = get_buffer_timeseries(row, OJPDepArr, stop_refs)
             except AuthAccessDeniedError as e:
                 if not auth_denied_logged:
                     message = f"AUTH ACCESS DENIED: {e}. Stopping processing cleanly."
@@ -147,6 +200,7 @@ def process_all_stops(stops):
 
             if result:
                 stops.at[index, "buffer_timeseries"] = result["buffer_timeseries"]
+                cluster_cache[stop_refs] = result
 
             # Persist progress regularly to support crash-safe resume.
             processed_indices.add(index)
@@ -256,14 +310,14 @@ def get_required_transfer_time(StopPlaceRef):
     return timedelta(minutes=2)
 
 
-def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
+def get_all_for_day(OJPDepArr, StopPlaceRefs, RequestType):
     """
     Fetch all arrivals or departures for a stop in the configured analysis window.
     Includes retry logic for transient API failures and rate limiting.
 
     Args:
         OJPDepArr: OJPStopDepArrRequest client instance.
-        StopPlaceRef: Stop identifier used by the OJP API.
+        StopPlaceRefs: One stop identifier or a collection of sibling refs used by the OJP API.
         RequestType: Either "arrival" or "departure".
 
     Returns:
@@ -278,50 +332,59 @@ def get_all_for_day(OJPDepArr, StopPlaceRef, RequestType):
 
     results = []
 
-    while current_time < end_time:
-        # Retry logic for API calls
-        new_batch = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                new_batch = OJPDepArr.fetch_departures_or_arrivals(
-                    stop_ref=StopPlaceRef, request_type=RequestType, timestamp=current_time
-                )
-                break  # Success, exit retry loop
-            except AuthAccessDeniedError:
-                # Do not retry auth/access-denied responses.
-                raise
-            except Exception as e:
-                if attempt < MAX_RETRIES - 1:
-                    wait_time = RETRY_DELAY * (2 ** attempt)  # Exponential backoff
-                    print(f"API call failed (attempt {attempt + 1}/{MAX_RETRIES}): {e}. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    print(f"API call failed after {MAX_RETRIES} attempts. Returning partial results.")
-                    return pd.DataFrame(results)
+    if isinstance(StopPlaceRefs, (str, int)):
+        stop_refs = [str(StopPlaceRefs)]
+    else:
+        stop_refs = [str(ref) for ref in StopPlaceRefs if ref]
 
-        if not new_batch:
-            # print("No more results returned from API.")
-            break
+    for stop_ref in stop_refs:
+        current_time = start_time
+        while current_time < end_time:
+            new_batch = None
+            for attempt in range(MAX_RETRIES):
+                try:
+                    new_batch = OJPDepArr.fetch_departures_or_arrivals(
+                        stop_ref=stop_ref, request_type=RequestType, timestamp=current_time
+                    )
+                    break
+                except AuthAccessDeniedError:
+                    raise
+                except Exception as e:
+                    if attempt < MAX_RETRIES - 1:
+                        wait_time = RETRY_DELAY * (2 ** attempt)
+                        print(f"API call failed (attempt {attempt + 1}/{MAX_RETRIES}): {e}. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"API call failed after {MAX_RETRIES} attempts. Returning partial results.")
+                        new_batch = pd.DataFrame()
+                        break
 
-        if new_batch[-1]["time"] <= current_time:
-            # print("Repeating Data. Stopping.")
-            break
+            # Handle case where fetch_departures_or_arrivals returns a list instead of DataFrame
+            if isinstance(new_batch, list):
+                if not new_batch:
+                    break
+                new_batch = pd.DataFrame(new_batch)
 
-        results.extend(new_batch)
+            if new_batch is None or new_batch.empty:
+                break
 
-        last_result = results[-1]["time"]
-        current_time = last_result
-        
-        # Rate limiting to avoid overwhelming the API
-        time.sleep(REQUEST_RATE_LIMIT)
+            if new_batch.iloc[-1]["time"] <= current_time:
+                break
 
-    # delete all entries where time > end_time
-    results = [r for r in results if r["time"] <= end_time]
+            results.extend(new_batch.to_dict(orient="records"))
+            current_time = results[-1]["time"]
+            time.sleep(REQUEST_RATE_LIMIT)
 
-    return pd.DataFrame(results)
+    if not results:
+        return pd.DataFrame()
+
+    results = pd.DataFrame(results).drop_duplicates(subset=["time", "line", "destination"])
+    results = results[results["time"] <= end_time]
+
+    return results
 
 
-def get_buffer_timeseries(row, OJPDepArr, debug=False):
+def get_buffer_timeseries(row, OJPDepArr, stop_refs, debug=False):
     """
     Calculate the transfer-buffer timeseries for a single stop.
     Handles API errors gracefully and logs them.
@@ -329,20 +392,23 @@ def get_buffer_timeseries(row, OJPDepArr, debug=False):
     Args:
         row: Row from the stop GeoDataFrame (must contain Nummer and Name).
         OJPDepArr: OJPStopDepArrRequest client instance.
-        debug: If True, overrides stop id with a fixed debug stop.
+        stop_refs: Tuple of string stop references to query, representing the station cluster.
+        debug: If True, prints additional debug information.
 
     Returns:
         Dict with key buffer_timeseries containing a JSON string, or status strings
         "NO SERVICE" / "NO TRANSFERS" / "API_ERROR" when errors occur.
     """
-    StopPlaceRef = row["Nummer"]
-    if debug:
-        StopPlaceRef = 8505084
+    StopPlaceRef = str(row["Nummer"])
 
     try:
         req_transfer_time = get_required_transfer_time(StopPlaceRef)
-        all_arrivals = get_all_for_day(OJPDepArr, StopPlaceRef, "arrival")
-        all_departures = get_all_for_day(OJPDepArr, StopPlaceRef, "departure")
+
+        # Log which stop refs are being queried
+        add_to_log(LOG, f"{row['Name']} ({StopPlaceRef}) querying stop_refs: {stop_refs}")
+
+        all_arrivals = get_all_for_day(OJPDepArr, stop_refs, "arrival")
+        all_departures = get_all_for_day(OJPDepArr, stop_refs, "departure")
         if debug:
             print("arrivals:", all_arrivals)
             print("departures:", all_departures)
