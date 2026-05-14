@@ -1,0 +1,122 @@
+Searching for delayed trains across Switzerland... (Current Time: 2026-05-14T15:05:47Z)
+
+Found 8 trains with significant delays:
+Line       | Delay     
+--------------------------------------------------
+1          (tram) | 13.1 min
+21         (bus) | 29.9 min
+212        (bus) | 14.9 min
+TGV        (rail) | 50.0 min
+36         (bus) | 12.3 min
+8          (bus) | 13.9 min
+391        (bus) | 40.6 min
+TER        (rail) | 10.0 min
+
+Analyzing Train 1 (ID: sbb_140273873730048)
+Current Delay: 13.1 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Wettsteinplatz
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Clarastrasse
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Riehenring
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Wettsteinallee
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Hirzbrunnen/Claraspital
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Surinam
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Erlenmatt
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Badischer Bahnhof
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Messeplatz
+- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Gewerbeschule
+
+
+Analyzing Train 21 (ID: sbb_140273711226736)
+Current Delay: 29.9 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Schappe-Center
+- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Zentrum Pilatus
+- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Hofmatt-Bellpark
+- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Feldmühle
+- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Alpenstrasse
+
+
+Analyzing Train 212 (ID: sbb_140273331088016)
+Current Delay: 14.9 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Corseaux, Délassement at 2026-05-14T15:03:54Z to Vevey, av. de Corsier
+
+
+Analyzing Train TGV (ID: sbb_140273350244096)
+Current Delay: 50.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Bollwiller
+- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Colmar
+- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Belfort-Montbéliard TGV
+- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Saint-Louis (Haut-Rhin)
+
+
+Analyzing Train 36 (ID: sbb_140273343264080)
+Current Delay: 12.3 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Neubad
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bernoullianum
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Metzerstrasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Wolfschlucht
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Kinderspital
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Allschwil, Lindenplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Tellplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Wanderstrasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Marktplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Rütimeyerplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Belforterstrasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Schifflände
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Zoo Dorenbach
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Universitätsspital
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Universität
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Allschwilerplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bernerring
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Im Wasenboden
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bahnhof St. Johann
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Margarethen
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Binningen, Hohle Gasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, St. Galler-Ring
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Burgfelderplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, IWB
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Brausebad
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Johanniterbrücke
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Rheingasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Waldighoferstrasse
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Friedrich-Miescher-Str.
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Kannenfeldplatz
+- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Strassburgerallee
+
+
+Analyzing Train 8 (ID: sbb_140273211204896)
+Current Delay: 13.9 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Kirche Bruggen
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Stocken
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Moos
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Wendeplatz Stocken
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Russen
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Bruggen
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen Bruggen, Erlachstr.
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Friedhof Bruggen
+- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Fürstenlandbrücke
+
+
+Analyzing Train 391 (ID: sbb_140273868648304)
+Current Delay: 40.6 minutes 
+
+Analyzing Train TER (ID: sbb_140273873581104)
+Current Delay: 10.0 minutes 
+

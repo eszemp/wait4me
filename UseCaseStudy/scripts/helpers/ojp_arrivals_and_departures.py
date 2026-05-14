@@ -89,7 +89,7 @@ class OJPStopDepArrRequest:
 
         return xml_template
 
-    def fetch_departures_or_arrivals(self, stop_ref, request_type="departure", timestamp=None, number_of_results=50):
+    def fetch_departures_or_arrivals(self, stop_ref, request_type="departure", timestamp=None, number_of_results=50, include_stops=False):
         """Sends the request and returns the parsed results."""
         payload = self._build_xml_payload(stop_ref, request_type, timestamp, number_of_results)
         
@@ -112,10 +112,10 @@ class OJPStopDepArrRequest:
         elif response.status_code != 200:
             raise Exception(f"API Error: {response.status_code} - {response.text}")
             
-        return self._parse_response(response.text, request_type)
+        return self._parse_response(response.text, request_type, include_stops)
 
     
-    def _parse_response(self, xml_text, request_type):
+    def _parse_response(self, xml_text, request_type, include_stops):
         """Parses the XML response into a list of simplified dictionaries."""
         try:
             root = ET.fromstring(xml_text)
@@ -154,14 +154,88 @@ class OJPStopDepArrRequest:
                     timestamp = get_text(this_call, './/ojp:ServiceDeparture/ojp:TimetabledTime')
                 elif request_type=="arrival":
                     timestamp = get_text(this_call, './/ojp:ServiceArrival/ojp:TimetabledTime')
-            
-            results.append({
-                "line": line,
-                "destination": destination,
-                "time": datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
-            })
+
+            if include_stops:
+                onward_stop_names = []
+                calls = stop_event.findall('.//ojp:OnwardCall/ojp:CallAtStop', self.ns)
+                
+                for call in calls:
+                    stop_name = get_text(call, './/ojp:StopPointName/ojp:Text')
+                    if stop_name != "N/A":
+                        onward_stop_names.append(stop_name)
+
+                results.append({
+                    "line": line,
+                    "destination": destination,
+                    "time": datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ"),
+                    "stops": onward_stop_names
+                })
+            else:
+                results.append({
+                    "line": line,
+                    "destination": destination,
+                    "time": datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ")
+                })
             
         return results
+    
+
+
+    def get_stop_ref(self, stop_name):
+        """
+        Resolves a station name to a StopPointRef (UIC ID) using OJP 2.0 LIR.
+        """
+        curTime = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        
+        # Correct OJP 2.0 Name Search: InitialInput -> LocationName -> Text
+        payload = f"""<?xml version="1.0" encoding="UTF-8"?>
+    <OJP xmlns="http://www.vdv.de/ojp" xmlns:siri="http://www.siri.org.uk/siri" version="2.0">
+        <OJPRequest>
+            <siri:ServiceRequest>
+                <siri:RequestTimestamp>{curTime}</siri:RequestTimestamp>
+                <siri:RequestorRef>{self.requestor_ref}</siri:RequestorRef>
+                <OJPLocationInformationRequest>
+                    <siri:RequestTimestamp>{curTime}</siri:RequestTimestamp>
+                    <InitialInput>
+                        <Name>{stop_name}</Name>
+                    </InitialInput>
+                    <Restrictions>
+                        <Type>stop</Type>
+                        <NumberOfResults>1</NumberOfResults>
+                    </Restrictions>
+                </OJPLocationInformationRequest>
+            </siri:ServiceRequest>
+        </OJPRequest>
+    </OJP>"""
+        
+
+        try:
+            response = requests.post(self.endpoint, data=payload, headers=self.headers)
+            if response.status_code != 200:
+                return None
+                
+            root = ET.fromstring(response.text)
+
+            # 1. Try finding StopPointRef (common for specific quays/platforms)
+            # This is usually in the siri: namespace
+            stop_ref = root.find('.//siri:StopPointRef', self.ns)
+            
+            # 2. If not found, try StopPlaceRef (common for the whole station/area)
+            # As seen in your example, this is in the ojp: namespace
+            if stop_ref is None:
+                stop_ref = root.find('.//ojp:StopPlaceRef', self.ns)
+
+            if stop_ref is not None:
+                return stop_ref.text
+            
+            print(f"No reference ID found in response for {stop_name}")
+            return None
+
+        except Exception as e:
+            print(f"Error parsing LIR response: {e}")
+            return None
+        
+
 
 # --- Example Usage ---
 if __name__ == "__main__":
