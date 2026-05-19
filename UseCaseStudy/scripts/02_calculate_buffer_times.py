@@ -17,8 +17,8 @@ from helpers.write_log import initialize_logfile, add_to_log
 SCRIPT_DIR = Path(__file__).resolve().parent
 FILE_PATH = SCRIPT_DIR.parent / "data/stop-places-schweiz/stop-places-schweiz.shp"
 TRANSFER_FILE_PATH = SCRIPT_DIR.parent / "data/transfer-time/transfers.txt"
-LOG = SCRIPT_DIR / "03_calculate_buffer_times_LOGFILE.txt"
-CHECKPOINT_PATH = SCRIPT_DIR / "03_calculate_buffer_times_checkpoint.json"
+LOG = SCRIPT_DIR / "02_calculate_buffer_times_LOGFILE.txt"
+CHECKPOINT_PATH = SCRIPT_DIR / "02_calculate_buffer_times_checkpoint.json"
 OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
 PARTIAL_OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.partial.gpkg")
 
