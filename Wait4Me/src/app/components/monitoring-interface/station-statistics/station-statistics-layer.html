@@ -8,16 +8,16 @@
   }
 
   <div class="legend">
-    <div class="legend-title">Highest wait time</div>
+    <div class="legend-title">Most Common Transfer Buffer <br/> per Station</div>
     <div class="legend-items">
       <div class="legend-item" *ngFor="let item of legendItems">
         <div class="legend-color" [style.background-color]="item.color"></div>
-        <div class="legend-label">{{ item.label }}</div>
+        <div class="legend-label">{{ item.displayText }}</div>
       </div>
     </div>
     <div class="legend-description">
-      The colour of the points show which minimal transfer time occurs the most per day on this
-      station. You can click on it to see a histogram withe the distribution of the transfer times calculated for one Weekday (09.12.2026). 
+      The colour of the points show which transfer buffer time occurs the most per day for connections at this
+      station. A click on a station reveals a histogram with the exact distribution of the transfer buffer times. Everything is calculated for one exemplary weekday (09.12.2026). 
     </div>
   </div>
 </div>

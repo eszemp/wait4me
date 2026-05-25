@@ -77,9 +77,12 @@
 }
 
 .legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0.8;
+  border: 1px solid #ffffff;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 
@@ -153,7 +156,7 @@
 
 :host ::ng-deep .histogram-bar-fill {
   height: 100%;
-  background: #177d8c;
+  background: var(--fir-green);
   border-radius: 11px;
 }
 

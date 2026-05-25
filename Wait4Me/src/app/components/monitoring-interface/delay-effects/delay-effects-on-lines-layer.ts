@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
@@ -55,7 +56,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   selectedDelayMinutes = 0;
-  legendExpanded = true;
+  legendExpanded = false;
 
   private readonly ojpTrip = inject(OJPTrip);
   private readonly destroy$ = new Subject<void>();
@@ -67,6 +68,8 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   private readonly stationTransferDatasetUrl = '/map-data/stop_histogram_schweiz.geojson';
   private readonly startStationIconId = 'start-station-square-icon';
 
+  public no_route = false;
+
   private map: maplibregl.Map | null = null;
   private readonly stationTransferByRef = new Map<string, StationTransferDataset>();
   private readonly stationTransferByName = new Map<string, StationTransferDataset>();
@@ -75,6 +78,8 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     type: 'FeatureCollection',
     features: [],
   };
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   /**
    * Create the map instance and initialize layers.
@@ -122,7 +127,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     void this.loadStationTransferDataset();
 
     if (!selection) {
-      this.updateTrackSource({ type: 'FeatureCollection', features: [] });
+      this.updateTrackSource({ type: 'FeatureCollection', features: [] }, true);
       return;
     }
 
@@ -139,7 +144,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
           this.updateTrackSource(geojson);
         },
         error: () => {
-          this.updateTrackSource({ type: 'FeatureCollection', features: [] });
+          this.updateTrackSource({ type: 'FeatureCollection', features: [] }, true);
         },
       });
   }
@@ -314,12 +319,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
    * Enriches received GeoJSON features with transfer data and sets the
    * GeoJSON source; then adjusts the viewport to fit the geometry.
    */
-  private updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
+  private updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing=false): void {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
       return;
     }
-
     this.ensureTrackLayer();
     this.latestTrackGeojson = geojson;
 
@@ -327,7 +331,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const enrichedGeojson = this.enrichStationFeatures(geojson);
     source?.setData(enrichedGeojson as GeoJSON.FeatureCollection);
 
-    this.fitToTrack(enrichedGeojson);
+    this.fitToTrack(enrichedGeojson, clearing);
   }
 
   /**
@@ -533,14 +537,28 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       .addTo(map);
   }
 
+  async showMessageNoGeometry(): Promise<void> {
+    this.no_route = true;
+    this.cdr.detectChanges();
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    this.no_route = false;
+    this.cdr.detectChanges();
+  }
+
+
   /**
    * Fits the map viewport to all valid coordinates of the currently rendered track.
    *
    * Ignores invalid geometries and ensures padding is applied for UI elements.
    */
-  private fitToTrack(geojson: { type: 'FeatureCollection'; features: unknown[] }): void {
+  private fitToTrack(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing: Boolean): void {
     const map = this.map;
     if (!map || geojson.features.length === 0) {
+      if (!clearing){
+        this.showMessageNoGeometry();
+      }
       return;
     }
 

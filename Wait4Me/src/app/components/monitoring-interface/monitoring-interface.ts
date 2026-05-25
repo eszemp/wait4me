@@ -19,7 +19,7 @@ type MonitoringLayerId = 'station-statistics' | 'delay-effects-on-lines';
  */
 export class MonitoringInterface implements OnInit, OnDestroy {
   readonly layerOptions: Array<{ id: MonitoringLayerId; label: string }> = [
-    { id: 'delay-effects-on-lines', label: 'Delay effects on lines' },
+    { id: 'delay-effects-on-lines', label: 'Delay Effects on Lines' },
     { id: 'station-statistics', label: 'Vulnerability of Stations to Delays' },
   ];
 
