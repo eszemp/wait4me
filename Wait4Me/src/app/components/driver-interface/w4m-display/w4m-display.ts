@@ -97,11 +97,12 @@ export class Wait4MeDisplay {
   }
 
   hasMultipleRequestsForStop(): boolean {
+    return this.numberOfStacksForStop() > 1;
+  }
+
+  numberOfStacksForStop(): number {
     const requestsByDelay = this.w4mService.requestIds()[this.stopRef];
-    return (
-      !!requestsByDelay &&
-      Object.values(requestsByDelay).reduce((count, requestIds) => count + requestIds.length, 0) > 1
-    );
+    return requestsByDelay ? Object.keys(requestsByDelay).length : 0;
   }
 
   async process_requests_for_this_stop(): Promise<void> {
