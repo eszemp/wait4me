@@ -1,122 +1,160 @@
-Searching for delayed trains across Switzerland... (Current Time: 2026-05-14T15:05:47Z)
+Searching for delayed trains across Switzerland... (Current Time: 2026-05-18T08:40:53Z)
 
-Found 8 trains with significant delays:
+Found 11 trains with significant delays:
 Line       | Delay     
 --------------------------------------------------
-1          (tram) | 13.1 min
-21         (bus) | 29.9 min
-212        (bus) | 14.9 min
-TGV        (rail) | 50.0 min
-36         (bus) | 12.3 min
-8          (bus) | 13.9 min
-391        (bus) | 40.6 min
-TER        (rail) | 10.0 min
+12         (tram) | 10.3 min
+702        (bus) | 11.6 min
+21         (bus) | 11.6 min
+TER        (rail) | 20.0 min
+613        (bus) | 11.0 min
+TER        (rail) | 20.0 min
+RE         (rail) | 19.0 min
+RE         (rail) | 15.9 min
+3          (bus) | 12.2 min
+TER        (rail) | 40.0 min
+TER        (rail) | 15.0 min
 
-Analyzing Train 1 (ID: sbb_140273873730048)
-Current Delay: 13.1 minutes 
-
--> Try these routing requests (possibly broken connection)
-
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Wettsteinplatz
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Clarastrasse
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Riehenring
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Wettsteinallee
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Hirzbrunnen/Claraspital
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Surinam
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Erlenmatt
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Badischer Bahnhof
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Messeplatz
-- from Basel, Wettsteinplatz at 2026-05-14T15:05:18Z to Basel, Gewerbeschule
-
-
-Analyzing Train 21 (ID: sbb_140273711226736)
-Current Delay: 29.9 minutes 
+Analyzing Train 12 (ID: sbb_139744106115664)
+Current Delay: 10.3 minutes 
 
 -> Try these routing requests (possibly broken connection)
 
-- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Schappe-Center
-- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Zentrum Pilatus
-- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Hofmatt-Bellpark
-- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Feldmühle
-- from Kriens, Grabenhof at 2026-05-14T15:01:54Z to Kriens, Alpenstrasse
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Grand-Lancy, Préventorium
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Grand-Lancy, Stade de Genève
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Plan-les-Ouates, Trèfle-Blanc
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Grand-Lancy, Palettes
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Carouge GE, Rondeau
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Plan-les-Ouates, Comm.-Réunies
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Lancy-Bachet, gare
+- from Carouge GE, Rondeau at 2026-05-18T08:39:00Z to Grand-Lancy, De-Staël
 
 
-Analyzing Train 212 (ID: sbb_140273331088016)
-Current Delay: 14.9 minutes 
-
--> Try these routing requests (possibly broken connection)
-
-- from Corseaux, Délassement at 2026-05-14T15:03:54Z to Vevey, av. de Corsier
-
-
-Analyzing Train TGV (ID: sbb_140273350244096)
-Current Delay: 50.0 minutes 
+Analyzing Train 702 (ID: sbb_139744545189504)
+Current Delay: 11.6 minutes 
 
 -> Try these routing requests (possibly broken connection)
 
-- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Bollwiller
-- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Colmar
-- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Belfort-Montbéliard TGV
-- from Paris Gare de Lyon at 2026-05-14T13:12:00Z to Saint-Louis (Haut-Rhin)
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, Marcelin
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, gare
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, La Prairie
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, ch. du Bochet
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, Casino
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, Longeraie
+- from Lonay-Préverenges, gare nord at 2026-05-18T08:40:24Z to Morges, En Bonjean
 
 
-Analyzing Train 36 (ID: sbb_140273343264080)
-Current Delay: 12.3 minutes 
-
--> Try these routing requests (possibly broken connection)
-
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Neubad
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bernoullianum
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Metzerstrasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Wolfschlucht
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Kinderspital
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Allschwil, Lindenplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Tellplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Wanderstrasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Marktplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Rütimeyerplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Belforterstrasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Schifflände
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Zoo Dorenbach
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Universitätsspital
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Universität
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Allschwilerplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bernerring
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Im Wasenboden
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Bahnhof St. Johann
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Margarethen
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Binningen, Hohle Gasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, St. Galler-Ring
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Burgfelderplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, IWB
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Brausebad
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Johanniterbrücke
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Rheingasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Waldighoferstrasse
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Friedrich-Miescher-Str.
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Kannenfeldplatz
-- from Basel, Dreispitz at 2026-05-14T15:04:18Z to Basel, Strassburgerallee
-
-
-Analyzing Train 8 (ID: sbb_140273211204896)
-Current Delay: 13.9 minutes 
+Analyzing Train 21 (ID: sbb_139743850692176)
+Current Delay: 11.6 minutes 
 
 -> Try these routing requests (possibly broken connection)
 
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Kirche Bruggen
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Stocken
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Moos
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Wendeplatz Stocken
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Russen
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Bruggen
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen Bruggen, Erlachstr.
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Friedhof Bruggen
-- from St. Gallen, Ruckhalde at 2026-05-14T15:02:48Z to St. Gallen, Fürstenlandbrücke
+- from Lausanne, gare at 2026-05-18T08:40:06Z to Lausanne, Georgette
+- from Lausanne, gare at 2026-05-18T08:40:06Z to Lausanne, Alpes
+- from Lausanne, gare at 2026-05-18T08:40:06Z to Lausanne, Jurigoz
+- from Lausanne, gare at 2026-05-18T08:40:06Z to Lausanne, Elysée
+- from Lausanne, gare at 2026-05-18T08:40:06Z to Lausanne, Montchoisi
 
 
-Analyzing Train 391 (ID: sbb_140273868648304)
-Current Delay: 40.6 minutes 
+Analyzing Train TER (ID: sbb_139744715098720)
+Current Delay: 20.0 minutes 
 
-Analyzing Train TER (ID: sbb_140273873581104)
-Current Delay: 10.0 minutes 
+-> Try these routing requests (possibly broken connection)
+
+- from Perrignier at 2026-05-18T08:41:00Z to Evian-les-Bains
+
+
+Analyzing Train 613 (ID: sbb_139744522466736)
+Current Delay: 11.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Lignerolle, Le Daillard at 2026-05-18T08:41:00Z to Vallorbe, Trésit
+- from Lignerolle, Le Daillard at 2026-05-18T08:41:00Z to Vallorbe, Eterpaz
+- from Lignerolle, Le Daillard at 2026-05-18T08:41:00Z to Le Sentier, hôpital
+- from Lignerolle, Le Daillard at 2026-05-18T08:41:00Z to Vallorbe, Les Jurats
+- from Lignerolle, Le Daillard at 2026-05-18T08:41:00Z to Vallorbe, Le Creux
+
+
+Analyzing Train TER (ID: sbb_139744692878592)
+Current Delay: 20.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Mulhouse at 2026-05-18T08:36:00Z to Saint-Louis la Chaussée
+
+
+Analyzing Train RE (ID: sbb_139744531794384)
+Current Delay: 19.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Karlsruhe Hbf
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Kenzingen
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Bad Krozingen
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Freiburg(Breisgau) St. Georgen
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Offenburg
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Lahr (Schwarzw)
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Denzlingen
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Müllheim im Markgräflerland
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Herbolzheim (Breisgau)
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Emmendingen
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Freiburg(Breisgau) Hbf
+- from Müllheim im Markgräflerland at 2026-05-18T08:41:00Z to Riegel-Malterdingen
+
+
+Analyzing Train RE (ID: sbb_139744689147760)
+Current Delay: 15.9 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Trin at 2026-05-18T08:39:24Z to Chur West
+- from Trin at 2026-05-18T08:39:24Z to Landquart
+
+
+Analyzing Train 3 (ID: sbb_139744116992224)
+Current Delay: 12.2 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Bahnhofplatz
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Turnerwiese
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Alexanderplatz
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Malteser
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Quader Center
+- from Chur, Weinbergstrasse at 2026-05-18T08:41:12Z to Chur, Post I
+
+
+Analyzing Train TER (ID: sbb_139744055353984)
+Current Delay: 40.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Lure
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Belfort
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Mulhouse Dornach
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Mulhouse
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Trois Chênes
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Héricourt
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Belfort-Montbéliard TGV
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Colmar
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Altkirch
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Danjoutin
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Saint-Louis (Haut-Rhin)
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Rixheim
+- from Culmont - Chalindrey at 2026-05-18T08:13:00Z to Ronchamp
+
+
+Analyzing Train TER (ID: sbb_139743900124160)
+Current Delay: 15.0 minutes 
+
+-> Try these routing requests (possibly broken connection)
+
+- from Altkirch at 2026-05-18T08:41:00Z to Rixheim
+- from Altkirch at 2026-05-18T08:41:00Z to Saint-Louis (Haut-Rhin)
+- from Altkirch at 2026-05-18T08:41:00Z to Altkirch
+- from Altkirch at 2026-05-18T08:41:00Z to Mulhouse
+- from Altkirch at 2026-05-18T08:41:00Z to Colmar
+- from Altkirch at 2026-05-18T08:41:00Z to Mulhouse Dornach
+
 
