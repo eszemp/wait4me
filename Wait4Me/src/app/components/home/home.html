@@ -1,31 +1,74 @@
 <section class="home">
   <nav>
-    <a class="routing-button" routerLink="/passenger" [state]="{ clearStorage: true }"
-      >Passenger Interface</a
-    >
-    <a class="routing-button" routerLink="/driver" [state]="{ clearStorage: true }"
-      >Driver Interface</a
-    >
-    <a class="routing-button" routerLink="/monitoring">Delay Impact Analysis</a>
+    <div class="interface-block">
+      <a class="routing-button" routerLink="/passenger" [state]="{ clearStorage: true }"
+        >Passenger Interface</a
+      >
+      <p class="info-text">
+        The passenger interface is intended for passengers and is designed to be used on a
+        smartphone. It works also on bigger screen sizes.
+      </p>
+    </div>
+    <div class="interface-block">
+      <a class="routing-button" routerLink="/driver" [state]="{ clearStorage: true }"
+        >Driver Interface</a
+      >
+      <p class="info-text">
+        The driver interface is intended for drivers and is designed to be used on a tablet in
+        landscape mode. It works also on bigger screens.
+      </p>
+    </div>
+    <div class="interface-block">
+      <a class="routing-button" routerLink="/monitoring">Delay Impact Analysis</a>
+      <p class="info-text">
+        The delay impact analysis provides insights into how delays affect public transportation
+        services and is designed for desktop use.
+      </p>
+    </div>
   </nav>
   <div class="info-section">
-    <p class="info-title">Passenger Interface</p>
-    <p class="info-text">
-      The passenger interface is intended for passengers and is designed to be used on a smartphone. It works also on bigger screen sizes.
-    </p>
-    <p class="info-title">Driver Interface</p>
-    <p class="info-text">
-      The driver interface is intended for drivers and is designed to be used on a tablet in landscape mode. It works also on bigger screens.
-    </p>
-    <p class="info-title">Delay Impact Analysis</p>
-    <p class="info-text">
-      The delay impact analysis provides insights into how delays affect public transportation services and is designed for desktop use.
-    <p class="info-title">Impressum</p>
-    <p class="info-text">
-      Wait4Me is a proof of concept developed by Christian Blaser and Estelle Zemp in the Geomatics
-      Master Project at ETH Zurich in the Spring Semester 2026 in collaboration with
-      <a href="https://www.oev-info.ch/de/organisation/ueber-ski">SKI+</a>. The project is licensed
-      under the MIT License.
-    </p>
+    <div class="info-links" role="navigation" aria-label="Home information links">
+      <button type="button" class="info-link" (click)="openInfoPanel('about')">About us</button>
+      <button
+        type="button"
+        class="info-link info-link--center"
+        (click)="openInfoPanel('impressum')"
+      >
+        Impressum
+      </button>
+      <button type="button" class="info-link info-link--right" (click)="openInfoPanel('privacy')">
+        Privacy
+      </button>
+    </div>
+    <p class="copyright-text">© 2026 Christian Blaser and Estelle Zemp.</p>
   </div>
+
+  @if (this.activeInfoPanel) {
+    <div class="info-overlay" (click)="closeInfoPanel()" aria-hidden="true"></div>
+    <div class="info-modal" role="dialog" aria-modal="true" [attr.aria-label]="infoPanelTitle">
+      <button
+        type="button"
+        class="info-modal-close"
+        (click)="closeInfoPanel()"
+        aria-label="Close dialog"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="info-modal-title">{{ infoPanelTitle }}</p>
+      @for (paragraph of infoPanelBody; track paragraph) {
+        <p class="info-modal-text">{{ paragraph }}</p>
+      }
+      @if (this.activeInfoPanel === 'about' || this.activeInfoPanel === 'impressum') {
+        <p class="info-modal-text">
+          In collaboration with
+          <a
+            href="https://www.oev-info.ch/de/organisation/ueber-ski"
+            target="_blank"
+            rel="noopener noreferrer"
+            >SKI+</a
+          >.
+        </p>
+      }
+    </div>
+  }
 </section>

@@ -17,13 +17,29 @@
   align-items: center;
   justify-content: center;
   height: 70px;
-  width: min(calc(100% - 20px), 680px);
+  width: 100%;
   border: 2px solid var(--fir-green);
   border-radius: 20px;
   background: #ffffff;
   color: var(--fir-green);
   font-size: 20px;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.interface-block {
+  width: min(calc(100vw - 100px), 680px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.interface-block .info-text {
+  font-size: 16px;
+  color: var(--grey);
+  font-weight: normal;
 }
 
 a {
@@ -36,6 +52,102 @@ a {
   margin: 0 auto;
   padding: 10px;
   font-weight: normal;
+}
+
+.info-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: nowrap;
+}
+
+.info-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--fir-green);
+  font: inherit;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.copyright-text {
+  margin: 10px 0 0;
+  font-size: 16px;
+  color: var(--grey);
+  font-weight: normal;
+}
+
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 1100;
+}
+
+.info-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(calc(100vw - 40px), 660px);
+  background: white;
+  border: 2px solid var(--fir-green);
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  z-index: 1101;
+  padding: 24px 24px 20px;
+  box-sizing: border-box;
+  color: black;
+}
+
+.info-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.info-modal-close img {
+  width: 18px;
+  height: 18px;
+}
+
+.info-modal-title {
+  margin: 0 38px 16px 0;
+  color: var(--fir-green);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.info-modal-text {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--grey);
+  font-weight: normal;
+}
+
+.info-modal-text a {
+  color: var(--fir-green);
+  text-decoration: underline;
+}
+
+.info-modal-text:last-child {
+  margin-bottom: 0;
 }
 
 .info-title {
