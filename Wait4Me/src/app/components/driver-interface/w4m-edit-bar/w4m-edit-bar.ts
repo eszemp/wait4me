@@ -45,6 +45,7 @@ export class Wait4MeEditBar {
         depTime: time_string,
         delay: delay,
         autoSelectFirstDeparture: true,
+        showCloseButton: true,
       },
       panelClass: 'custom-modal-container'
     });
