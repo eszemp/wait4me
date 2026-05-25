@@ -43,7 +43,8 @@ export class Wait4MeEditBar {
       data: {            
         stopName: this.w4mService.activeStopName(),
         depTime: time_string,
-        delay: delay
+        delay: delay,
+        autoSelectFirstDeparture: true,
       },
       panelClass: 'custom-modal-container'
     });

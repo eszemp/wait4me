@@ -27,6 +27,7 @@ export class LineSearchComponent implements OnDestroy {
 
   @Input() initialStopName: string | null = null;
   @Input() initialDepartureTime: string | null = null;
+  @Input() autoSelectFirstDeparture = false;
 
   stationQuery = '';
   stationSuggestions = signal<StopLookupResult[]>([]);
@@ -35,6 +36,9 @@ export class LineSearchComponent implements OnDestroy {
   selectedStation = signal<StopLookupResult | null>(null);
   selectedTime = signal('12:00');
   selectedLine = signal<DepartureLine | null>(null);
+
+  private preferredLineCode: string | null = null;
+  private pendingInitialStationSelection = false;
 
   departingLines = signal<DepartureLine[]>([]);
   showDepartureDropdown = signal(false);
@@ -68,10 +72,9 @@ export class LineSearchComponent implements OnDestroy {
       this.stationQuery = this.initialStopName;
       this.showStationSuggestions = true;
       this.error.set(null);
+      this.pendingInitialStationSelection = true;
       this.searchSubject.next(this.initialStopName);
       console.log("initialized with", this.initialStopName);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.selectStation(this.stationSuggestions()[0]);
     }
   }
 
@@ -91,8 +94,15 @@ export class LineSearchComponent implements OnDestroy {
       .subscribe({
         next: (stops) => {
           this.stationSuggestions.set(stops);
+
+          if (this.pendingInitialStationSelection && stops.length > 0) {
+            this.pendingInitialStationSelection = false;
+            this.selectStation(stops[0]);
+            return;
+          }
         },
         error: () => {
+          this.pendingInitialStationSelection = false;
           this.error.set('Error searching stations');
         },
       });
@@ -102,6 +112,7 @@ export class LineSearchComponent implements OnDestroy {
   selectStation(station: StopLookupResult): void {
     this.selectedStation.set(station);
     this.selectedLine.set(null);
+    this.preferredLineCode = null;
     this.lineSelected.emit(null);
     this.stationQuery = station.stopPlaceName;
     this.showStationSuggestions = false;
@@ -112,10 +123,13 @@ export class LineSearchComponent implements OnDestroy {
 
   /** Refreshes departures after the time selector changes. */
   onTimeChange(): void {
+    const currentLineCode = this.selectedLine()?.line ?? this.preferredLineCode;
     if (this.selectedLine()) {
       this.selectedLine.set(null);
-      this.lineSelected.emit(null);
     }
+
+    this.preferredLineCode = currentLineCode;
+    this.lineSelected.emit(null);
 
     if (this.selectedStation()) {
       this.fetchDepartures();
@@ -138,6 +152,17 @@ export class LineSearchComponent implements OnDestroy {
         next: (lines) => {
           this.departingLines.set(lines);
           this.showDepartureDropdown.set(lines.length > 0);
+
+          if (this.autoSelectFirstDeparture && lines.length > 0) {
+            const targetLineCode = this.normalizeLineCode(
+              this.selectedLine()?.line ?? this.preferredLineCode,
+            );
+            const matchingLine = targetLineCode
+              ? lines.find((line) => this.normalizeLineCode(line.line) === targetLineCode)
+              : null;
+
+            this.selectLine(matchingLine ?? lines[0]);
+          }
         },
         error: () => {
           this.error.set('Error fetching connections');
@@ -154,6 +179,7 @@ export class LineSearchComponent implements OnDestroy {
   /** Stores the selected departure line and collapses the dropdown. */
   selectLine(line: DepartureLine): void {
     this.selectedLine.set(line);
+    this.preferredLineCode = line.line;
     this.showDepartureDropdown.set(false);
 
     const station = this.selectedStation();
@@ -173,6 +199,7 @@ export class LineSearchComponent implements OnDestroy {
 
   clearSelectedLine(): void {
     this.selectedLine.set(null);
+    this.preferredLineCode = null;
     this.showDepartureDropdown.set(true);
     this.lineSelected.emit(null);
   }
@@ -181,8 +208,10 @@ export class LineSearchComponent implements OnDestroy {
     this.stationQuery = '';
     this.stationSuggestions.set([]);
     this.showStationSuggestions = false;
+    this.pendingInitialStationSelection = false;
     this.selectedStation.set(null);
     this.selectedLine.set(null);
+    this.preferredLineCode = null;
     this.departingLines.set([]);
     this.showDepartureDropdown.set(false);
     this.error.set(null);
@@ -221,5 +250,9 @@ export class LineSearchComponent implements OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.searchSubject.complete();
+  }
+
+  private normalizeLineCode(lineCode: string | null | undefined): string {
+    return (lineCode ?? '').trim().toLowerCase();
   }
 }
