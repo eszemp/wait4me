@@ -1,5 +1,10 @@
 <div class="map-wrapper">
   <div #mapContainer class="monitoring-map"></div>
+  @if (this.no_route) {
+    <div class="no-line-geometry-status" aria-live="polite">
+      <span>No geometry available for this line</span>
+    </div>
+  }
   <app-line-search
     [initialStopName]="this.initialStopName"
     [initialDepartureTime]="this.initialDepartureTime"

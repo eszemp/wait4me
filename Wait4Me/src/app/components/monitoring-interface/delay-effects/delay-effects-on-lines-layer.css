@@ -146,3 +146,20 @@
 .delay-slider-panel .legend-description .legend-desc-content {
   margin-top: 8px;
 }
+
+.no-line-geometry-status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  border-radius: 20px;
+  color: var(--fir-green);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
