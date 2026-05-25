@@ -1,4 +1,12 @@
 <div class="monitoring-shell">
+  <button
+    type="button"
+    class="monitoring-close-button"
+    (click)="close()"
+    aria-label="Close monitoring modal"
+  >
+    <img src="/close.svg" alt="" aria-hidden="true" />
+  </button>
   <div class="map-stage">
     <div class="map-toolbar">
       <label class="layer-label" for="monitoring-layer-select">Layer</label>
@@ -18,6 +26,7 @@
           [initialStopName]="stopName"
           [initialDepartureTime]="depTime"
           [delay]="delay"
+          [autoSelectFirstDeparture]="autoSelectFirstDeparture"
         />
       }
     }

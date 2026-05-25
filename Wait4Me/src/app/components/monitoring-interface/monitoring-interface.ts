@@ -26,6 +26,7 @@ export class MonitoringInterface implements OnInit, OnDestroy {
   stopName: string | null = null;
   depTime: string | null = null;
   delay: number | null = null;
+  autoSelectFirstDeparture = false;
   selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';
 
   private readonly bodyOverflowBeforeLock: string;
@@ -41,6 +42,7 @@ export class MonitoringInterface implements OnInit, OnDestroy {
       this.stopName = this.data.stopName ?? null;
       this.depTime = this.data.depTime ?? null;
       this.delay = this.data.delay ?? null;
+      this.autoSelectFirstDeparture = this.data.autoSelectFirstDeparture ?? false;
     }
 
     this.bodyOverflowBeforeLock = this.document.body.style.overflow;
