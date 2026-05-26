@@ -46,6 +46,9 @@
       @if (trip.departurePlatform) {
         <span class="platform"> {{ trip.departurePlatform }}</span>
       }
+      @else {
+        <span class="platform">n/a</span>
+      }
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
       <span class="date">{{ trip.startTime | date: 'dd.MM.yyyy' }}</span>
     </div>
@@ -80,7 +83,7 @@
               </span>
               <span class="location-start"
                 >{{ leg.boardStopName }}
-                <i>{{ leg.lineName }} to {{ leg.destinationText }}</i></span
+                <i>- {{ leg.lineName }} to {{ leg.destinationText }}</i></span
               >
             </div>
             <div>
@@ -97,6 +100,9 @@
           <div class="meta-column">
             @if (leg.boardPlatform) {
               <span class="platform"> {{ leg.boardPlatform }}</span>
+            }
+            @else {
+              <span class="platform">n/a</span>
             }
             <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
           </div>
