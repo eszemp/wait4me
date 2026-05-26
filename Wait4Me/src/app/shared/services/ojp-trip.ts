@@ -898,6 +898,9 @@ export class OJPTrip extends OJPBase {
       if (typeof value.text === 'string') {
         return value.text;
       }
+      else if (typeof value.text === 'number') {
+        return String(value.text);
+      }
     }
 
     return null;
