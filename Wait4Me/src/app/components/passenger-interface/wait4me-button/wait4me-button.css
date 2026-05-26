@@ -56,8 +56,63 @@
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
   z-index: 1101;
   padding: 24px;
+  padding-top: 40px;
   box-sizing: border-box;
   color: black;
+}
+
+.w4m-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.w4m-modal-close img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.w4m-alt-loading {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  color: var(--fir-green);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.w4m-alt-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #3951482b;
+  border-top-color: var(--fir-green);
+  animation: w4m-alt-spin 0.9s linear infinite;
+}
+
+@keyframes w4m-alt-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .w4m-confirm-title {
@@ -178,11 +233,6 @@
 .w4m-confirm-btn--yes {
   background: var(--mint);
   color: var(--fir-green);
-}
-
-.w4m-confirm-btn--no {
-  background: var(--light-red);
-  color: var(--red);
 }
 
 .w4m-request-trip-card {
