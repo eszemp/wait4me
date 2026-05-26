@@ -67,7 +67,7 @@
               <span class="time-start">
                 {{ leg.boardTimeTimetable | date: 'HH:mm' }}
                 @if (
-                  w4mService.status() === 'accepted' && trip.criticalTransferId! + 1 === leg.id
+                  this.getRequestState() === 'accepted' && trip.criticalTransferId! + 1 === leg.id
                 ) {
                   <span class="time-delay">
                     +{{ leg.boardDelay.plus(w4mService.transfer!.requestedDelay).format() }}
@@ -106,22 +106,22 @@
         @if (trip.criticalTransferId === leg.id) {
           <div
             class="transfer-warning"
-            [class.transfer-warning--accepted]="w4mService.status() === 'accepted'"
+            [class.transfer-warning--accepted]="this.getRequestState() === 'accepted'"
           >
             <div class="time-column">
               <img class="attention-icon" src="/attention.svg" alt="" aria-hidden="true" />
             </div>
             <div class="transfer-warning-text">
-              @if (w4mService.status() === 'enabled') {
+              @if (this.getRequestState() === 'enabled') {
                 Likely to miss transfer. Send Wait4Me request.
-              } @else if (w4mService.status() === 'pending') {
+              } @else if (this.getRequestState() === 'pending') {
                 Likely to miss transfer.
-              } @else if (w4mService.status() === 'declined') {
+              } @else if (this.getRequestState() === 'declined') {
                 Transfer is not possible. Choose alternative.
-              } @else if (w4mService.status() === 'accepted') {
+              } @else if (this.getRequestState() === 'accepted') {
                 Connecting vehicle is waiting. Transfer fast.
               } @else {
-                Likely to miss transfer. Send Wait4Me request.
+                Likely to miss transfer.
               }
             </div>
           </div>
