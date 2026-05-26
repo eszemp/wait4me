@@ -49,7 +49,12 @@
           @if (trip.departurePlatform) {
             <span class="platform"> {{ trip.departurePlatform }}</span>
           }
-          <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
+          @else {
+            <span class="platform">n/a</span>
+          }
+          @if (trip.criticalTransferId === null) {
+            <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
+          }
           <span> </span>
         </div>
       </section>

@@ -81,4 +81,14 @@ export class ConnectionDetails {
     this.router.navigate(['/passenger']);
     this.w4mService.disable_if_not_active();
   }
+
+  getRequestState(): string {
+    const state = this.w4mService.status();
+    if (this.w4mService.trip) {
+      if (this.trip == this.w4mService.trip) {
+        return state;
+      }
+    }
+    return 'inactive';
+  }
 }

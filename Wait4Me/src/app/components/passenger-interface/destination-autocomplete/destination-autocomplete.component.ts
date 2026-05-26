@@ -65,7 +65,7 @@ export class DestinationAutocompleteComponent {
   }
 
   async onQueryChange(query: string): Promise<void> {
-    if (query.length < 2) {
+    if (query.length < 1) {
       //only start searching from min. 2 letters
       this.destinations = [];
       return;

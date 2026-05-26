@@ -31,6 +31,7 @@
 
 .content {
   margin-top: 29px;
+  margin-bottom: 60px;
   width: min(calc(100vw - 20px), 680px);
   max-width: min(calc(100vw - 20px), 680px);
   margin-left: auto;
