@@ -57,10 +57,14 @@ export class W4MPassengerService {
   }
 
   disable_if_not_active() {
-    if (this.status() === 'pending' || this.status() === 'accepted') {
+    if (this.status() === 'pending') {
       return;
     }
-    // else if status is inactive / enabled / declined / expired, reset to inactive so that a new request can be sent
+    if (this.status() === 'accepted' && !this.acceptedStatusBarDismissed()) {
+      return;
+    }
+    // else if status is inactive / enabled / declined / expired / accepted and dismissed, 
+    // then reset to inactive so that a new request can be sent
     this.status.set('inactive');
   }
 
