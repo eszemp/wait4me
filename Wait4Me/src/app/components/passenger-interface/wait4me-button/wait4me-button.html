@@ -12,6 +12,14 @@
       aria-label="Confirm Wait4Me request"
       [style.top.px]="this.requestConfirmationTopPx"
     >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close confirmation"
+        (click)="this.close_request_confirmation()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
       <p class="w4m-confirm-title">You're about to send a Wait4Me request for the connection:</p>
 
       @if (this.waiting_connection_leg; as waitingLeg) {
@@ -78,7 +86,18 @@
       aria-label="Wait4Me request details"
       [style.top.px]="this.requestConfirmationTopPx"
     >
-      <p class="w4m-confirm-title">You have sent a Wait4Me request for {{this.w4mService.requested_delay}} min to this connection:</p>
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close details"
+        (click)="this.close_request_details()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">
+        You have sent a Wait4Me request for {{ this.w4mService.requested_delay }} min to this
+        connection:
+      </p>
 
       @if (this.waiting_connection_leg; as waitingLeg) {
         <div class="w4m-request-trip-card">
@@ -118,14 +137,16 @@
         >
           Go to connection
         </button>
-        <button
-          type="button"
-          class="w4m-confirm-btn w4m-confirm-btn--no"
-          (click)="this.close_request_details()"
-        >
-          Close
-        </button>
       </div>
+    </div>
+  }
+
+  @if (this.showAlternativeLoading) {
+    <div class="w4m-alt-loading" aria-live="polite">
+      <span class="w4m-alt-spinner" aria-hidden="true"></span>
+      <span
+        >Searching for Feasible Connections Starting at the Station of Your Missed Transfer</span
+      >
     </div>
   }
 
