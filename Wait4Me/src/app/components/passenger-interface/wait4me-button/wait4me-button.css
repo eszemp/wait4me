@@ -90,9 +90,10 @@
   height: 100vh;
   z-index: 2000;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   padding: 24px;
   text-align: center;
   color: var(--fir-green);
@@ -100,6 +101,10 @@
   letter-spacing: 0.02em;
   backdrop-filter: blur(6px);
   background: rgba(255, 255, 255, 0.95);
+}
+
+.w4m-alt-loading > span:last-child {
+  max-width: 28ch;
 }
 
 .w4m-alt-spinner {
@@ -235,6 +240,11 @@
 .w4m-confirm-btn--yes {
   background: var(--mint);
   color: var(--fir-green);
+}
+
+.w4m-confirm-btn--no {
+  background: var(--light-red);
+  color: var(--red);
 }
 
 .w4m-request-trip-card {
