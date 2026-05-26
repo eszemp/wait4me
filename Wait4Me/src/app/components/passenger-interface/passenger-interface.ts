@@ -89,15 +89,8 @@ export class PassengerInterface implements OnDestroy {
           this.tripService.departureTimeOfDay() || '',
         ).subscribe({
           next: (results) => {
-            Promise.all(results)
-              .then((resolvedResults) => {
-                this.tripService.tripResults.set(resolvedResults);
-                this.tripService.isLoadingTrips.set(false);
-              })
-              .catch(() => {
-                this.tripService.tripResults.set([]);
-                this.tripService.isLoadingTrips.set(false);
-              });
+            this.tripService.tripResults.set(results);
+            this.tripService.isLoadingTrips.set(false);
           },
           error: () => {
             this.tripService.tripResults.set([]);

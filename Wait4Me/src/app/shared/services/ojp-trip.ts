@@ -158,14 +158,21 @@ export class OJPTrip extends OJPBase {
     (request as any).payload.params.useRealtimeData = 'explanatory';
 
     return from(request.fetchResponse(this.sdk)).pipe(
-      map((response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           throw response.error;
         }
 
-        return (response.value.tripResult ?? [])
-          .map((result) => this.toPassengerTrip(result))
-          .filter((trip): trip is Promise<PassengerTrip> => trip !== null);
+        const settledTrips = await Promise.allSettled(
+          (response.value.tripResult ?? []).map((result) => this.toPassengerTrip(result)),
+        );
+
+        return settledTrips
+          .filter((settled): settled is PromiseFulfilledResult<PassengerTrip | null> => {
+            return settled.status === 'fulfilled';
+          })
+          .map((settled) => settled.value)
+          .filter((trip): trip is PassengerTrip => trip !== null);
       }),
     );
   }
@@ -636,6 +643,10 @@ export class OJPTrip extends OJPBase {
 
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
+
+    if (!firstTimedLeg || !lastTimedLeg) {
+      return null;
+    }
 
     const [criticalTransferId, criticalTransfer] = await this.findCriticalTransfer(
       transferLegs,
