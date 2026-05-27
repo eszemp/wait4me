@@ -160,15 +160,17 @@ export class Wait4MeButton {
   }
 
   get request_unavailable_description(): string[] {
-    const timeWindow = `${this.requestConfig.minMinutesBeforeDepartureToRequest} to ${this.requestConfig.maxMinutesBeforeDepartureToRequest} minutes before departure`;
+    const timeMessage = `You can send a request between ${this.requestConfig.maxMinutesBeforeDepartureToRequest} and ${this.requestConfig.minMinutesBeforeDepartureToRequest} minutes prior to the departure time of the outgoing service from the station of the critical transfer.`;
     const geofenceMessage = this.requestConfig.geofencingEnabled
-      ? `Geofencing is enabled, so you also need to be inside the route buffer of the trip route.`
+      ? `Geofencing is currently enabled.`
       : 'Geofencing is currently disabled, so only the time window matters.';
 
     return [
-      'You can send a Wait4Me request only when the selected trip is inside the configured request window and the connection is broken.',
-      `The current request window is ${timeWindow}.`,
-      geofenceMessage,
+      'You can send a Wait4Me request only when the following conditions are fulfilled:',
+      ' ',
+      'The connection is broken.',
+      'You are close enough to the time of the transfer. ' + timeMessage,
+      'If geofencing is enabled, you must be on the route to the transfer station. ' + geofenceMessage,
     ];
   }
 
