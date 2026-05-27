@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 from helpers.db_interactions import *
-from helpers.geofencing import is_valid_request
 
 
 backend_app = Flask(__name__)
@@ -13,14 +12,11 @@ scheduler = APScheduler()
 @backend_app.route('/create-request', methods=['POST'])
 def create_request():
     data = request.json
-    if is_valid_request(data):
-        status, id = create_new_request(data)
-        if status=="created":
-            return jsonify({"api_status": status, "request_id": id}), 201
-        else:
-            return jsonify({"api_status": status}), 500
+    status, id = create_new_request(data)
+    if status=="created":
+        return jsonify({"api_status": status, "request_id": id}), 201
     else:
-        return jsonify({"api_status": str('error: must be on route to send a request')}), 500
+        return jsonify({"api_status": status}), 500
 
 # POST a status change to a passenger request (cancel, accept or decline)
 @backend_app.route('/update-request/<request_id>', methods=['POST'])
