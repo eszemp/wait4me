@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 import { W4M_REQUEST_CONFIG } from '../../../shared/config/w4m-request-config';
+import { GeofenceService } from '../../../shared/services/geofence.service';
 
 @Component({
   selector: 'w4m-button',
@@ -16,6 +17,7 @@ import { W4M_REQUEST_CONFIG } from '../../../shared/config/w4m-request-config';
 export class Wait4MeButton {
   public w4mService = inject(W4MPassengerService);
   public tripService = inject(OJPTrip);
+  public geofenceService = inject(GeofenceService);
   private router = inject(Router);
   readonly requestConfig = W4M_REQUEST_CONFIG;
   showRequestConfirmation = false;
@@ -26,6 +28,11 @@ export class Wait4MeButton {
   requestConfirmationTopPx = 120;
 
   on_wait4me_button_click() {
+    if (this.geofenceService.locationAccessWarning()) {
+      this.update_request_confirmation_position();
+      return;
+    }
+
     if (this.w4mService.status() === 'enabled') {
       this.update_request_confirmation_position();
       this.showRequestConfirmation = true;
@@ -104,6 +111,10 @@ export class Wait4MeButton {
 
   close_request_unavailable() {
     this.showRequestUnavailable = false;
+  }
+
+  close_location_unavailable() {
+    this.geofenceService.clearLocationAccessWarning();
   }
 
   open_request_details() {

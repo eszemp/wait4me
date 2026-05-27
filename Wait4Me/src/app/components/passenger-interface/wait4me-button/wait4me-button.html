@@ -101,6 +101,38 @@
     </div>
   }
 
+  @if (this.geofenceService.locationAccessWarning()) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_location_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Location access required"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close location warning"
+        (click)="this.close_location_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">Wait4Me needs location access to work.</p>
+      <p class="w4m-confirm-text">
+        Please allow location access in your browser so Wait4Me can check whether you are close
+        enough to the connection.
+      </p>
+      <p class="w4m-confirm-text">
+        Without location access, Wait4Me cannot verify if the request is available for your trip.
+      </p>
+    </div>
+  }
+
   @if (this.showRequestDetails) {
     <div
       class="w4m-confirm-overlay"

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { OJPTrip } from './ojp-trip';
 import { OJPLocation } from './ojp-location';
@@ -9,8 +9,17 @@ import { W4M_REQUEST_CONFIG } from '../config/w4m-request-config';
 export class GeofenceService {
   private tripService = inject(OJPTrip);
   private locationService = inject(OJPLocation);
+  readonly locationAccessWarning = signal<string | null>(null);
   private lastKnownPosition: { latitude: number; longitude: number; timestamp: number } | null =
     null;
+
+  clearLocationAccessWarning() {
+    this.locationAccessWarning.set(null);
+  }
+
+  private setLocationAccessWarning(message: string) {
+    this.locationAccessWarning.set(message);
+  }
 
   /**
    * Check whether the user's current (or recently cached) geolocation lies
@@ -44,6 +53,9 @@ export class GeofenceService {
     try {
       console.log('[Geofence] check start', { tripId: trip.id });
 
+      const userPos = await this.getUserPosition();
+      if (!userPos) return false;
+
       const originSuggestions = await firstValueFrom(
         this.locationService.getLocationInformation(first.boardStopName, 1),
       );
@@ -62,9 +74,6 @@ export class GeofenceService {
           (first as any).lineName ?? undefined,
         ),
       );
-
-      const userPos = await this.getUserPosition();
-      if (!userPos) return false;
 
       const buffer = W4M_REQUEST_CONFIG.bufferWidthMeters ?? 50;
       let closestDistance = Number.POSITIVE_INFINITY;
@@ -116,20 +125,42 @@ export class GeofenceService {
     }
   }
 
-  private getUserPosition(): Promise<{ latitude: number; longitude: number } | null> {
+  private async getUserPosition(): Promise<{ latitude: number; longitude: number } | null> {
     const cachedPosition = this.lastKnownPosition;
     if (cachedPosition && Date.now() - cachedPosition.timestamp < 120000) {
-      return Promise.resolve({
+      this.clearLocationAccessWarning();
+      return {
         latitude: cachedPosition.latitude,
         longitude: cachedPosition.longitude,
-      });
+      };
     }
 
-    return new Promise((resolve, reject) => {
-      if (!('geolocation' in navigator)) return resolve(null);
+    const locationUnavailableMessage =
+      'Please allow location access in your browser so Wait4Me can work.';
 
+    if (!('geolocation' in navigator)) {
+      this.setLocationAccessWarning(locationUnavailableMessage);
+      return null;
+    }
+
+    if ('permissions' in navigator) {
+      try {
+        const permissionState = await navigator.permissions.query({
+          name: 'geolocation' as PermissionName,
+        });
+        if (permissionState.state === 'denied') {
+          this.setLocationAccessWarning(locationUnavailableMessage);
+          return null;
+        }
+      } catch {
+        // Fall back to the geolocation prompt if the Permissions API is unavailable.
+      }
+    }
+
+    return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          this.clearLocationAccessWarning();
           this.lastKnownPosition = {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
@@ -137,7 +168,13 @@ export class GeofenceService {
           };
           resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
         },
-        (_err) => {
+        (err) => {
+          if (err?.code === err.PERMISSION_DENIED) {
+            this.setLocationAccessWarning(locationUnavailableMessage);
+            resolve(null);
+            return;
+          }
+
           if (cachedPosition)
             return resolve({
               latitude: cachedPosition.latitude,
