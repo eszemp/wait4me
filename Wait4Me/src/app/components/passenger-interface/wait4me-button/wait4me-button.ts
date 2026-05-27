@@ -168,7 +168,7 @@ export class Wait4MeButton {
     return [
       'You can send a Wait4Me request only when the following conditions are fulfilled:',
       ' ',
-      'The connection is broken.',
+      'You are about to miss a transfer due to a delay.',
       'You are close enough to the time of the transfer. ' + timeMessage,
       'If geofencing is enabled, you must be on the route to the transfer station. ' + geofenceMessage,
     ];
