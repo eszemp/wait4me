@@ -1,10 +1,11 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { BehaviorSubject, Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
+import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
 import { CriticalTransfer } from '../types/PassengerTripTypes';
 import { PassengerTrip } from '../types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
 import { GetStatusResponse, PostResponse, BACKEND_URL } from '../types/Wait4MeRequest';
+import { W4M_REQUEST_CONFIG } from '../config/w4m-request-config';
 
 @Injectable({ providedIn: 'root' })
 export class W4MPassengerService {
@@ -40,20 +41,39 @@ export class W4MPassengerService {
     if (this.status()!=='inactive' && this.status()!=='enabled') {
       return;
     }
-    // TODO: determine max allowed requested delay and difference to current time
-    const delay_too_big = trip.criticalTransfer!.requestedDelay.totalMinutes >= 60;
-    const request_too_early = false; // TODO: (transfer.scheduledOutgoingDeparture);
-    const request_too_late = false;
-    if (delay_too_big || request_too_early || request_too_late) {
+    const transfer = trip.criticalTransfer;
+    if (!transfer) {
       this.status.set('inactive');
       return;
     }
-    // TODO: geofencing
+
+    const minutesUntilDeparture =
+      (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const delay_too_big =
+      transfer.requestedDelay.totalMinutes > W4M_REQUEST_CONFIG.maxAllowedDelayMinutes;
+    const request_too_early =
+      minutesUntilDeparture > W4M_REQUEST_CONFIG.maxMinutesBeforeDepartureToRequest;
+    const request_too_late =
+      minutesUntilDeparture < W4M_REQUEST_CONFIG.minMinutesBeforeDepartureToRequest;
+
+    // TODO: replace placeholder with actual geofence check once passenger location is available.
+    const geofencing_blocks_request =
+      W4M_REQUEST_CONFIG.geofencingEnabled && !this.isPassengerWithinGeofence();
+
+    if (delay_too_big || request_too_early || request_too_late || geofencing_blocks_request) {
+      this.status.set('inactive');
+      return;
+    }
+
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
     this.trip = trip;
-    this.transfer = trip.criticalTransfer!;
+    this.transfer = transfer;
     return;
+  }
+
+  private isPassengerWithinGeofence(): boolean {
+    return true;
   }
 
   disable_if_not_active() {
