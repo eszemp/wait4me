@@ -5,6 +5,7 @@ import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { Router } from '@angular/router';
 import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
+import { W4M_REQUEST_CONFIG } from '../../../shared/config/w4m-request-config';
 
 @Component({
   selector: 'w4m-button',
@@ -16,8 +17,10 @@ export class Wait4MeButton {
   public w4mService = inject(W4MPassengerService);
   public tripService = inject(OJPTrip);
   private router = inject(Router);
+  readonly requestConfig = W4M_REQUEST_CONFIG;
   showRequestConfirmation = false;
   showRequestDetails = false;
+  showRequestUnavailable = false;
   isSubmittingRequest = false;
   showAlternativeLoading = false;
   requestConfirmationTopPx = 120;
@@ -28,7 +31,11 @@ export class Wait4MeButton {
       this.showRequestConfirmation = true;
       return;
     }
-    this.w4mService.click_on_button();
+    if (!this.is_inside_trip_details()) {
+      return;
+    }
+    this.update_request_confirmation_position();
+    this.showRequestUnavailable = true;
   }
 
   get waiting_connection_leg(): PassengerTimedLeg | null {
@@ -87,8 +94,16 @@ export class Wait4MeButton {
     this.requestConfirmationTopPx = Math.round(rect.top);
   }
 
+  private is_inside_trip_details(): boolean {
+    return this.router.url === '/passenger/connection-details';
+  }
+
   close_request_confirmation() {
     this.showRequestConfirmation = false;
+  }
+
+  close_request_unavailable() {
+    this.showRequestUnavailable = false;
   }
 
   open_request_details() {
@@ -131,6 +146,19 @@ export class Wait4MeButton {
         state: { selectedTrip: requestedTrip },
       });
     }
+  }
+
+  get request_unavailable_description(): string[] {
+    const timeWindow = `${this.requestConfig.minMinutesBeforeDepartureToRequest} to ${this.requestConfig.maxMinutesBeforeDepartureToRequest} minutes before departure`;
+    const geofenceMessage = this.requestConfig.geofencingEnabled
+      ? `Geofencing is enabled, so you also need to be inside the route buffer of the trip route.`
+      : 'Geofencing is currently disabled, so only the time window matters.';
+
+    return [
+      'You can send a Wait4Me request only when the selected trip is inside the configured request window and the connection is broken.',
+      `The current request window is ${timeWindow}.`,
+      geofenceMessage,
+    ];
   }
 
   async confirm_and_send_request() {

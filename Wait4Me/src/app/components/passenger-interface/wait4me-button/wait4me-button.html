@@ -73,6 +73,34 @@
     </div>
   }
 
+  @if (this.showRequestUnavailable) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_request_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Wait4Me request unavailable"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close unavailable message"
+        (click)="this.close_request_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">Wait4Me is not available for this connection.</p>
+      @for (paragraph of this.request_unavailable_description; track paragraph) {
+        <p class="w4m-confirm-text">{{ paragraph }}</p>
+      }
+    </div>
+  }
+
   @if (this.showRequestDetails) {
     <div
       class="w4m-confirm-overlay"
