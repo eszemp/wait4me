@@ -1,13 +1,22 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { BehaviorSubject, Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
+import { Subscription, timer, lastValueFrom, switchMap, tap } from 'rxjs';
 import { CriticalTransfer } from '../types/PassengerTripTypes';
 import { PassengerTrip } from '../types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
 import { GetStatusResponse, PostResponse, BACKEND_URL } from '../types/Wait4MeRequest';
+import { W4M_REQUEST_CONFIG } from '../config/w4m-request-config';
 
 @Injectable({ providedIn: 'root' })
 export class W4MPassengerService {
+  /**
+   * Client-side passenger service for creating and tracking wait4me requests.
+   *
+   * Manages UI-visible status signals, holds the currently selected trip and
+   * critical transfer, and communicates with the backend to create and poll
+   * request status changes. The service also handles lifecycle actions like
+   * enabling/disabling the request UI and cancelling active requests.
+   */
   readonly status: WritableSignal<
     'inactive' | 'enabled' | 'pending' | 'accepted' | 'declined' | 'expired'
   > = signal('inactive');
@@ -36,43 +45,69 @@ export class W4MPassengerService {
     this.requested_delay = null;
   }
 
+  /**
+   * Enable the service for a specific trip if the contained critical transfer
+   * meets configured eligibility constraints (timing and requested delay).
+   * When enabled the service retains the `trip` and `transfer` for later
+   * request creation.
+   *
+   * @param trip the selected `PassengerTrip` to evaluate
+   */
   enable_if_eligible(trip: PassengerTrip) {
-    if (this.status()!=='inactive' && this.status()!=='enabled') {
+    if (this.status() !== 'inactive' && this.status() !== 'enabled') {
       return;
     }
-    // TODO: determine max allowed requested delay and difference to current time
-    const delay_too_big = trip.criticalTransfer!.requestedDelay.totalMinutes >= 60;
-    const request_too_early = false; // TODO: (transfer.scheduledOutgoingDeparture);
-    const request_too_late = false;
+    const transfer = trip.criticalTransfer;
+    if (!transfer) {
+      this.status.set('inactive');
+      return;
+    }
+
+    const minutesUntilDeparture =
+      (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const delay_too_big =
+      transfer.requestedDelay.totalMinutes > W4M_REQUEST_CONFIG.maxAllowedDelayMinutes;
+    const request_too_early =
+      minutesUntilDeparture > W4M_REQUEST_CONFIG.maxMinutesBeforeDepartureToRequest;
+    const request_too_late =
+      minutesUntilDeparture < W4M_REQUEST_CONFIG.minMinutesBeforeDepartureToRequest;
+
     if (delay_too_big || request_too_early || request_too_late) {
       this.status.set('inactive');
       return;
     }
-    // TODO: geofencing
+
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
     this.trip = trip;
-    this.transfer = trip.criticalTransfer!;
+    this.transfer = transfer;
     return;
   }
 
   disable_if_not_active() {
+    /**
+     * Reset the service to an inactive state when there is no active request
+     * or when an accepted request has been dismissed by the user. Does not
+     * interrupt requests that are currently `pending`.
+     */
     if (this.status() === 'pending') {
       return;
     }
     if (this.status() === 'accepted' && !this.acceptedStatusBarDismissed()) {
       return;
     }
-    // else if status is inactive / enabled / declined / expired / accepted and dismissed, 
+    // else if status is inactive / enabled / declined / expired / accepted and dismissed,
     // then reset to inactive so that a new request can be sent
     this.clean_up();
   }
 
   dismissAcceptedStatusBar() {
+    /** Mark the accepted status bar as dismissed so the UI can be reset. */
     this.acceptedStatusBarDismissed.set(true);
   }
 
   clean_up() {
+    /** Reset all service state and stop any polling. */
     this.status.set('inactive');
     this.acceptedStatusBarDismissed.set(false);
     this.stopStatusPolling();
@@ -83,6 +118,11 @@ export class W4MPassengerService {
   }
 
   async click_on_button() {
+    /**
+     * Handler invoked when the passenger UI button is clicked. Behavior
+     * depends on the current `status` signal (inactive, enabled, pending,
+     * accepted, declined, expired).
+     */
     console.log('Initial status: ', this.status());
     switch (this.status()) {
       case 'inactive':
@@ -113,6 +153,11 @@ export class W4MPassengerService {
   }
 
   async trigger_new_request() {
+    /**
+     * Create a new wait4me request on the backend using the currently stored
+     * `transfer` and `passenger_id`. If creation succeeds the service enters
+     * the `pending` state and begins polling for status updates.
+     */
     const request = {
       passenger_id: this.passenger_id,
       incoming_journey_ref: this.transfer?.incomingJourneyRef,
@@ -138,6 +183,10 @@ export class W4MPassengerService {
   }
 
   async cancel_request() {
+    /**
+     * Cancel an active backend request. If the backend confirms the change
+     * the service stops polling and resets to `inactive`.
+     */
     console.log('cancelling request', this.request_id, 'current status', this.status());
     if (!this.request_id || (this.status() !== 'pending' && this.status() !== 'accepted')) {
       return;
@@ -166,6 +215,7 @@ export class W4MPassengerService {
   }
 
   private stopStatusPolling() {
+    /** Stop the periodic polling subscription, if active. */
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
       this.pollingSubscription = null;
@@ -173,6 +223,10 @@ export class W4MPassengerService {
   }
 
   private startStatusPolling() {
+    /**
+     * Begin periodic polling of the backend for the current request status.
+     * Polls every 5s and updates the `status` signal accordingly.
+     */
     console.log('polling results from db for request', this.request_id);
     if (!this.request_id || this.pollingSubscription) {
       return;

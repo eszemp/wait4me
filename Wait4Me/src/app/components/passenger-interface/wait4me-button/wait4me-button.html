@@ -73,6 +73,65 @@
     </div>
   }
 
+  @if (this.showRequestUnavailable) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_request_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Wait4Me request unavailable"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close unavailable message"
+        (click)="this.close_request_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">You cannot currently send a Wait4Me request for this connection!</p>
+      @for (paragraph of this.request_unavailable_description; track paragraph) {
+        <p class="w4m-confirm-text">{{ paragraph }}</p>
+      }
+    </div>
+  }
+
+  @if (this.geofenceService.locationAccessWarning()) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_location_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Location access required"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close location warning"
+        (click)="this.close_location_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">Wait4Me needs your location!</p>
+      <p class="w4m-confirm-text">
+        Please give Wait4Me permission to access your position. We only use it to check whether you are currently traveling on this connection.
+      </p>
+      <p class="w4m-confirm-text">
+        Without access to your location, you will not be able to send any Wait4Me requests.
+      </p>
+    </div>
+  }
+
   @if (this.showRequestDetails) {
     <div
       class="w4m-confirm-overlay"
