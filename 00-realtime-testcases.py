@@ -6,17 +6,19 @@ from UseCaseStudy.scripts.helpers.ojp_arrivals_and_departures import OJPStopDepA
 
 load_dotenv(dotenv_path='.env', override=True)
 API_KEY = os.getenv("GEOPS_API_KEY")
+ojp_client = OJPStopDepArrRequest()
+
+# CONFIGS
 FEED_NAME = "sbb" 
 SWISS_BBOX = "663000,5750000,1168000,6070000" # EPSG:3857 (Web Mercator)
-
 output = '00-realtime-testcases.txt'
 
-ojp_client = OJPStopDepArrRequest()
 
 
 def get_delayed_trains(min_delay_ms=600000):
     """
-    Fetches trains across Switzerland with a delay >= 10 minutes.
+    Fetches delayed trains across Switzerland from the GEOPS Realtime API.
+    Default: Searches for delays bigger than 10 minutes.
     """
 
     url = f"https://api.geops.io/tracker-http/v1/trajectories/{FEED_NAME}/"
@@ -34,48 +36,56 @@ def get_delayed_trains(min_delay_ms=600000):
     delayed_trains = []
 
     for feature in data.get("features", []):
-        props = feature.get("properties", {})
-        delay = props.get("delay")
+        properties = feature.get("properties", {})
+        delay = properties.get("delay")
+        traffic_mode = properties.get("type")
         
-        # Filter for delay (delay is in milliseconds)
+        # filter for delay and mode
         if delay is not None and delay >= min_delay_ms:
-            delayed_trains.append({
-                "train_id": props.get("train_id"),
-                "line_name": props.get("line", {}).get("name", "Unknown"),
-                "delay_mins": delay / 60000,
-                "type": props.get("type"),
-                "state": props.get("state")
-            })
+            if traffic_mode == "rail":
+                delayed_trains.append({
+                    "train_id": properties.get("train_id"),
+                    "line_name": properties.get("line", {}).get("name", "Unknown"),
+                    "delay_mins": delay / 60000
+                })
             
     return delayed_trains
 
 
 def get_stop_sequence(train_id):
     """
-    Fetches the stop sequence for a specific train to see where it's headed.
+    Fetches the stop sequence for a specific train from the GEOPS API.
     """
+
     url = f"https://api.geops.io/tracker-http/v1/calls/{train_id}/"
     params = {"key": API_KEY}
     
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        return data[0].get("stations")
     
     except Exception as e:
         print(f"Could not fetch stops for {train_id}: {e}")
         return None
 
 
-def find_destinations_with_critical_transfers(potential_transfer_station, arr_scheduled, arr_actual, line_name):
+def find_destinations_with_critical_transfers(potential_transfer_station, arr_scheduled, arr_actual, line_name, stop_names_incoming_line):
+    """
+    Looks at departures from a station where an incoming line is delayed. 
+    The goal is to find destinations to which a connection would theoretically 
+    be possible from the incoming service according to the timetable but where that connection is no longer possible due to a delay.
+    """
+    
     destinations = []
-
     stop_ref = ojp_client.get_stop_ref(potential_transfer_station)
 
     if not stop_ref:
         return []
 
-    # Search starting from when the passenger WOULD have been ready if on time
+    # search starting from when the passenger WOULD have been ready to depart if they arrived on time 
+    # (assume 2 min for transfer)
     search_time = arr_scheduled + timedelta(minutes=2) 
     
     # The moment the passenger is ACTUALLY ready to board a new train
@@ -91,18 +101,22 @@ def find_destinations_with_critical_transfers(potential_transfer_station, arr_sc
         )
 
         for dep in departures:
+
             # skip if it is the same line number as the incoming service
             if dep['line'] == line_name:
                 continue
             
-            # If the connecting train departs BEFORE the passenger actually arrives + buffer, 
+            # If the connecting train departs BEFORE the passenger is ready,
             # it is a broken (critical) connection.
             if dep['time'] < actual_ready_time:
-                
-                # first one of the onward stops -> destination for routing
-                if dep.get('stops') and len(dep['stops']) > 0:
-                    first_onward_stop = dep['stops'][0]
-                    destinations.append(first_onward_stop)
+
+                # check that the onward stops are not also stops of the original delayed line
+                # save the first onward stop that fulfills this condition
+                for onward_stop in dep.get('stops', []):
+
+                    if onward_stop not in stop_names_incoming_line:
+                        destinations.append(onward_stop)
+                        break
         
     except Exception as e:
         print(f"Error fetching OJP data for {stop_ref}: {e}")
@@ -110,34 +124,39 @@ def find_destinations_with_critical_transfers(potential_transfer_station, arr_sc
     return destinations
     
 
-def possibly_broken_connections(delayed_trains):
+def find_broken_connections(delayed_trains):
     """
     Iterates through delayed trains and identifies upcoming stops with arrival delays.
+    Then it looks at departures from upcoming onward stops to find potential broken connections.
     """
+
     for train in delayed_trains:
         print(f"\nAnalyzing Train {train['line_name']} (ID: {train['train_id']})\n")
+
         with open(output, 'a', encoding='utf-8') as file:
             file.write(f"Analyzing Train {train['line_name']} (ID: {train['train_id']})\n")
             file.write(f"Current Delay: {train['delay_mins']:.1f} minutes \n\n")
         
-        stops_data = get_stop_sequence(train['train_id'])
+        all_stops_of_line = get_stop_sequence(train['train_id'])
 
-        if not stops_data:
+        if not all_stops_of_line:
             continue
-
-        stations = stops_data[0].get("stations", [])
 
         suggested_start_station = ''
         suggested_start_time = ''
         suggested_destinations = []
-        
-        for stop in stations:
 
+        stops_of_delayed_line = [stop.get("stationName") for stop in all_stops_of_line if stop.get("stationName")]
+        
+        for stop in all_stops_of_line:
+
+            # if the train has already left a station, save this as a suggested start
             if stop.get("state") == "LEAVING":
                 suggested_start_station = stop.get("stationName")
-                suggested_start_time = stop.get("departureTime")
+                suggested_start_time = stop.get("aimedDepartureTime")
 
-            elif stop.get("state") in ["INCOMING", "STOPS_AT", "PENDING"]:
+            # for all upcoming stops, check for a significant arrival delay
+            elif stop.get("state") == "PENDING":
                 potential_transfer_station = stop.get("stationName")
                 
                 fmt = "%Y-%m-%dT%H:%M:%SZ"
@@ -151,31 +170,22 @@ def possibly_broken_connections(delayed_trains):
                 if arr_scheduled and arr_actual:
                     delay = arr_actual - arr_scheduled
                     arr_delay = delay.total_seconds() / 60
-                    #print(f"  - {potential_transfer_station}: Expected {arr_actual} (Sched: {arr_scheduled}) -> Delay: {arr_delay} min")
                     if arr_delay > 5:
                         print("searching for destinations from transfer stop", potential_transfer_station)
-                        destinations = find_destinations_with_critical_transfers(potential_transfer_station, 
-                                                                                 arr_scheduled, 
-                                                                                 arr_actual, 
-                                                                                 train['line_name'])
-                        
-                        # remove dublicates
-                        destinations = list(set(destinations))
-                        
-                        suggested_destinations += destinations
+                        destinations = find_destinations_with_critical_transfers(potential_transfer_station, arr_scheduled, arr_actual, train['line_name'], stops_of_delayed_line)                   
+                        suggested_destinations += list(set(destinations))
 
 
         if len(suggested_destinations)>0:
             with open(output, 'a', encoding='utf-8') as file:
-                file.write("-> Try these routing requests (possibly broken connection)\n\n")
+                file.write("-> Try these routing requests (possibly broken connections)\n\n")
                 lines = []
                 for dest in suggested_destinations:
-                    lines.append(f"- from {suggested_start_station} at {suggested_start_time} to {dest}\n")
+                    lines.append(f"- from {suggested_start_station} at {suggested_start_time} (timetabled time) to {dest}\n")
                 lines = list(set(lines))
                 file.writelines(lines)
                 file.write("\n\n")
 
-        
 
 
 
@@ -185,7 +195,7 @@ if __name__ == "__main__":
     curTime = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
     with open(output, 'w', encoding='utf-8') as file:
-        file.write(f"Searching for delayed trains across Switzerland... (Current Time: {curTime})\n\n")
+        file.write(f"Searching for delayed trains in the SBB network... (Current Time: {curTime})\n\n")
 
     delayed_trains = get_delayed_trains()
     
@@ -198,7 +208,7 @@ if __name__ == "__main__":
             file.write(f"{'Line':<10} | {'Delay':<10}\n")
             file.write("-" * 50 + "\n")
             for t in delayed_trains:
-                file.write(f"{t['line_name']:<10} ({t['type']}) | {t['delay_mins']:>4.1f} min\n")
+                file.write(f"{t['line_name']:<10} | {t['delay_mins']:>4.1f} min\n")
             file.write("\n")
 
-    possibly_broken_connections(delayed_trains)
+        find_broken_connections(delayed_trains)
