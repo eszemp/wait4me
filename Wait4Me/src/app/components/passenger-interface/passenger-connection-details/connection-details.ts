@@ -77,8 +77,9 @@ export class ConnectionDetails {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.tripService.selectedConnectionTrip()) {
-          console.log('update trip with realtime traffic info');
-          this.tripService.refineTrip();
+          // TODO: fix ojp trip refinement error
+          // console.log('update trip with realtime traffic info');
+          // this.tripService.refineTrip();
         }
       });
   }
