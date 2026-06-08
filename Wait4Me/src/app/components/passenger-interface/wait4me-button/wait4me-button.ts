@@ -1,9 +1,9 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { W4MPassengerService } from '../../../shared/services/w4m-service-passenger';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { Router } from '@angular/router';
-import { PassengerTimedLeg } from '../../../shared/types/PassengerTripTypes';
+import { PassengerTimedLeg, PassengerTrip } from '../../../shared/types/PassengerTripTypes';
 import { Duration } from '../../../shared/models/duration';
 import { W4M_REQUEST_CONFIG } from '../../../shared/config/w4m-request-config';
 import { GeofenceService } from '../../../shared/services/geofence.service';
@@ -26,6 +26,66 @@ export class Wait4MeButton {
   isSubmittingRequest = false;
   showAlternativeLoading = false;
   requestConfirmationTopPx = 120;
+  // Geofence check state used to show which condition fails in the popup
+  geofenceCheckInProgress = signal(false);
+  geofenceInside = signal<boolean | null>(null);
+  // Cached transfer used to render the unavailable message reliably
+  currentTransfer = signal<PassengerTrip['criticalTransfer'] | null>(null);
+
+  readonly requestUnavailableHeader = 'Sending a Wait4Me request is not possible for the following reason:';
+
+  readonly request_unavailable_description = computed(() => {
+    const transfer = this.currentTransfer() ?? this.tripService.selectedConnectionTrip()?.criticalTransfer ?? null;
+
+    if (!transfer) {
+      return [{ kind: 'error' as const, text: 'No critical transfer is available for the selected trip.' }];
+    }
+
+    const delayTooBig = transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
+    if (delayTooBig) {
+      return [
+        {
+          kind: 'error' as const,
+          text: `Requested delay exceeds allowed maximum (${this.requestConfig.maxAllowedDelayMinutes} min). Requested: ${Math.round(
+          transfer.requestedDelay.totalMinutes,
+          )} min.`,
+        },
+      ];
+    }
+
+    const minutesUntilDeparture = (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const tooEarly = minutesUntilDeparture > this.requestConfig.maxMinutesBeforeDepartureToRequest;
+    const tooLate = minutesUntilDeparture < this.requestConfig.minMinutesBeforeDepartureToRequest;
+    if (tooEarly) {
+      return [{ kind: 'error' as const, text: `Too early to request, maximum ${this.requestConfig.maxMinutesBeforeDepartureToRequest} min before departure allowed. Current: ${Math.round(minutesUntilDeparture)} min until departure.` }];
+    }
+    if (tooLate) {
+      return [{ kind: 'error' as const, text: `Too late to request, minimum ${this.requestConfig.minMinutesBeforeDepartureToRequest} min before departure needed. Current: ${Math.round(minutesUntilDeparture)} min until departure.` }];
+    }
+
+    if (!this.requestConfig.geofencingEnabled) {
+      return [{ kind: 'ok' as const, text: 'Geofencing disabled — time window and delay are OK.' }];
+    }
+
+    const accessWarning = this.geofenceService.locationAccessWarning();
+    if (accessWarning) {
+      return [{ kind: 'error' as const, text: 'Geofencing: location access not granted. ' + accessWarning }];
+    }
+
+    if (this.geofenceCheckInProgress()) {
+      return [{ kind: 'pending' as const, text: 'Checking your location to determine eligibility...' }];
+    }
+
+    if (this.geofenceInside() === null) {
+      return [{ kind: 'pending' as const, text: 'Checking your location to determine eligibility...' }];
+    }
+
+    if (!this.geofenceInside()) {
+      return [{ kind: 'error' as const, text: 'Geofencing: You are not on the way to the transfer station.' }];
+    }
+
+    return [{ kind: 'ok' as const, text: 'All eligibility conditions are met. You should be able to send a request.' }];
+  });
 
   on_wait4me_button_click() {
     if (this.geofenceService.locationAccessWarning()) {
@@ -42,7 +102,65 @@ export class Wait4MeButton {
       return;
     }
     this.update_request_confirmation_position();
+    // cache current transfer immediately so the popup has stable data
+    this.currentTransfer.set(this.tripService.selectedConnectionTrip()?.criticalTransfer ?? null);
+    // start an async evaluation of geofence state (result used by the popup)
+    // do not mark checking here — the evaluator will only set checking when
+    // geofence verification is actually required (prevents sticky 'checking')
+    this.geofenceInside.set(null);
+    this.geofenceCheckInProgress.set(false);
+    void this.evaluate_unavailable_reasons();
     this.showRequestUnavailable = true;
+  }
+
+  private async evaluate_unavailable_reasons() {
+    const trip = this.tripService.selectedConnectionTrip();
+    this.geofenceInside.set(null);
+    // Only perform geofence check when all other eligibility checks pass.
+    if (!trip || !trip.criticalTransfer) {
+      this.geofenceCheckInProgress.set(false);
+      return;
+    }
+
+    const transfer = trip.criticalTransfer;
+    const delayTooBig = transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
+    const minutesUntilDeparture = (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const tooEarly = minutesUntilDeparture > this.requestConfig.maxMinutesBeforeDepartureToRequest;
+    const tooLate = minutesUntilDeparture < this.requestConfig.minMinutesBeforeDepartureToRequest;
+
+    if (delayTooBig || tooEarly || tooLate) {
+      // other conditions already fail — no need to geofence-check
+      this.geofenceCheckInProgress.set(false);
+      this.geofenceInside.set(null);
+      return;
+    }
+
+    if (!this.requestConfig.geofencingEnabled) {
+      this.geofenceInside.set(true);
+      this.geofenceCheckInProgress.set(false);
+      return;
+    }
+
+    // if location access warning is present we can't perform the check
+    if (this.geofenceService.locationAccessWarning()) {
+      this.geofenceInside.set(false);
+      this.geofenceCheckInProgress.set(false);
+      return;
+    }
+
+    // perform geofence check but guard with a short timeout so the UI doesn't
+    // remain in a perpetual 'checking' state
+    this.geofenceCheckInProgress.set(true);
+    try {
+      const geofencePromise = this.geofenceService.isUserWithinGeofenceForTrip(trip);
+      const timeout = new Promise<boolean>((res) => setTimeout(() => res(false), 5000));
+      const inside = await Promise.race([geofencePromise, timeout]);
+      this.geofenceInside.set(Boolean(inside));
+    } catch (e) {
+      this.geofenceInside.set(false);
+    } finally {
+      this.geofenceCheckInProgress.set(false);
+    }
   }
 
   get waiting_connection_leg(): PassengerTimedLeg | null {
@@ -111,6 +229,7 @@ export class Wait4MeButton {
 
   close_request_unavailable() {
     this.showRequestUnavailable = false;
+    this.currentTransfer.set(null);
   }
 
   close_location_unavailable() {
@@ -157,21 +276,6 @@ export class Wait4MeButton {
         state: { selectedTrip: requestedTrip },
       });
     }
-  }
-
-  get request_unavailable_description(): string[] {
-    const timeMessage = `A request can only be sent between ${this.requestConfig.maxMinutesBeforeDepartureToRequest} and ${this.requestConfig.minMinutesBeforeDepartureToRequest} minutes prior to the departure time of the outgoing service from the station of the critical transfer.`;
-    const geofenceMessage = this.requestConfig.geofencingEnabled
-      ? `Geofencing is currently enabled.`
-      : 'Geofencing is currently disabled, so only the time window matters.';
-
-    return [
-      'Sending a Wait4Me request is only possible when the following conditions are fulfilled:',
-      ' ',
-      'You are about to miss a transfer due to a delay.',
-      'You are close enough to the time of the transfer: ' + timeMessage,
-      'If geofencing is enabled, you must be on the route to the transfer station. ' + geofenceMessage,
-    ];
   }
 
   async confirm_and_send_request() {
