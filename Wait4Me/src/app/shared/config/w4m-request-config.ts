@@ -19,11 +19,11 @@ export const W4M_REQUEST_CONFIG = {
   maxMinutesBeforeDepartureToRequest: 120,
 
   // Toggle geofencing checks for request eligibility.
-  geofencingEnabled: true,
+  geofencingEnabled: false,
 
   // Buffer width (meters) used for geofence checks around the connection track.
-  bufferWidthMeters: 250000,
+  bufferWidthMeters: 1000,
 
   // Allow only requests for buses. For testing purposes, this can be set to false to allow requests for every connection.
-  allowOnlyBusRequests: true,
+  allowOnlyBusRequests: false,
 } as const;
