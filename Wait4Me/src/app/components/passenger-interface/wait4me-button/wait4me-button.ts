@@ -36,14 +36,23 @@ export class Wait4MeButton {
     'Sending a Wait4Me request is not possible for the following reason:';
 
   readonly request_unavailable_description = computed(() => {
-    const transfer =
-      this.currentTransfer() ?? this.tripService.selectedConnectionTrip()?.criticalTransfer ?? null;
+    const selectedTrip = this.tripService.selectedConnectionTrip();
+    const transfer = this.currentTransfer() ?? selectedTrip?.criticalTransfer ?? null;
 
     if (!transfer) {
       return [
         {
           kind: 'error' as const,
           text: 'No critical transfer is available for the selected trip.',
+        },
+      ];
+    }
+
+    if (this.requestConfig.allowOnlyBusRequests && !this.w4mService.isBusTrip(selectedTrip)) {
+      return [
+        {
+          kind: 'error' as const,
+          text: 'Only bus connections can receive Wait4Me requests for the current configuration.',
         },
       ];
     }
@@ -172,6 +181,12 @@ export class Wait4MeButton {
       // other conditions already fail — no need to geofence-check
       this.geofenceCheckInProgress.set(false);
       this.geofenceInside.set(null);
+      return;
+    }
+
+    if (this.requestConfig.allowOnlyBusRequests && !this.w4mService.isBusTrip(trip)) {
+      this.geofenceCheckInProgress.set(false);
+      this.geofenceInside.set(false);
       return;
     }
 
