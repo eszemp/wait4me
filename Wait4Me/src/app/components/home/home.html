@@ -32,9 +32,9 @@
       <button
         type="button"
         class="info-link info-link--center"
-        (click)="openInfoPanel('impressum')"
+        (click)="openInfoPanel('imprint')"
       >
-        Impressum
+        Imprint
       </button>
       <button type="button" class="info-link info-link--right" (click)="openInfoPanel('privacy')">
         Privacy
@@ -58,9 +58,9 @@
       @for (paragraph of infoPanelBody; track paragraph) {
         <p class="info-modal-text">{{ paragraph }}</p>
       }
-      @if (this.activeInfoPanel === 'about' || this.activeInfoPanel === 'impressum') {
+      @if (this.activeInfoPanel === 'about') {
         <p class="info-modal-text">
-          In collaboration with
+          This project is a collaboration with
           <a
             href="https://www.oev-info.ch/de/organisation/ueber-ski"
             target="_blank"
