@@ -8,16 +8,16 @@ import { DelayEffectsOnLinesLayerComponent } from './delay-effects/delay-effects
 type MonitoringLayerId = 'station-statistics' | 'delay-effects-on-lines';
 
 @Component({
-  selector: 'app-monitoring-interface',
-  templateUrl: './monitoring-interface.html',
-  styleUrls: ['./monitoring-interface.css'],
+  selector: 'app-delay-impact-analysis',
+  templateUrl: './delay-impact-analysis.html',
+  styleUrls: ['./delay-impact-analysis.css'],
   standalone: true,
   imports: [FormsModule, StationStatisticsLayerComponent, DelayEffectsOnLinesLayerComponent],
 })
 /**
  * Entry component for monitoring layers with a simple layer switcher.
  */
-export class MonitoringInterface implements OnInit, OnDestroy {
+export class DelayImpactAnalysis implements OnInit, OnDestroy {
   readonly layerOptions: Array<{ id: MonitoringLayerId; label: string }> = [
     { id: 'delay-effects-on-lines', label: 'Delay Effects on Lines' },
     { id: 'station-statistics', label: 'Vulnerability of Stations to Delays' },
@@ -34,7 +34,7 @@ export class MonitoringInterface implements OnInit, OnDestroy {
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    @Optional() private dialogRef: MatDialogRef<MonitoringInterface>,
+    @Optional() private dialogRef: MatDialogRef<DelayImpactAnalysis>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     // If data exists (Modal mode), assign values. 
