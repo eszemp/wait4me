@@ -10,6 +10,7 @@ export const W4M_REQUEST_CONFIG = {
   maxAllowedDelayMinutes: 60,
 
   // A request is only allowed if at least this many minutes remain before departure.
+  // Use negative values to allow requesting after departure, which can be useful for testing and in case of unexpected delays.
   minMinutesBeforeDepartureToRequest: -120,
 
   // A request is considered "too early" if it is made when more than this many

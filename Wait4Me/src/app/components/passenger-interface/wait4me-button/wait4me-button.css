@@ -139,6 +139,23 @@
   font-weight: normal;
 }
 
+.w4m-inline-status-icon {
+  display: inline-block;
+  width: 0.76em;
+  height: 0.76em;
+  margin-right: 0.22em;
+  flex-shrink: 0;
+  background-color: var(--grey);
+  -webkit-mask: url('/close.svg') no-repeat center / contain;
+  mask: url('/close.svg') no-repeat center / contain;
+}
+
+.w4m-inline-status-icon--ok {
+  background-color: var(--grey);
+  -webkit-mask: url('/check-mark.svg') no-repeat center / contain;
+  mask: url('/check-mark.svg') no-repeat center / contain;
+}
+
 .w4m-confirm-text:last-child {
   margin-bottom: 0;
 }
