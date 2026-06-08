@@ -94,7 +94,9 @@
       >
         <img src="/close.svg" alt="" aria-hidden="true" />
       </button>
-      <p class="w4m-confirm-title">You cannot currently send a Wait4Me request for this connection!</p>
+      <p class="w4m-confirm-title">
+        You cannot currently send a Wait4Me request for this connection!
+      </p>
       @if (this.requestUnavailableHeader) {
         <p class="w4m-confirm-text">{{ this.requestUnavailableHeader }}</p>
       }
@@ -102,6 +104,11 @@
         <p class="w4m-confirm-text">
           @if (item.kind === 'error') {
             <span class="w4m-inline-status-icon" aria-hidden="true"></span>
+          } @else if (item.kind === 'ok') {
+            <span
+              class="w4m-inline-status-icon w4m-inline-status-icon--ok"
+              aria-hidden="true"
+            ></span>
           }
           {{ item.text }}
         </p>
@@ -132,7 +139,8 @@
       </button>
       <p class="w4m-confirm-title">Wait4Me needs your location!</p>
       <p class="w4m-confirm-text">
-        Please give Wait4Me permission to access your position. We only use it to check whether you are currently traveling on this connection.
+        Please give Wait4Me permission to access your position. We only use it to check whether you
+        are currently traveling on this connection.
       </p>
       <p class="w4m-confirm-text">
         Without access to your location, you will not be able to send any Wait4Me requests.

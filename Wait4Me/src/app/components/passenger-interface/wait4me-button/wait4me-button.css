@@ -150,6 +150,12 @@
   mask: url('/close.svg') no-repeat center / contain;
 }
 
+.w4m-inline-status-icon--ok {
+  background-color: var(--grey);
+  -webkit-mask: url('/check-mark.svg') no-repeat center / contain;
+  mask: url('/check-mark.svg') no-repeat center / contain;
+}
+
 .w4m-confirm-text:last-child {
   margin-bottom: 0;
 }

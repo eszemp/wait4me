@@ -32,35 +32,54 @@ export class Wait4MeButton {
   // Cached transfer used to render the unavailable message reliably
   currentTransfer = signal<PassengerTrip['criticalTransfer'] | null>(null);
 
-  readonly requestUnavailableHeader = 'Sending a Wait4Me request is not possible for the following reason:';
+  readonly requestUnavailableHeader =
+    'Sending a Wait4Me request is not possible for the following reason:';
 
   readonly request_unavailable_description = computed(() => {
-    const transfer = this.currentTransfer() ?? this.tripService.selectedConnectionTrip()?.criticalTransfer ?? null;
+    const transfer =
+      this.currentTransfer() ?? this.tripService.selectedConnectionTrip()?.criticalTransfer ?? null;
 
     if (!transfer) {
-      return [{ kind: 'error' as const, text: 'No critical transfer is available for the selected trip.' }];
+      return [
+        {
+          kind: 'error' as const,
+          text: 'No critical transfer is available for the selected trip.',
+        },
+      ];
     }
 
-    const delayTooBig = transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
+    const delayTooBig =
+      transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
     if (delayTooBig) {
       return [
         {
           kind: 'error' as const,
           text: `Requested delay exceeds allowed maximum (${this.requestConfig.maxAllowedDelayMinutes} min). Requested: ${Math.round(
-          transfer.requestedDelay.totalMinutes,
+            transfer.requestedDelay.totalMinutes,
           )} min.`,
         },
       ];
     }
 
-    const minutesUntilDeparture = (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const minutesUntilDeparture =
+      (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
     const tooEarly = minutesUntilDeparture > this.requestConfig.maxMinutesBeforeDepartureToRequest;
     const tooLate = minutesUntilDeparture < this.requestConfig.minMinutesBeforeDepartureToRequest;
     if (tooEarly) {
-      return [{ kind: 'error' as const, text: `Too early to request, maximum ${this.requestConfig.maxMinutesBeforeDepartureToRequest} min before departure allowed. Current: ${Math.round(minutesUntilDeparture)} min until departure.` }];
+      return [
+        {
+          kind: 'error' as const,
+          text: `Too early to request, maximum ${this.requestConfig.maxMinutesBeforeDepartureToRequest} min before departure allowed. Current: ${Math.round(minutesUntilDeparture)} min until departure.`,
+        },
+      ];
     }
     if (tooLate) {
-      return [{ kind: 'error' as const, text: `Too late to request, minimum ${this.requestConfig.minMinutesBeforeDepartureToRequest} min before departure needed. Current: ${Math.round(minutesUntilDeparture)} min until departure.` }];
+      return [
+        {
+          kind: 'error' as const,
+          text: `Too late to request, minimum ${this.requestConfig.minMinutesBeforeDepartureToRequest} min before departure needed. Current: ${Math.round(minutesUntilDeparture)} min until departure.`,
+        },
+      ];
     }
 
     if (!this.requestConfig.geofencingEnabled) {
@@ -69,22 +88,41 @@ export class Wait4MeButton {
 
     const accessWarning = this.geofenceService.locationAccessWarning();
     if (accessWarning) {
-      return [{ kind: 'error' as const, text: 'Geofencing: location access not granted. ' + accessWarning }];
+      return [
+        {
+          kind: 'error' as const,
+          text: 'Geofencing: location access not granted. ' + accessWarning,
+        },
+      ];
     }
 
     if (this.geofenceCheckInProgress()) {
-      return [{ kind: 'pending' as const, text: 'Checking your location to determine eligibility...' }];
+      return [
+        { kind: 'pending' as const, text: 'Checking your location to determine eligibility...' },
+      ];
     }
 
     if (this.geofenceInside() === null) {
-      return [{ kind: 'pending' as const, text: 'Checking your location to determine eligibility...' }];
+      return [
+        { kind: 'pending' as const, text: 'Checking your location to determine eligibility...' },
+      ];
     }
 
     if (!this.geofenceInside()) {
-      return [{ kind: 'error' as const, text: 'Geofencing: You are not on the way to the transfer station.' }];
+      return [
+        {
+          kind: 'error' as const,
+          text: 'Geofencing: You are not on the way to the transfer station.',
+        },
+      ];
     }
 
-    return [{ kind: 'ok' as const, text: 'All eligibility conditions are met. You should be able to send a request.' }];
+    return [
+      {
+        kind: 'ok' as const,
+        text: 'All eligibility conditions are met. You should be able to send a request.',
+      },
+    ];
   });
 
   on_wait4me_button_click() {
@@ -123,8 +161,10 @@ export class Wait4MeButton {
     }
 
     const transfer = trip.criticalTransfer;
-    const delayTooBig = transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
-    const minutesUntilDeparture = (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
+    const delayTooBig =
+      transfer.requestedDelay.totalMinutes > this.requestConfig.maxAllowedDelayMinutes;
+    const minutesUntilDeparture =
+      (transfer.scheduledOutgoingDeparture.getTime() - Date.now()) / 60000;
     const tooEarly = minutesUntilDeparture > this.requestConfig.maxMinutesBeforeDepartureToRequest;
     const tooLate = minutesUntilDeparture < this.requestConfig.minMinutesBeforeDepartureToRequest;
 
