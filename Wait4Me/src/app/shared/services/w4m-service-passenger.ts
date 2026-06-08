@@ -77,6 +77,11 @@ export class W4MPassengerService {
       return;
     }
 
+    if (W4M_REQUEST_CONFIG.allowOnlyBusRequests && !this.isBusTrip(trip)) {
+      this.status.set('inactive');
+      return;
+    }
+
     // if eligible, change service State and save criticalTransfer to Service
     this.status.set('enabled');
     this.trip = trip;
@@ -115,6 +120,39 @@ export class W4MPassengerService {
     this.requested_delay = null;
     this.trip = null;
     this.transfer = null;
+  }
+
+  isBusTrip(trip: PassengerTrip | null | undefined): boolean {
+    if (!trip) {
+      return false;
+    }
+
+    if (trip.criticalTransferId === null || trip.criticalTransferId === undefined) {
+      return false;
+    }
+
+    const waitingLegId = trip.criticalTransferId + 1;
+    const waitingLeg = trip.legs.find(
+      (leg): leg is PassengerTrip['legs'][number] & { kind: 'timed' } =>
+        leg.kind === 'timed' && leg.id === waitingLegId,
+    );
+    if (!waitingLeg) {
+      return false;
+    }
+
+    const busModes = new Set(['bus', 'coach', 'trolleyBus']);
+    const rawWaitingLeg = trip.rawTrip.leg?.find(
+      (leg) => Number(leg.id) === waitingLegId,
+    )?.timedLeg;
+    const ptMode = rawWaitingLeg?.service?.mode?.ptMode;
+    console.log('[Wait4Me] bus eligibility check', {
+      tripId: trip.id,
+      criticalTransferId: trip.criticalTransferId,
+      waitingLegId,
+      ptMode,
+      isBus: typeof ptMode === 'string' && busModes.has(ptMode),
+    });
+    return typeof ptMode === 'string' && busModes.has(ptMode);
   }
 
   async click_on_button() {
