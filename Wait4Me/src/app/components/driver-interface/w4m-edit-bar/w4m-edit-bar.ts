@@ -14,6 +14,7 @@ import { DelayImpactAnalysis } from '../../delay-impact-analysis/delay-impact-an
 export class Wait4MeEditBar {
   public w4mService = inject(W4MDriverService);
   private dialog = inject(MatDialog);
+  @Input() currentLineCode: string | null = null;
 
   public number_of_requests(): String {
     const delay_in_edit =
@@ -44,6 +45,7 @@ export class Wait4MeEditBar {
         stopName: this.w4mService.activeStopName(),
         depTime: time_string,
         delay: delay,
+        currentLineCode: this.currentLineCode,
         autoSelectFirstDeparture: true,
         showCloseButton: true,
       },
