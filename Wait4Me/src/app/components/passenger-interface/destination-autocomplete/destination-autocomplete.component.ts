@@ -1,6 +1,7 @@
 import { Component, input, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { LocationSuggestion, OJPLocation } from '../../../shared/services/ojp-location';
+import { OJPLocation } from '../../../shared/services/ojp-location';
+import type { LocationSuggestion } from '../../../shared/types/ojp-types';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
 import { firstValueFrom } from 'rxjs';
 
