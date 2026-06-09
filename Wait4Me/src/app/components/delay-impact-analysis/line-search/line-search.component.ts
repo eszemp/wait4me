@@ -27,6 +27,7 @@ export class LineSearchComponent implements OnDestroy {
 
   @Input() initialStopName: string | null = null;
   @Input() initialDepartureTime: string | null = null;
+  @Input() currentLineCode: string | null = null;
   @Input() autoSelectFirstDeparture = false;
 
   stationQuery = '';
@@ -155,13 +156,17 @@ export class LineSearchComponent implements OnDestroy {
 
           if (this.autoSelectFirstDeparture && lines.length > 0) {
             const targetLineCode = this.normalizeLineCode(
-              this.selectedLine()?.line ?? this.preferredLineCode,
+              this.selectedLine()?.line ?? this.preferredLineCode ?? this.currentLineCode,
             );
             const matchingLine = targetLineCode
               ? lines.find((line) => this.normalizeLineCode(line.line) === targetLineCode)
               : null;
 
-            this.selectLine(matchingLine ?? lines[0]);
+            if (matchingLine) {
+              this.selectLine(matchingLine);
+            } else if (!targetLineCode) {
+              this.selectLine(lines[0]);
+            }
           }
         },
         error: () => {

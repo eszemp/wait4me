@@ -51,6 +51,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   @Input() initialStopName: string | null = null;
   @Input() initialDepartureTime: string | null = null;
   @Input() delay: number | null = null;
+  @Input() currentLineCode: string | null = null;
   @Input() autoSelectFirstDeparture = false;
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;

@@ -26,6 +26,7 @@ export class DelayImpactAnalysis implements OnInit, OnDestroy {
   stopName: string | null = null;
   depTime: string | null = null;
   delay: number | null = null;
+  currentLineCode: string | null = null;
   autoSelectFirstDeparture = false;
   showCloseButton = false;
   selectedLayerId: MonitoringLayerId = 'delay-effects-on-lines';
@@ -43,6 +44,7 @@ export class DelayImpactAnalysis implements OnInit, OnDestroy {
       this.stopName = this.data.stopName ?? null;
       this.depTime = this.data.depTime ?? null;
       this.delay = this.data.delay ?? null;
+      this.currentLineCode = this.data.currentLineCode ?? null;
       this.autoSelectFirstDeparture = this.data.autoSelectFirstDeparture ?? false;
       this.showCloseButton = this.data.showCloseButton ?? false;
     }

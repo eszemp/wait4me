@@ -82,5 +82,5 @@
   } @else {
     <section class="empty-state">No connection selected.</section>
   }
-  <w4m-edit-bar></w4m-edit-bar>
+  <w4m-edit-bar [currentLineCode]="departure?.line ?? null"></w4m-edit-bar>
 </section>
