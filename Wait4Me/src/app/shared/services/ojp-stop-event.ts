@@ -142,10 +142,11 @@ export class OJPStopEvent extends OJPBase {
             console.log("Last stop", lastOnwardCall);
 
             const arrivalTimetable = lastOnwardCall.timeTimetable;
-            // TODO: estimated time / delay is not correctly returned by OJP Stop Event Request?
+            // TODO: estimated time / delay is not correctly returned by OJP Stop Event Request
             // current solution, take estimated arrival of second to last stop
             const arrivalDelay = secondLastOnwardCall.delay;
             const arrivalEstimated = arrivalDelay.addToDate(arrivalTimetable);
+            //----------------- Wehn bug is fixed, use this and comment the tow lies above out. should be fixed on 1. july 2026 ------------
             //const arrivalEstimated = lastOnwardCall.timeEstimated;
             //const arrivalDelayInSeconds = (arrivalEstimated.getTime() - arrivalTimetable.getTime())/1000;
             //const arrivalDelay = Duration.initFromTotalSeconds(arrivalDelayInSeconds);
