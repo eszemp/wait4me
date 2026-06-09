@@ -20,47 +20,14 @@ import { OJPBase } from './ojp-base';
 import { OJPLocation } from './ojp-location';
 import { OJPStopEvent } from './ojp-stop-event';
 import { Duration } from '../models/duration';
-
-type ConnectionLineFeature = {
-  type: 'Feature';
-  geometry: { type: 'LineString'; coordinates: number[][] };
-  properties: {
-    line: string;
-    featureType: 'track';
-    stationStops: TimedLegStop[];
-  };
-};
-
-type ConnectionStationFeature = {
-  type: 'Feature';
-  geometry: { type: 'Point'; coordinates: [number, number] };
-  properties: {
-    line: string;
-    featureType: 'station';
-    stopRef: string;
-    stopName: string;
-    stopRole: 'board' | 'intermediate' | 'alight';
-    arrivalTime: string;
-  };
-};
-
-type ConnectionTrackFeature = ConnectionLineFeature | ConnectionStationFeature;
-
-type WalkingRouteFeature = {
-  type: 'Feature';
-  geometry: { type: 'LineString'; coordinates: number[][] };
-  properties: {
-    featureType: 'walking-transfer';
-    transferLegId: number;
-  };
-};
-
-type TimedLegStop = {
-  stopRef: string;
-  stopName: string;
-  stopRole: 'board' | 'intermediate' | 'alight';
-  arrivalTime: string;
-};
+import type {
+  ConnectionLineFeature,
+  ConnectionStationFeature,
+  ConnectionTrackFeature,
+  WalkingRouteFeature,
+  TimedLegStop,
+  LocationSuggestion,
+} from '../types/ojp-types';
 
 @Injectable({
   providedIn: 'root',
