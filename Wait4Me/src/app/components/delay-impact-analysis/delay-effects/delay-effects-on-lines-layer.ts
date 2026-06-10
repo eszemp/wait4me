@@ -24,6 +24,7 @@ type StationTransferSeriesEntry = {
   time: string;
   minutes: number;
   timestampMs: number;
+  outgoingLineId: string | null;
 };
 
 type StationTransferDataset = {
@@ -411,10 +412,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const transferTimes = Array.isArray(properties['buffer_timeseries'])
       ? properties['buffer_timeseries']
           .map((entry: any) => {
-            const rawEntry = entry as { time?: unknown; buffer?: unknown };
+            const rawEntry = entry as { time?: unknown; buffer?: unknown; outgoing_line_id?: unknown };
             const time = this.toSafeString(rawEntry.time);
             const timestampMs = this.parseTimestampMs(time);
             const bufferSeconds = this.toSafeNumber(rawEntry.buffer);
+            const outgoingLineId = this.toSafeString(rawEntry.outgoing_line_id);
 
             if (!time || Number.isNaN(timestampMs)) return null;
 
@@ -422,6 +424,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
               time,
               minutes: Math.round(bufferSeconds / 60),
               timestampMs,
+              outgoingLineId,
             } satisfies StationTransferSeriesEntry;
           })
           .filter((entry: StationTransferSeriesEntry | null): entry is StationTransferSeriesEntry => entry !== null)
@@ -495,6 +498,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
             transferSeries: dataset.transferSeries,
             transferTimeMinutes: selectedTransfer?.minutes ?? null,
             transferTimeMatchedAt: selectedTransfer?.time ?? null,
+            outgoingLineId: selectedTransfer?.outgoingLineId ?? null,
             remainingBufferMinutes,
             hasTransferData,
           },
@@ -523,6 +527,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const transferMinutesValue = properties['transferTimeMinutes'];
     const transferMinutes =
       transferMinutesValue == null ? null : this.toSafeNumber(transferMinutesValue);
+    const outgoingLineId = this.toSafeString(properties['outgoingLineId']) ?? '';
     const remainingBufferValue = properties['remainingBufferMinutes'];
     const remainingBufferMinutes =
       remainingBufferValue == null || Number.isNaN(Number(remainingBufferValue))
@@ -531,23 +536,26 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const transferTimeText = transferMinutes === null ? 'n/a' : `${transferMinutes} min`;
     const remainingBufferText =
       remainingBufferMinutes === null ? 'n/a' : `${remainingBufferMinutes} min`;
+    const outgoingLineText = outgoingLineId ? this.escapeHtml(outgoingLineId) : 'n/a';
 
     const content = `
-      <div class="station-series-popup">
-        <div class="station-series-title" style="font-weight: bold;">${stopName}</div>
-        <div class="station-series-list" style="min-width: 260px;">
-          <div class="station-series-row">
-            <div class="station-series-time">Arrival</div>
-            <div class="station-series-value">${arrivalTimeText || 'n/a'}</div>
-          </div>
-          <div class="station-series-row">
-            <div class="station-series-time">Available transfer buffer time</div>
-            <div class="station-series-value">${transferTimeText}</div>
-          </div>
-          <div class="station-series-row">
-            <div class="station-series-time">Remaining time buffer</div>
-            <div class="station-series-value">${remainingBufferText}</div>
-          </div>
+      <div class="station-series-popup-content">
+        <div class="station-series-title">${stopName}</div>
+        <div class="station-series-row">
+          <div class="station-series-time">Arrival:</div>
+          <div class="station-series-value">${arrivalTimeText || 'n/a'}</div>
+        </div>
+        <div class="station-series-row">
+          <div class="station-series-time">Available transfer buffer time:</div>
+          <div class="station-series-value">${transferTimeText}</div>
+        </div>
+        <div class="station-series-row">
+          <div class="station-series-time">Remaining time buffer:</div>
+          <div class="station-series-value">${remainingBufferText}</div>
+        </div>
+        <div class="station-series-row">
+          <div class="station-series-time">Next departing line:</div>
+          <div class="station-series-value">${outgoingLineText}</div>
         </div>
       </div>
     `;
@@ -764,13 +772,9 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     }
 
     return date.toLocaleString('de-CH', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      // Keep popup timestamps aligned with Swiss timetable semantics.
       timeZone: 'Europe/Zurich',
     });
   }

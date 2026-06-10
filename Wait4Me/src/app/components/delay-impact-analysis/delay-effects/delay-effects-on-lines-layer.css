@@ -163,3 +163,54 @@
   letter-spacing: 0.02em;
   backdrop-filter: blur(4px);
 }
+
+:host ::ng-deep .station-series-popup-shell .maplibregl-popup-content {
+  font-family: inherit;
+  color: var(--fir-green);
+  min-width: 320px;
+  max-width: 360px;
+  padding: 16px;
+  border-radius: 5px;
+}
+
+:host ::ng-deep .station-series-popup-shell .maplibregl-popup-close-button {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  line-height: 24px;
+  color: var(--fir-green);
+}
+
+:host ::ng-deep .station-series-popup-content {
+  width: 100%;
+}
+
+:host ::ng-deep .station-series-title {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--fir-green);
+}
+
+:host ::ng-deep .station-series-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 8px 0;
+}
+
+:host ::ng-deep .station-series-time {
+  flex: 1 1 auto;
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+:host ::ng-deep .station-series-value {
+  flex: 0 0 auto;
+  text-align: right;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
