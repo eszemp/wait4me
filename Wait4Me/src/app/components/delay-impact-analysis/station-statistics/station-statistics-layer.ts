@@ -1,5 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { BACKEND_URL } from '../../../shared/config/backend';
 import maplibregl from 'maplibre-gl';
 import type * as GeoJSON from 'geojson';
 
@@ -41,6 +44,8 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
     color: this.binColors[index],
   }));
 
+  constructor(private http: HttpClient) {}
+
   /** Initializes the map and loads the histogram layer once style data is ready. */
   ngAfterViewInit(): void {
     this.map = new maplibregl.Map({
@@ -78,13 +83,21 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
       return;
     }
 
-    const response = await fetch('/map-data/stop_histogram_schweiz.geojson');
-    if (!response.ok) {
+    let response: HistogramFeatureCollection;
+
+    try {
+      response = await firstValueFrom(
+        this.http.get<HistogramFeatureCollection>(`${BACKEND_URL}/get-stops`)
+      );
+    } catch (error) {
+      console.error('Failed to load station histogram data from backend:', error);
+      this.loadingState.set('ready'); // or create an 'error' state for your signal
       return;
     }
 
-    const geojson = this.colorizeByMaxBin(await response.json());
+    const geojson = this.colorizeByMaxBin(response);
     if (!geojson.features || geojson.features.length === 0) {
+      this.loadingState.set('ready');
       return;
     }
 
