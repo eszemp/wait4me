@@ -12,7 +12,7 @@ export const routes: Routes = [
   { path: 'passenger', component: PassengerInterface },
   { path: 'driver', component: DriverInterface },
   { path: 'driver/connection-details', component: DriverConnectionDetails },
-  { path: 'monitoring', component: DelayImpactAnalysis },
+  { path: 'delay-impact-analysis', component: DelayImpactAnalysis },
   { path: 'passenger/connection-details', component: ConnectionDetails },
   { path: 'passenger/walking-route', component: WalkingRoute },
 ];
