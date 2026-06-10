@@ -7,13 +7,20 @@ from dotenv import load_dotenv
 import geopandas as gpd
 from pyproj import Transformer
 from pathlib import Path
+from .db_interactions_stop_stats import *
 
+# CONFIGS FOR DELAY IMPACT RATING
+
+NO_OF_CONSIDERED_STOPS = 20 # onward stops from station with additional departure delay
+
+MAX_THRESHOLD_SMALL_DELAY_IMPACT = 10 # percent of onward stops with a broken connection
+MAX_THRESHOLD_MEDIUM_DELAY_IMPACT = 40 # percent of onward stops with a broken connection
+
+# CONFIGS FOR OJP
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 API_URL = 'https://odpch-api.clients.liip.ch/ojp20-beta'
-NO_OF_CONSIDERED_STOPS = 20
-BASE_DIR = Path(__file__).resolve().parent
-gpkg_path = BASE_DIR / ".." / ".." / ".." / "data" / "stop-places-schweiz-with-buffers.gpkg"
+
 
 def get_delay_impact_rating(data):
     depStopRef = data['transfer_stop_ref']
@@ -28,11 +35,14 @@ def get_delay_impact_rating(data):
         if (buffer - addedDelay) < 0:
             stops_with_broken_connections += 1
 
-    percentage_of_broken_connections = (stops_with_broken_connections / len(buffer_upcoming_stops)) * 100
+    if len(buffer_upcoming_stops) == 0:
+        percentage_of_broken_connections = 0
+    else:
+        percentage_of_broken_connections = (stops_with_broken_connections / len(buffer_upcoming_stops)) * 100
 
-    if percentage_of_broken_connections < 10:
+    if percentage_of_broken_connections < MAX_THRESHOLD_SMALL_DELAY_IMPACT:
         return 'small'
-    elif percentage_of_broken_connections < 40:
+    elif percentage_of_broken_connections < MAX_THRESHOLD_MEDIUM_DELAY_IMPACT:
         return 'medium'
     else:
         return 'large'
@@ -42,7 +52,7 @@ def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
     dt_object = datetime.fromisoformat(depTime)
     depTime = dt_object.isoformat()
     dt_object = dt_object - timedelta(minutes=3)
-    searchTime = dt_object.isoformat() # ensure the connection is actually present in the search results
+    searchTime = dt_object.isoformat()
 
     # get line (stop event request)
     response = post_stop_event_request(depStopRef, searchTime)
@@ -59,47 +69,18 @@ def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
         return buffer_times[0:number_of_stops]
     return buffer_times
 
-def find_stop_by_coord(gpkg_path, lon, lat, ref, name, buffer_m=500):
-    transformer = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True)
-    east, north = transformer.transform(lon, lat)
-    minx, miny = east - buffer_m, north - buffer_m
-    maxx, maxy = east + buffer_m, north + buffer_m
-
-    # print("searching for", name, "in gpkg")
-
-    stops_subset = gpd.read_file(
-        gpkg_path, 
-        bbox=(minx, miny, maxx, maxy),
-        layer='stop_buffers'
-    )
-
-    if stops_subset.empty:
-        return None
-    
-    exact_stop = stops_subset[
-        (stops_subset['Nummer'] == str(ref)) | 
-        (stops_subset['Name'] == name)
-    ]
-
-    if len(exact_stop) > 1:
-        return exact_stop.iloc[0]
-    elif len(exact_stop) == 1:
-        return exact_stop.iloc[0]
-    
-    return None
-
 
 def get_buffer_time_per_stop(service_name, onward_stops):
     results = []
     for s in onward_stops:
-        stop = find_stop_by_coord(gpkg_path, 
-                                  float(s['Longitude']), 
+        stop = get_stop_by_coord(float(s['Longitude']), 
                                   float(s['Latitude']), 
                                   s['StopPlaceRef'], 
                                   s['StopName'])
         
+        
         if stop is None:
-            print('stop not found in gpkg')
+            print('stop not found in database')
             continue
 
         raw_data = stop['buffer_timeseries']
