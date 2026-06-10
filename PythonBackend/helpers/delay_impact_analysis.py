@@ -108,7 +108,8 @@ def get_buffer_time_per_stop(service_name, onward_stops):
                     
         # print('closest match with', min_diff, 'seconds difference to searched time')
 
-        results.append(best_buffer)
+        if best_buffer is not None:
+            results.append(best_buffer)
 
     return results
 
