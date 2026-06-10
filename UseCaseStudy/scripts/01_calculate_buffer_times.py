@@ -15,10 +15,10 @@ from helpers.ojp_transfer_windows import OJPStopInfoRequest, normalize_station_n
 from helpers.write_log import initialize_logfile, add_to_log
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-FILE_PATH = SCRIPT_DIR.parent / "data/stop-places-schweiz/stop-places-schweiz.shp"
+FILE_PATH = SCRIPT_DIR.parent / "data/haltestellen-oev_2056_de.gpkg/HaltestellenOeV.gpkg"
 TRANSFER_FILE_PATH = SCRIPT_DIR.parent / "data/transfer-time/transfers.txt"
-LOG = SCRIPT_DIR / "02_calculate_buffer_times_LOGFILE.txt"
-CHECKPOINT_PATH = SCRIPT_DIR / "02_calculate_buffer_times_checkpoint.json"
+LOG = SCRIPT_DIR / "01_calculate_buffer_times_LOGFILE.txt"
+CHECKPOINT_PATH = SCRIPT_DIR / "01_calculate_buffer_times_checkpoint.json"
 OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
 PARTIAL_OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.partial.gpkg")
 
@@ -26,6 +26,16 @@ MAX_RETRIES = 3
 RETRY_DELAY = 2
 REQUEST_RATE_LIMIT = 0.02
 CHECKPOINT_SAVE_EVERY = 25
+
+
+def inread_data():
+    """Load interesting columns of stop places."""
+    stop_places = gpd.read_file(
+        FILE_PATH, 
+        layer = 'Betriebspunkt',
+        columns = ['Name', 'Nummer', 'geometry']
+    )
+    return stop_places
 
 
 @lru_cache(maxsize=1024)
@@ -118,10 +128,7 @@ def restore_progress(stops):
         return set()
 
 
-def inread_data():
-    """Load stop places from the configured shapefile."""
-    print(f"Loading shapefile: {FILE_PATH}")
-    return gpd.read_file(str(FILE_PATH))
+
 
 
 def process_all_stops(stops):
