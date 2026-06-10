@@ -9,9 +9,12 @@ import {
   ViewChild,
 } from '@angular/core';
 import maplibregl from 'maplibre-gl';
-import { Subject } from 'rxjs';
+import { BACKEND_URL } from '../../../shared/config/backend';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OJPTrip } from '../../../shared/services/ojp-trip';
+import { Subscription } from 'rxjs';
 import {
   LineSearchComponent,
   type SelectedConnectionPayload,
@@ -60,21 +63,24 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   legendExpanded = false;
 
   private readonly ojpTrip = inject(OJPTrip);
+  private readonly http = inject(HttpClient);
   private readonly destroy$ = new Subject<void>();
 
   private readonly trackSourceId = 'selected-connection-track-source';
   private readonly trackLayerId = 'selected-connection-track-layer';
   private readonly trackStationsLayerId = 'selected-connection-track-stations-layer';
   private readonly trackStartStationLayerId = 'selected-connection-track-start-station-layer';
-  private readonly stationTransferDatasetUrl = '/map-data/stop_histogram_schweiz.geojson';
   private readonly startStationIconId = 'start-station-square-icon';
+
+  private trackSubscription?: Subscription;
 
   public no_route = false;
 
   private map: maplibregl.Map | null = null;
   private readonly stationTransferByRef = new Map<string, StationTransferDataset>();
   private readonly stationTransferByName = new Map<string, StationTransferDataset>();
-  private stationTransferDatasetPromise: Promise<void> | null = null;
+  private readonly missingStationsCache = new Set<string>();
+
   private latestTrackGeojson: { type: 'FeatureCollection'; features: unknown[] } = {
     type: 'FeatureCollection',
     features: [],
@@ -109,7 +115,6 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       this.map?.dragRotate.disable();
       this.map?.touchZoomRotate.disableRotation();
       this.addStartStationIcon();
-      void this.loadStationTransferDataset();
       this.ensureTrackLayer();
     });
 
@@ -125,14 +130,15 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
    * map source. If `selection` is `null` the map source is cleared.
    */
   onLineSelected(selection: SelectedConnectionPayload | null): void {
-    void this.loadStationTransferDataset();
+
+    this.trackSubscription?.unsubscribe();
 
     if (!selection) {
       this.updateTrackSource({ type: 'FeatureCollection', features: [] }, true);
       return;
     }
 
-    this.ojpTrip
+    this.trackSubscription = this.ojpTrip
       .getConnectionTrack(
         selection.originStopPlaceRef,
         selection.destinationStopPlaceRef,
@@ -316,17 +322,18 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
   /**
    * Updates the track source data and re-frames the map to the drawn geometry.
-   *
-   * Enriches received GeoJSON features with transfer data and sets the
-   * GeoJSON source; then adjusts the viewport to fit the geometry.
+   * Enriches received GeoJSON features with transfer data; then adjusts the viewport to fit the geometry.
    */
-  private updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing=false): void {
+  private async updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing=false): Promise<void> {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
       return;
     }
+    
     this.ensureTrackLayer();
     this.latestTrackGeojson = geojson;
+
+    await this.ensureStationDataCached(geojson);
 
     const source = map.getSource(this.trackSourceId) as maplibregl.GeoJSONSource | undefined;
     const enrichedGeojson = this.enrichStationFeatures(geojson);
@@ -336,81 +343,97 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   }
 
   /**
-   * Lazily loads the station transfer-time dataset and builds ref/name lookup indexes.
-   *
-   * The dataset is a local GeoJSON file containing precomputed transfer buffer
-   * time series which is parsed into lookup maps by stop reference and name.
+   * Scans the incoming connection track for stations, checks the local cache, 
+   * and queries the backend for any stations it hasn't seen yet.
    */
-  private async loadStationTransferDataset(): Promise<void> {
-    if (this.stationTransferDatasetPromise) {
-      return this.stationTransferDatasetPromise;
+  private async ensureStationDataCached(geojson: { type: 'FeatureCollection'; features: unknown[] }): Promise<void> {
+    const fetchPromises: Promise<void>[] = [];
+
+    for (const feature of geojson.features) {
+      const typedFeature = feature as any;
+      if (typedFeature.geometry?.type !== 'Point' || !typedFeature.properties) {
+        continue;
+      }
+
+      const stopRef = this.normalizeStopRef(typedFeature.properties['stopRef']);
+      const stopName = this.toSafeString(typedFeature.properties['stopName']) ?? '';
+      const stopNameKey = this.normalizeStopName(stopName);
+
+      if (!stopRef && !stopNameKey) continue;
+
+      // Skip if already successfully cached
+      if ((stopRef && this.stationTransferByRef.has(stopRef)) || 
+          (stopNameKey && this.stationTransferByName.has(stopNameKey))) {
+        continue;
+      }
+
+      // Skip if we already queried the DB and it wasn't there
+      const cacheKey = stopRef || stopNameKey;
+      if (this.missingStationsCache.has(cacheKey)) {
+        continue;
+      }
+
+      // Add API call to queue
+      const params = new HttpParams().set('ref', stopRef).set('name', stopName);
+      
+      const requestPromise = firstValueFrom(
+        this.http.get<any>(`${BACKEND_URL}/get-stop`, { params })
+      ).then((response) => {
+        if (response && response.properties) {
+          const dataset = this.buildDatasetFromFeature(response);
+          if (dataset.stopRef) this.stationTransferByRef.set(dataset.stopRef, dataset);
+          if (dataset.stopNameKey) this.stationTransferByName.set(dataset.stopNameKey, dataset);
+        }
+      }).catch(() => {
+        // Suppress 404s and cache the miss so we don't spam the backend
+        this.missingStationsCache.add(cacheKey);
+      });
+
+      fetchPromises.push(requestPromise);
     }
 
-    this.stationTransferDatasetPromise = (async () => {
-      if (this.stationTransferByRef.size > 0 || this.stationTransferByName.size > 0) {
-        return;
-      }
+    // Wait for all missing stations to load simultaneously
+    if (fetchPromises.length > 0) {
+      await Promise.allSettled(fetchPromises);
+    }
+  }
 
-      const response = await fetch(this.stationTransferDatasetUrl);
-      if (!response.ok) {
-        return;
-      }
+  /**
+   * Parses the single GeoJSON feature returned by the backend into a strongly typed Dataset.
+   */
+  private buildDatasetFromFeature(feature: any): StationTransferDataset {
+    const properties = feature.properties ?? {};
+    const stopRef = this.normalizeStopRef(properties['Nummer']);
+    const stopName = this.toSafeString(properties['Name']) ?? 'Stop';
+    const stopNameKey = this.normalizeStopName(stopName);
+    const coordinates = this.parsePointCoordinates(feature.geometry ?? {});
 
-      const geojson = await response.json();
-      const features = Array.isArray(geojson?.features) ? geojson.features : [];
+    const transferTimes = Array.isArray(properties['buffer_timeseries'])
+      ? properties['buffer_timeseries']
+          .map((entry: any) => {
+            const rawEntry = entry as { time?: unknown; buffer?: unknown };
+            const time = this.toSafeString(rawEntry.time);
+            const timestampMs = this.parseTimestampMs(time);
+            const bufferSeconds = this.toSafeNumber(rawEntry.buffer);
 
-      for (const feature of features) {
-        const properties = (feature?.properties ?? {}) as Record<string, unknown>;
-        const stopRef = this.normalizeStopRef(properties['Nummer']);
-        const stopName = this.toSafeString(properties['Name']) ?? 'Stop';
-        const stopNameKey = this.normalizeStopName(stopName);
-        const geometry = (feature?.geometry ?? {}) as { type?: string; coordinates?: unknown };
-        const coordinates = this.parsePointCoordinates(geometry);
+            if (!time || Number.isNaN(timestampMs)) return null;
 
-        const transferTimes = Array.isArray(properties['buffer_timeseries'])
-          ? properties['buffer_timeseries']
-              .map((entry) => {
-                const rawEntry = entry as { time?: unknown; buffer?: unknown };
-                const time = this.toSafeString(rawEntry.time);
-                const timestampMs = this.parseTimestampMs(time);
-                const bufferSeconds = this.toSafeNumber(rawEntry.buffer);
+            return {
+              time,
+              minutes: Math.round(bufferSeconds / 60),
+              timestampMs,
+            } satisfies StationTransferSeriesEntry;
+          })
+          .filter((entry: StationTransferSeriesEntry | null): entry is StationTransferSeriesEntry => entry !== null)
+      : [];
 
-                if (!time || Number.isNaN(timestampMs)) {
-                  return null;
-                }
-
-                return {
-                  time,
-                  minutes: Math.round(bufferSeconds / 60),
-                  timestampMs,
-                } satisfies StationTransferSeriesEntry;
-              })
-              .filter((entry): entry is StationTransferSeriesEntry => entry !== null)
-          : [];
-
-        const dataset: StationTransferDataset = {
-          stopRef,
-          stopName,
-          stopNameKey,
-          coordinates,
-          transferSeries: transferTimes,
-        };
-
-        if (stopRef) {
-          this.stationTransferByRef.set(stopRef, dataset);
-        }
-
-        if (stopNameKey) {
-          this.stationTransferByName.set(stopNameKey, dataset);
-        }
-      }
-
-      if (this.latestTrackGeojson.features.length > 0) {
-        this.updateTrackSource(this.latestTrackGeojson);
-      }
-    })();
-
-    return this.stationTransferDatasetPromise;
+    return {
+      stopRef,
+      stopName,
+      stopNameKey,
+      coordinates,
+      transferSeries: transferTimes,
+    };
   }
 
   /**
@@ -462,6 +485,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         const remainingBufferMinutes = selectedTransfer
           ? selectedTransfer.minutes - this.selectedDelayMinutes
           : null;
+        const hasTransferData = Array.isArray(dataset.transferSeries) && dataset.transferSeries.length > 0;
 
         return {
           ...typedFeature,
@@ -472,7 +496,7 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
             transferTimeMinutes: selectedTransfer?.minutes ?? null,
             transferTimeMatchedAt: selectedTransfer?.time ?? null,
             remainingBufferMinutes,
-            hasTransferData: true,
+            hasTransferData,
           },
         };
       }),
