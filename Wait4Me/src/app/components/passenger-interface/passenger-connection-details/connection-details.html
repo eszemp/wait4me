@@ -45,8 +45,7 @@
     <div class="meta-column">
       @if (trip.departurePlatform) {
         <span class="platform"> {{ trip.departurePlatform }}</span>
-      }
-      @else {
+      } @else {
         <span class="platform">n/a</span>
       }
       <span class="duration">{{ trip.duration.formatWithMinH() }}</span>
@@ -100,14 +99,12 @@
           <div class="meta-column">
             @if (leg.boardPlatform) {
               <span class="platform"> {{ leg.boardPlatform }}</span>
-            }
-            @else {
+            } @else {
               <span class="platform">n/a</span>
             }
             <span class="duration">{{ leg.duration.formatWithMinH() }}</span>
           </div>
         </div>
-
       } @else if (leg.kind === 'transfer') {
         @if (trip.criticalTransferId === leg.id) {
           <div

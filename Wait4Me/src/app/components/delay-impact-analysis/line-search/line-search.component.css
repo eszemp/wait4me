@@ -70,7 +70,6 @@
   box-sizing: border-box;
 }
 
-
 .search-input:focus {
   border-color: transparent;
   box-shadow: none;

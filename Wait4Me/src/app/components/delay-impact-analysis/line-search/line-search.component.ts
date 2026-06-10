@@ -50,7 +50,6 @@ export class LineSearchComponent implements OnDestroy {
 
   @Output() lineSelected = new EventEmitter<SelectedConnectionPayload | null>();
 
-
   constructor() {
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -63,19 +62,19 @@ export class LineSearchComponent implements OnDestroy {
       });
   }
 
-  async ngOnInit(){
-    console.log("Line search initialized with", this.initialDepartureTime, this.initialStopName);
+  async ngOnInit() {
+    console.log('Line search initialized with', this.initialDepartureTime, this.initialStopName);
     if (this.initialDepartureTime) {
       this.selectedTime.set(this.initialDepartureTime);
-      console.log("initialized with", this.selectedTime());
-    }  
+      console.log('initialized with', this.selectedTime());
+    }
     if (this.initialStopName) {
       this.stationQuery = this.initialStopName;
       this.showStationSuggestions = true;
       this.error.set(null);
       this.pendingInitialStationSelection = true;
       this.searchSubject.next(this.initialStopName);
-      console.log("initialized with", this.initialStopName);
+      console.log('initialized with', this.initialStopName);
     }
   }
 

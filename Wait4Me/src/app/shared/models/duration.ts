@@ -30,7 +30,6 @@ export class Duration {
     return new Duration(hours, minutes, seconds);
   }
 
-
   public asOjpDurationText(): string {
     let text = 'PT';
     if (this.hours > 0) text += `${this.hours}H`;
@@ -53,10 +52,11 @@ export class Duration {
   }
 
   public format(): string {
-    if (this.seconds >= 30){ // round up
+    if (this.seconds >= 30) {
+      // round up
       return String(this.totalMinutes + 1);
-    }
-    else { // round down
+    } else {
+      // round down
       return String(this.totalMinutes);
     }
   }
@@ -65,10 +65,11 @@ export class Duration {
     const parts: string[] = [];
     if (this.hours > 0) parts.push(`${this.hours} h`);
     if (this.minutes > 0) {
-      if (this.seconds >= 30){ // round up
+      if (this.seconds >= 30) {
+        // round up
         parts.push(`${this.minutes + 1} min`);
-      }
-      else { // round down
+      } else {
+        // round down
         parts.push(`${this.minutes} min`);
       }
     }
@@ -86,5 +87,4 @@ export class Duration {
   public isBiggerThanZero(): boolean {
     return this.totalSeconds >= 30;
   }
-
 }

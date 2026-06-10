@@ -4,7 +4,7 @@ import { CriticalTransfer } from '../types/PassengerTripTypes';
 import { PassengerTrip } from '../types/PassengerTripTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
-import { GetStatusResponse, PostResponse} from '../types/Wait4MeRequest';
+import { GetStatusResponse, PostResponse } from '../types/Wait4MeRequest';
 import { BACKEND_URL } from '../config/backend';
 import { W4M_REQUEST_CONFIG } from '../config/w4m-request-config';
 
