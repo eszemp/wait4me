@@ -1,3 +1,5 @@
+"""Utilities to estimate how strongly a requested departure delay affects connections."""
+
 import os
 import requests
 import json
@@ -23,6 +25,7 @@ API_URL = 'https://odpch-api.clients.liip.ch/ojp20-beta'
 
 
 def get_delay_impact_rating(data):
+    """Classify delay impact as small/medium/large for a passenger request payload."""
     depStopRef = data['transfer_stop_ref']
     journeyRef = data['outgoing_journey_ref']
     depTime = data['scheduled_departure_time']
@@ -48,6 +51,7 @@ def get_delay_impact_rating(data):
         return 'large'
     
 def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
+    """Fetch buffer times (minutes) for upcoming stops on a specific journey."""
 
     dt_object = datetime.fromisoformat(depTime)
     depTime = dt_object.isoformat()
@@ -71,6 +75,7 @@ def get_buffers_of_line(depStopRef, depTime, journeyRef, number_of_stops):
 
 
 def get_buffer_time_per_stop(service_name, onward_stops):
+    """Resolve historical transfer buffers per onward stop for an incoming service."""
     results = []
     for s in onward_stops:
         stop = get_stop_by_coord(float(s['Longitude']), 
@@ -115,6 +120,7 @@ def get_buffer_time_per_stop(service_name, onward_stops):
 
 
 def read_response(xml, reqDepTime, reqJourneyRef):
+    """Parse OJP XML and return the matching service name with onward call metadata."""
     
     namespaces = {'ojp': 'http://www.vdv.de/ojp', 'siri': 'http://www.siri.org.uk/siri'}
 
@@ -188,6 +194,7 @@ def read_response(xml, reqDepTime, reqJourneyRef):
 
 
 def post_stop_event_request(depStopRef, depTime):
+    """Send an OJP StopEvent request and return raw XML response text."""
     timestamp = datetime.now(timezone.utc).isoformat()
     xml_request = f"""<?xml version="1.0" encoding="UTF-8"?>
     <OJP xmlns="http://www.vdv.de/ojp" xmlns:siri="http://www.siri.org.uk/siri" version="2.0">
