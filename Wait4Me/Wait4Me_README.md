@@ -37,6 +37,12 @@ Use `src/environments/environments.example.ts` as a template:
 
 Then update the `apiKey` value in `environments.ts` with your valid key before starting the app.
 
+## Request config
+
+Passenger request eligibility is configured in `src/app/shared/config/w4m-request-config.ts`.
+
+The current values are intentionally testing friendly, so they allow generous timing windows and relaxed checks. For a real-world deployment, these settings should be adapted to stricter operational rules and the actual service constraints.
+
 ## Development server
 
 Start the app locally with:
