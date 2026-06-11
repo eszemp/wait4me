@@ -1,104 +1,110 @@
 # Wait4Me
 
-This repository contains code and the website for Wait4Me. Under [Wait4Me](https://wait4me.ethz.ch) you find the prototype online.
-
+This repository contains the Wait4Me prototype, its Python backend, and the buffer-analysis workspace used to generate the transfer-buffer times. The public prototype is available at [wait4me.ethz.ch](https://wait4me.ethz.ch).
 
 ## Folder structure
 
 ```text
 wait4me/
 |- README.md
+|- CalculateBufferTimes/
+|  |- requirements.txt
+|  |- UseCaseStudy_README.md
+|  |- data/
+|  |- scripts/
+|  `- scripts/.env.example
 |- PythonBackend/
 |  |- backend_app.py
 |  |- instructions.txt
 |  |- requirements_server.txt
-|  |- helpers/
-|  |  |- db_interactions.py
-|  |  |- delay_impact_analysis.py
-|  |  `- geofencing.py
-|  `- setup/
-|     `- create-db-table.py
-|- UseCaseStudy/
-|  |- requirements.txt
-|  |- UseCaseStudy_README.md
-|  |- data/
-|  |  |- haltestellen-oev_2056_de.gpkg/
-|  |  |- output/
-|  |  |- stop-places-schweiz/
-|  |  |- stop-places-schwyz/
-|  |  |- stop-places-vagabond/
-|  |  |- tarif-area/
-|  |  |- tarifverbundkarte/
-|  |  `- transfer-time/
-|  |- env/
-|  `- scripts/
-|     |- 01_preprocess_tarif_area.ipynb
-|     |- 02_preprocess_stop_places.ipynb
-|     |- 03_calculate_buffer_times.py
-|     |- 03_calculate_buffer_times_LOGFILE.txt
-|     |- 04_analyze_visualize_time_series.ipynb
-|     `- helpers/
-`- Wait4Me/
-	 |- angular.json
-	 |- package.json
-	 |- README.md
-	 |- public/
-	 |  `- map-data/
-	 `- src/
-			|- app/
-			|- environments/
-			|- index.html
-			|- main.ts
-			|- material-theme.scss
-			|- styles.css
-			`- typings.d.ts
+|  `- helpers/
+|     |- db_interactions_stop_stats.py
+|     |- db_interactions_w4m_requests.py
+|     `- delay_impact_analysis.py
+|- Wait4Me/
+|  |- angular.json
+|  |- package.json
+|  |- README.md
+|  |- public/
+|  `- src/
+|     |- app/
+|     |- environments/
+|     |- index.html
+|     |- main.ts
+|     |- material-theme.scss
+|     |- styles.css
+|     `- shims/
+`- package-lock.json
 ```
+
+## CalculateBufferTimes
+
+Python workspace for the stop-buffer and transfer-time analysis pipeline.
+
+- `requirements.txt`: Python dependencies for the analysis scripts and notebooks.
+- `UseCaseStudy_README.md`: Setup notes for the analysis environment.
+- `data/`: Input data, intermediate layers, and generated outputs.
+- `scripts/`: Processing scripts, notebooks, and helpers.
+- `scripts/.env.example`: Template for the OJP access token used by the helpers.
+
+Typical setup:
+
+```bash
+cd CalculateBufferTimes
+python -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
+
+If you use the OJP API helpers, copy `scripts/.env.example` to `scripts/.env` and set `OJP_ACCESS_TOKEN`.
 
 ## PythonBackend
 
-Backend service for the Wait4Me prototype.
+Flask API for passenger requests and stop statistics.
 
-- `backend_app.py`: Main backend entry point (API/service logic).
-- `requirements_server.txt`: Python dependencies for running the backend.
-- `instructions.txt`: Notes/instructions for backend usage.
-- `helpers/`: Reusable backend modules:
-	- `db_interactions.py`: Database read/write utilities.
-	- `delay_impact_analysis.py`: Logic for delay impact calculations.
-	- `geofencing.py`: Geospatial/geofencing helper logic.
-- `setup/`: Setup scripts for backend infrastructure:
-	- `create-db-table.py`: Creates required database tables.
+- `backend_app.py`: Main backend entry point.
+- `requirements_server.txt`: Runtime dependencies for the backend service.
+- `instructions.txt`: Notes for local and server deployment.
+- `helpers/`: Database and analysis helper modules.
 
-## UseCaseStudy
+Typical local run:
 
-Analysis and data-processing workspace for the transport use case.
+```bash
+cd PythonBackend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements_server.txt
+python backend_app.py
+```
 
-- `requirements.txt`: Python dependencies for analysis scripts/notebooks.
-- `UseCaseStudy_README.md`: Detailed documentation for the use-case workflow.
-- `data/`: Input, intermediate, and output geospatial datasets.
-	- `haltestellen-oev_2056_de.gpkg/`: Raw stop data package.
-	- `stop-places-*`: Stop place shapefiles and derived geopackages.
-	- `tarif-area/` and `tarifverbundkarte/`: Tariff area boundaries and merged layers.
-	- `transfer-time/`: Transfer-time datasets.
-	- `output/`: Generated output files (e.g., geojson histograms).
-- `scripts/`: Processing and analysis pipeline.
-	- `01_preprocess_tarif_area.ipynb`: Prepare tariff area data.
-	- `02_preprocess_stop_places.ipynb`: Prepare stop place data.
-	- `03_calculate_buffer_times.py`: Compute buffer/transfer times.
-	- `04_analyze_visualize_time_series.ipynb`: Analyze and visualize time series.
-	- `helpers/`: Script-specific helper functions.
-- `env/`: Local Python virtual environment for reproducible runs.
+The backend expects its database and API configuration in a local `.env` file.
 
 ## Wait4Me
 
-Angular frontend for the public prototype website.
+Angular frontend for the public prototype.
 
-- `package.json`: Frontend dependencies and npm scripts.
-- `angular.json`: Angular workspace/project configuration.
-- `public/map-data/`: Static map assets served by the frontend.
-- `src/`: Frontend source code.
-	- `app/`: Main Angular application modules/components.
-	- `environments/`: Environment-specific configuration.
-	- `main.ts`: Angular bootstrap entry point.
-	- `index.html`: Main HTML host page.
-	- `styles.css` and `material-theme.scss`: Global styles and Material theme.
-	- `typings.d.ts`: TypeScript/global type declarations.
+- `package.json`: Frontend scripts and dependencies.
+- `angular.json`: Angular workspace configuration.
+- `src/`: Application code, routes, styles, and supporting shims.
+- `public/`: Static assets used by the UI.
+
+Typical frontend workflow:
+
+```bash
+cd Wait4Me
+npm install
+npm start
+```
+
+Build and test commands:
+
+```bash
+npm run build
+npm test
+```
+
+## Notes
+
+- `PythonBackend/` and `CalculateBufferTimes/` each manage their own Python environment.
+- The frontend build output is written to `Wait4Me/dist/`.
+- Generated analysis outputs are stored under `CalculateBufferTimes/data/output/`.
