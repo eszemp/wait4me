@@ -36,7 +36,8 @@ wait4me/
 |     `- styles.css
 |- FindTestCases/
 |  |- FindTestCases_README.md
-|  `- ...
+|  |- realtime_testcases.py
+|  `- testcases.txt
 `- package-lock.json
 ```
 
@@ -72,7 +73,9 @@ Angular frontend for the public prototype.
 
 ## FindTestCases
 
-TODO
+- `FindTestCases_README.md`: Setup notes for script.
+- `realtime_testcases.py`: Script that finds currently delayed services and connections with broken transfers.
+- `testcases.txt`: Result of the script (possible routes with broken connections).
 
 ## License
 
