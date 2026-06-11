@@ -12,7 +12,7 @@ FindTestCases/
   `- .env.example
 ```
 
-- `realtime_testcases.py`: Script that finds currently delayed services and connections with broken transfers.
+- `realtime_testcases.py`: Script that finds currently delayed services and connections with broken transfers. Should be run from the parent directory of FindTestCases, so that it can import its modules correctly.
 - `testcases.txt`: Result of the script (possible routes with broken connections).
 
 ## Set Up
