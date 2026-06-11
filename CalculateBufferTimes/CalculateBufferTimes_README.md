@@ -44,3 +44,6 @@ The helper scripts in `scripts/helpers/` load that file automatically.
 - `02_analyze_visualize_time_series.ipynb`: Explores and visualizes the results.
 - `03_write_geojson_to_postgis_db.py`: Writes generated GeoJSON data into PostGIS.
 - `helpers/`: Shared helper modules for OJP requests, transfer windows, and logging.
+
+## Rerun after timtable change
+Update `START_TIME` in `01_calculate_buffer_times.py` to the first weekday before the timetable change in the target year, then rerun the script.

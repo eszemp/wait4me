@@ -22,6 +22,10 @@ CHECKPOINT_PATH = SCRIPT_DIR / "01_calculate_buffer_times_checkpoint.json"
 OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.gpkg")
 PARTIAL_OUTPUT_PATH = FILE_PATH.with_name(f"{FILE_PATH.stem}-with-buffers.partial.gpkg")
 
+# Configure the analysis window here.
+START_TIME = datetime(year=2026, month=12, day=9, hour=0, minute=0, second=0)
+END_TIME = datetime(year=2026, month=12, day=10, hour=3, minute=0, second=0)
+
 MAX_RETRIES = 3
 RETRY_DELAY = 2
 REQUEST_RATE_LIMIT = 0.02
@@ -332,10 +336,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRefs, RequestType):
         Returns empty DataFrame on persistent API failure.
     """
 
-    # look at 9th December (typical weekday)
-    start_time = datetime(year=2026, month=12, day=9, hour=0, minute=0, second=0)
-    end_time = datetime(year=2026, month=12, day=10, hour=3, minute=0, second=0)
-    current_time = start_time
+    current_time = START_TIME
 
     results = []
 
@@ -345,8 +346,8 @@ def get_all_for_day(OJPDepArr, StopPlaceRefs, RequestType):
         stop_refs = [str(ref) for ref in StopPlaceRefs if ref]
 
     for stop_ref in stop_refs:
-        current_time = start_time
-        while current_time < end_time:
+        current_time = START_TIME
+        while current_time < END_TIME:
             new_batch = None
             for attempt in range(MAX_RETRIES):
                 try:
@@ -386,7 +387,7 @@ def get_all_for_day(OJPDepArr, StopPlaceRefs, RequestType):
         return pd.DataFrame()
 
     results = pd.DataFrame(results).drop_duplicates(subset=["time", "line", "destination"])
-    results = results[results["time"] <= end_time]
+    results = results[results["time"] <= END_TIME]
 
     return results
 
