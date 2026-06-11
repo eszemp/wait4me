@@ -4,14 +4,17 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from UseCaseStudy.scripts.helpers.ojp_arrivals_and_departures import OJPStopDepArrRequest
 
-load_dotenv(dotenv_path='.env', override=True)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(script_dir, '.env')
+load_dotenv(dotenv_path=dotenv_path, override=True)
 API_KEY = os.getenv("GEOPS_API_KEY")
+
 ojp_client = OJPStopDepArrRequest()
 
 # CONFIGS
 FEED_NAME = "sbb" 
 SWISS_BBOX = "663000,5750000,1168000,6070000" # EPSG:3857 (Web Mercator)
-output = '00-realtime-testcases.txt'
+output = 'FindTestCases/testcases.txt'
 
 
 
@@ -22,7 +25,7 @@ def get_delayed_trains(min_delay_ms=600000):
     """
 
     url = f"https://api.geops.io/tracker-http/v1/trajectories/{FEED_NAME}/"
-    params = {"bbox": SWISS_BBOX, "key": API_KEY, "mots": "rail", "gen_level": 10}
+    params = {"bbox": SWISS_BBOX, "key": API_KEY, "mots": "rail"}
     
     try:
         response = requests.get(url, params=params)

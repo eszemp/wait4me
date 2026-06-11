@@ -1,7 +1,9 @@
 .vscode
+Wait4Me/src/environments/environments.ts
 UseCaseStudy/scripts/helpers/__pycache__/*.pyc
 PythonBackend/helpers/__pycache__
 PythonBackend/__pycache__
+FindTestCases/__pycache__
 UseCaseStudy/.env
-Wait4Me/src/environments/environments.ts
 PythonBackend/.env
+FindTestCases/.env
