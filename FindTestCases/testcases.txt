@@ -1,0 +1,81 @@
+Searching for delayed trains in the SBB network... (Current Time: 2026-05-29T09:40:55Z)
+
+Found 5 trains with significant delays:
+Line       | Delay     
+--------------------------------------------------
+TGV        | 25.3 min
+RE         | 12.6 min
+EC         | 17.0 min
+PE         | 28.0 min
+ICE        | 14.9 min
+
+Analyzing Train TGV (ID: sbb_139734061541024)
+Current Delay: 25.3 minutes 
+
+Analyzing Train RE (ID: sbb_139734369301360)
+Current Delay: 12.6 minutes 
+
+-> Try these routing requests (possibly broken connections)
+
+- from S-chanf at 2026-05-29T09:14:00Z (timetabled time) to Saas im Prättigau
+- from S-chanf at 2026-05-29T09:14:00Z (timetabled time) to Davos Dorf
+
+
+Analyzing Train EC (ID: sbb_139733656031344)
+Current Delay: 17.0 minutes 
+
+-> Try these routing requests (possibly broken connections)
+
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Bern
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Bassersdorf
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Gossau SG
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Zürich Stadelhofen
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Stettbach
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Zürich Oerlikon
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Andelfingen
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Thalwil
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Zürich Hardbrücke
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to St. Gallen Marktplatz
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Wil SG
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to St. Gallen St. Fiden
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Rorschach
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Winterthur Grüze
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Sargans
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Herisau
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Effretikon
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Basel SBB
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to St. Gallen Güterbahnhof
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Schaffhausen
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to St. Gallen Bruggen
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Zürich Wiedikon
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Hettlingen
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Kemptthal
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Aarau
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Frauenfeld
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Oberwinterthur
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Lenzburg
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Winterthur Töss
+- from St. Margrethen SG at 2026-05-29T09:10:00Z (timetabled time) to Baden
+
+
+Analyzing Train PE (ID: sbb_139733881160416)
+Current Delay: 28.0 minutes 
+
+-> Try these routing requests (possibly broken connections)
+
+- from Intragna at 2026-05-29T08:58:00Z (timetabled time) to Locarno S. Antonio
+
+
+Analyzing Train ICE (ID: sbb_139733829898000)
+Current Delay: 14.9 minutes 
+
+-> Try these routing requests (possibly broken connections)
+
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Basel Dreispitz
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Rheinfelden
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Olten
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Muttenz
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Liestal
+- from Zürich HB at 2026-05-29T08:59:00Z (timetabled time) to Laufen
+
+
