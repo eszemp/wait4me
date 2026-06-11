@@ -4,6 +4,9 @@ UseCaseStudy/scripts/helpers/__pycache__/*.pyc
 PythonBackend/helpers/__pycache__
 PythonBackend/__pycache__
 FindTestCases/__pycache__
-UseCaseStudy/.env
 PythonBackend/.env
 FindTestCases/.env
+UseCaseStudy/.env
+UseCaseStudy/scripts/.env
+UseCaseStudy/scripts/01_calculate_buffer_times_LOGFILE.txt
+UseCaseStudy/scripts/01_calculate_buffer_times_checkpoint.json

@@ -12,6 +12,14 @@
       aria-label="Confirm Wait4Me request"
       [style.top.px]="this.requestConfirmationTopPx"
     >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close confirmation"
+        (click)="this.close_request_confirmation()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
       <p class="w4m-confirm-title">You're about to send a Wait4Me request for the connection:</p>
 
       @if (this.waiting_connection_leg; as waitingLeg) {
@@ -65,6 +73,81 @@
     </div>
   }
 
+  @if (this.showRequestUnavailable) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_request_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Wait4Me request unavailable"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close unavailable message"
+        (click)="this.close_request_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">
+        You cannot currently send a Wait4Me request for this connection!
+      </p>
+      @if (this.requestUnavailableHeader) {
+        <p class="w4m-confirm-text">{{ this.requestUnavailableHeader }}</p>
+      }
+      @for (item of this.request_unavailable_description(); track item.text) {
+        <p class="w4m-confirm-text">
+          @if (item.kind === 'error') {
+            <span class="w4m-inline-status-icon" aria-hidden="true"></span>
+          } @else if (item.kind === 'ok') {
+            <span
+              class="w4m-inline-status-icon w4m-inline-status-icon--ok"
+              aria-hidden="true"
+            ></span>
+          }
+          {{ item.text }}
+        </p>
+      }
+    </div>
+  }
+
+  @if (this.geofenceService.locationAccessWarning()) {
+    <div
+      class="w4m-confirm-overlay"
+      (click)="this.close_location_unavailable()"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w4m-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Location access required"
+      [style.top.px]="this.requestConfirmationTopPx"
+    >
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close location warning"
+        (click)="this.close_location_unavailable()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">Wait4Me needs your location!</p>
+      <p class="w4m-confirm-text">
+        Please give Wait4Me permission to access your position. We only use it to check whether you
+        are currently traveling on this connection.
+      </p>
+      <p class="w4m-confirm-text">
+        Without access to your location, you will not be able to send any Wait4Me requests.
+      </p>
+    </div>
+  }
+
   @if (this.showRequestDetails) {
     <div
       class="w4m-confirm-overlay"
@@ -78,7 +161,18 @@
       aria-label="Wait4Me request details"
       [style.top.px]="this.requestConfirmationTopPx"
     >
-      <p class="w4m-confirm-title">You have sent a Wait4Me request for {{this.w4mService.requested_delay}} min to this connection:</p>
+      <button
+        type="button"
+        class="w4m-modal-close"
+        aria-label="Close details"
+        (click)="this.close_request_details()"
+      >
+        <img src="/close.svg" alt="" aria-hidden="true" />
+      </button>
+      <p class="w4m-confirm-title">
+        You have sent a Wait4Me request for {{ this.w4mService.requested_delay }} min to this
+        connection:
+      </p>
 
       @if (this.waiting_connection_leg; as waitingLeg) {
         <div class="w4m-request-trip-card">
@@ -118,14 +212,16 @@
         >
           Go to connection
         </button>
-        <button
-          type="button"
-          class="w4m-confirm-btn w4m-confirm-btn--no"
-          (click)="this.close_request_details()"
-        >
-          Close
-        </button>
       </div>
+    </div>
+  }
+
+  @if (this.showAlternativeLoading) {
+    <div class="w4m-alt-loading" aria-live="polite">
+      <span class="w4m-alt-spinner" aria-hidden="true"></span>
+      <span
+        >Searching for feasible connections starting at the station of your missed transfer...</span
+      >
     </div>
   }
 
@@ -185,6 +281,7 @@
         (click)="$event.stopPropagation(); this.close_accepted_status_bar()"
         aria-label="Close accepted status"
       >
+        <span>Done</span>
         <img class="w4m-status-action-icon" src="/close.svg" alt="" aria-hidden="true" />
       </button>
     </div>

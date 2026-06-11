@@ -1,0 +1,70 @@
+:host {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0px 0;
+}
+
+.monitoring-shell {
+  position: relative;
+  width: calc(100% - 20px);
+  margin: -20px auto 0 auto;
+}
+
+.monitoring-close-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 30;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.monitoring-close-button img {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.map-stage {
+  position: relative;
+}
+
+.map-toolbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.layer-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fir-green);
+  white-space: nowrap;
+}
+
+.layer-select {
+  min-width: 250px;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: white;
+  color: var(--grey);
+}

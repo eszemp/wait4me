@@ -1,10 +1,9 @@
 import { Injectable, WritableSignal, signal, computed } from '@angular/core';
 import { lastValueFrom } from 'rxjs';
-import { PostResponse, GetRequestResponse, BACKEND_URL } from '../types/Wait4MeRequest';
+import { PostResponse, GetRequestResponse } from '../types/Wait4MeRequest';
+import { BACKEND_URL } from '../config/backend';
 import { HttpClient } from '@angular/common/http';
-
-export type MapRequestIdsToDelays = { [delay: number]: string[] };
-export type IncomingRequestState = { [stopRef: string]: MapRequestIdsToDelays };
+import type { MapRequestIdsToDelays, IncomingRequestState } from '../types/w4m-driver-types';
 
 @Injectable({ providedIn: 'root' })
 export class W4MDriverService {

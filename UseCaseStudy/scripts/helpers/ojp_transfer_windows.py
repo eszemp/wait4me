@@ -21,6 +21,19 @@ def _load_env_file(env_path: Path) -> None:
 
 _load_env_file(Path(__file__).resolve().parents[2] / ".env")
 
+
+def normalize_station_name(name: str) -> str:
+    """Normalize common station naming variants to a shared base name."""
+    value = str(name).strip()
+    
+    # Example: "Cham (Cham (CH))" -> Handle nested parentheses by removing all content from the *last* open parenthesis downwards,
+    # or comprehensively drop a trailing `(...)` block even if it contains inner parens.
+    # regex matches a space, an opening parenthesis, any characters recursively/non-greedily, up to a final closing parenthesis at the end of the string.
+    value = re.sub(r"\s*\([^)]*\)?\)*$", "", value)
+    value = re.sub(r"\s*,\s*Bahnhof(?:\s+[\wÀ-ÿ./-]+)*$", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\s+Bahnhof(?:\s+[\wÀ-ÿ./-]+)*$", "", value, flags=re.IGNORECASE)
+    return value.strip()
+
 class OJPStopInfoRequest:
     
     def __init__(self):
@@ -65,6 +78,30 @@ class OJPStopInfoRequest:
 
         return xml_template
 
+    def _build_location_search_payload(self, name, number_of_results):
+        """Builds an OJP 2.0 LocationInformationRequest for a station name search."""
+        curTime = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        return f"""<?xml version="1.0" encoding="UTF-8"?>
+                        <OJP xmlns="http://www.vdv.de/ojp" xmlns:siri="http://www.siri.org.uk/siri" version="2.0">
+                            <OJPRequest>
+                                <siri:ServiceRequest>
+                                    <siri:RequestTimestamp>{curTime}</siri:RequestTimestamp>
+                                    <siri:RequestorRef>{self.requestor_ref}</siri:RequestorRef>
+                                    <OJPLocationInformationRequest>
+                                        <siri:RequestTimestamp>{curTime}</siri:RequestTimestamp>
+                                        <InitialInput>
+                                            <Name>{name}</Name>
+                                        </InitialInput>
+                                        <Restrictions>
+                                            <Type>stop</Type>
+                                            <NumberOfResults>{number_of_results}</NumberOfResults>
+                                        </Restrictions>
+                                    </OJPLocationInformationRequest>
+                                </siri:ServiceRequest>
+                            </OJPRequest>
+                        </OJP>"""
+
     def fetch_transfer_time(self, stop_ref):
         """Sends the request and returns the parsed results."""
         payload = self._build_xml_payload(stop_ref)
@@ -81,6 +118,17 @@ class OJPStopInfoRequest:
             raise Exception(f"API Error: {response.status_code} - {response.text}")
             
         return self._parse_response(response.text)
+
+    def fetch_places_by_name(self, name, number_of_results=25):
+        """Search for places and return matching stop-place / stop-point entries."""
+        payload = self._build_location_search_payload(name, number_of_results)
+
+        response = requests.post(self.endpoint, data=payload, headers=self.headers)
+
+        if response.status_code != 200:
+            raise Exception(f"API Error: {response.status_code} - {response.text}")
+
+        return self._parse_location_response(response.text)
 
     
     def _parse_duration(self, duration_str):
@@ -144,6 +192,40 @@ class OJPStopInfoRequest:
                 "type": "stop"
             })
             
+        return results
+
+    def _parse_location_response(self, xml_text):
+        """Parse OJPLocationInformationResponse place results into a simple structure."""
+        try:
+            root = ET.fromstring(xml_text)
+        except ET.ParseError as e:
+            raise Exception(f"Failed to parse XML: {e}")
+
+        results = []
+        for place_result in root.findall('.//{http://www.vdv.de/ojp}PlaceResult'):
+            place = place_result.find('{http://www.vdv.de/ojp}Place')
+            if place is None:
+                continue
+
+            stop_place_ref = place.findtext('.//{http://www.vdv.de/ojp}StopPlaceRef')
+            stop_point_ref = place.findtext('.//{http://www.siri.org.uk/siri}StopPointRef')
+            topographic_place_ref = place.findtext('.//{http://www.vdv.de/ojp}TopographicPlaceRef')
+            place_name = place.findtext('.//{http://www.vdv.de/ojp}Name/{http://www.vdv.de/ojp}Text')
+            stop_place_name = place.findtext('.//{http://www.vdv.de/ojp}StopPlaceName/{http://www.vdv.de/ojp}Text')
+            stop_point_name = place.findtext('.//{http://www.vdv.de/ojp}StopPointName/{http://www.vdv.de/ojp}Text')
+
+            results.append(
+                {
+                    "name": place_name or stop_place_name or stop_point_name or "N/A",
+                    "stop_place_ref": stop_place_ref,
+                    "stop_point_ref": stop_point_ref,
+                    "topographic_place_ref": topographic_place_ref,
+                    "normalized_name": normalize_station_name(
+                        place_name or stop_place_name or stop_point_name or ""
+                    ),
+                }
+            )
+
         return results
     
 

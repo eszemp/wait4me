@@ -4,17 +4,20 @@
   z-index: 0;
   height: 70px;
   width: 100%;
-  border: 2px solid var(--fir-green);
+  border: 2px solid var(--medium-grey);
   border-radius: 20px;
   background: var(--light-grey);
-  color: var(--fir-green);
+  color: var(--medium-grey);
   font-size: 20px;
   font-weight: bold;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
 }
 
 .w4m-button.is_enabled {
   background: var(--mint);
+  color: var(--fir-green);
+  border: 2px solid var(--fir-green);
   cursor: pointer;
 }
 
@@ -56,8 +59,68 @@
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
   z-index: 1101;
   padding: 24px;
+  padding-top: 40px;
   box-sizing: border-box;
   color: black;
+}
+
+.w4m-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.w4m-modal-close img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.w4m-alt-loading {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  color: var(--fir-green);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.w4m-alt-loading > span:last-child {
+  max-width: 28ch;
+}
+
+.w4m-alt-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #3951482b;
+  border-top-color: var(--fir-green);
+  animation: w4m-alt-spin 0.9s linear infinite;
+}
+
+@keyframes w4m-alt-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .w4m-confirm-title {
@@ -66,6 +129,35 @@
   font-size: 20px;
   line-height: 1.3;
   font-weight: bold;
+}
+
+.w4m-confirm-text {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--grey);
+  font-weight: normal;
+}
+
+.w4m-inline-status-icon {
+  display: inline-block;
+  width: 0.76em;
+  height: 0.76em;
+  margin-right: 0.22em;
+  flex-shrink: 0;
+  background-color: var(--grey);
+  -webkit-mask: url('/close.svg') no-repeat center / contain;
+  mask: url('/close.svg') no-repeat center / contain;
+}
+
+.w4m-inline-status-icon--ok {
+  background-color: var(--grey);
+  -webkit-mask: url('/check-mark.svg') no-repeat center / contain;
+  mask: url('/check-mark.svg') no-repeat center / contain;
+}
+
+.w4m-confirm-text:last-child {
+  margin-bottom: 0;
 }
 
 .w4m-confirm-connection {

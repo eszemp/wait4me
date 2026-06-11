@@ -1,0 +1,37 @@
+<div class="monitoring-shell">
+  @if (showCloseButton) {
+    <button
+      type="button"
+      class="monitoring-close-button"
+      (click)="close()"
+      aria-label="Close monitoring modal"
+    >
+      <img src="/close.svg" alt="" aria-hidden="true" />
+    </button>
+  }
+  <div class="map-stage">
+    <div class="map-toolbar">
+      <label class="layer-label" for="monitoring-layer-select">Layer</label>
+      <select id="monitoring-layer-select" class="layer-select" [(ngModel)]="selectedLayerId">
+        @for (layer of layerOptions; track layer.id) {
+          <option [value]="layer.id">{{ layer.label }}</option>
+        }
+      </select>
+    </div>
+
+    @switch (selectedLayerId) {
+      @case ('station-statistics') {
+        <app-station-statistics-layer />
+      }
+      @case ('delay-effects-on-lines') {
+        <app-delay-effects-on-lines-layer
+          [initialStopName]="stopName"
+          [initialDepartureTime]="depTime"
+          [delay]="delay"
+          [currentLineCode]="currentLineCode"
+          [autoSelectFirstDeparture]="autoSelectFirstDeparture"
+        />
+      }
+    }
+  </div>
+</div>

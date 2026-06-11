@@ -3,11 +3,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LocationInformationRequest, SDK } from 'ojp-sdk';
 import { OJPBase } from './ojp-base';
-
-export type LocationSuggestion = {
-  stopPlaceName: string;
-  stopPlaceRef: string;
-};
+import type { LocationSuggestion } from '../types/ojp-types';
 
 @Injectable({
   providedIn: 'root',

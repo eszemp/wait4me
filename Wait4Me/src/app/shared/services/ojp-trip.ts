@@ -20,47 +20,14 @@ import { OJPBase } from './ojp-base';
 import { OJPLocation } from './ojp-location';
 import { OJPStopEvent } from './ojp-stop-event';
 import { Duration } from '../models/duration';
-
-type ConnectionLineFeature = {
-  type: 'Feature';
-  geometry: { type: 'LineString'; coordinates: number[][] };
-  properties: {
-    line: string;
-    featureType: 'track';
-    stationStops: TimedLegStop[];
-  };
-};
-
-type ConnectionStationFeature = {
-  type: 'Feature';
-  geometry: { type: 'Point'; coordinates: [number, number] };
-  properties: {
-    line: string;
-    featureType: 'station';
-    stopRef: string;
-    stopName: string;
-    stopRole: 'board' | 'intermediate' | 'alight';
-    arrivalTime: string;
-  };
-};
-
-type ConnectionTrackFeature = ConnectionLineFeature | ConnectionStationFeature;
-
-type WalkingRouteFeature = {
-  type: 'Feature';
-  geometry: { type: 'LineString'; coordinates: number[][] };
-  properties: {
-    featureType: 'walking-transfer';
-    transferLegId: number;
-  };
-};
-
-type TimedLegStop = {
-  stopRef: string;
-  stopName: string;
-  stopRole: 'board' | 'intermediate' | 'alight';
-  arrivalTime: string;
-};
+import type {
+  ConnectionLineFeature,
+  ConnectionStationFeature,
+  ConnectionTrackFeature,
+  WalkingRouteFeature,
+  TimedLegStop,
+  LocationSuggestion,
+} from '../types/ojp-types';
 
 @Injectable({
   providedIn: 'root',
@@ -158,14 +125,21 @@ export class OJPTrip extends OJPBase {
     (request as any).payload.params.useRealtimeData = 'explanatory';
 
     return from(request.fetchResponse(this.sdk)).pipe(
-      map((response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           throw response.error;
         }
 
-        return (response.value.tripResult ?? [])
-          .map((result) => this.toPassengerTrip(result))
-          .filter((trip): trip is Promise<PassengerTrip> => trip !== null);
+        const settledTrips = await Promise.allSettled(
+          (response.value.tripResult ?? []).map((result) => this.toPassengerTrip(result)),
+        );
+
+        return settledTrips
+          .filter((settled): settled is PromiseFulfilledResult<PassengerTrip | null> => {
+            return settled.status === 'fulfilled';
+          })
+          .map((settled) => settled.value)
+          .filter((trip): trip is PassengerTrip => trip !== null);
       }),
     );
   }
@@ -637,6 +611,10 @@ export class OJPTrip extends OJPBase {
     const firstTimedLeg = timedLegs[0];
     const lastTimedLeg = timedLegs[timedLegs.length - 1];
 
+    if (!firstTimedLeg || !lastTimedLeg) {
+      return null;
+    }
+
     const [criticalTransferId, criticalTransfer] = await this.findCriticalTransfer(
       transferLegs,
       timedLegs,
@@ -897,6 +875,9 @@ export class OJPTrip extends OJPBase {
     if (value && typeof value === 'object') {
       if (typeof value.text === 'string') {
         return value.text;
+      }
+      else if (typeof value.text === 'number') {
+        return String(value.text);
       }
     }
 

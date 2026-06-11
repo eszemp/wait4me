@@ -1,0 +1,78 @@
+<div class="map-wrapper">
+  <div #mapContainer class="monitoring-map"></div>
+  @if (this.no_route) {
+    <div class="no-line-geometry-status" aria-live="polite">
+      <span>No geometry available for this line</span>
+    </div>
+  }
+  <app-line-search
+    [initialStopName]="this.initialStopName"
+    [initialDepartureTime]="this.initialDepartureTime"
+    [currentLineCode]="this.currentLineCode"
+    [autoSelectFirstDeparture]="this.autoSelectFirstDeparture"
+    (lineSelected)="onLineSelected($event)"
+  ></app-line-search>
+  <div class="delay-slider-panel" aria-label="Delay selection">
+    <div class="delay-slider-header">
+      <span>Delay</span>
+      <strong>{{ selectedDelayMinutes }} min</strong>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="30"
+      step="1"
+      [value]="selectedDelayMinutes"
+      (input)="onDelaySliderInput($event)"
+      aria-label="Delay in minutes"
+    />
+    <div class="legend">
+      <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-color_start" style="background: #395148"></div>
+            <div class="legend-label">Departure Station</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ff5555"></div>
+            <div class="legend-label">Broken connection</div>
+          </div>   
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ffd1d1"></div>
+            <div class="legend-label">Tight transfer (Buffer=0)</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #d1ffed"></div>
+            <div class="legend-label">Sufficient transfer time (Buffer>0)</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #395148"></div>
+            <div class="legend-label">No transfers</div>
+          </div>
+      </div>
+      <div class="legend-description">
+        <div class="legend-desc-header">
+          <div class="legend-title">Explanation:</div>
+          <button
+            class="legend-toggle"
+            (click)="toggleLegend()"
+            [attr.aria-label]="legendExpanded ? 'Collapse description' : 'Expand description'"
+          >
+            {{ legendExpanded ? '−' : '+' }}
+          </button>
+        </div>
+        @if (legendExpanded) {
+          <div class="legend-desc-content">
+            You can search for any station and choose a departure at any time of day. The departing line 
+            will be displayed on the map once its selected. By moving the delay slider you can see the 
+            impact any added delay will have on transfers at onward stops. The colors symbolize how much 
+            "transfer buffer time" remains with this specific delay. This buffer time is defined as the 
+            difference between arrival time of the service plus the time it takes to transfer at this 
+            stop and the earliest departure of a different service from this stop. If this difference 
+            becomes negative, the connection to that departing service is broken. Additional information 
+            about available buffer times at the onward stops can be revealed by clicking on the stations. 
+            All this data was calculated for the 09.12.2026 (typical weekday).
+          </div>
+        }
+      </div>
+  </div>
+</div>

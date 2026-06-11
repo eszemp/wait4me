@@ -2,7 +2,7 @@ import { Component, inject, Input } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule, formatDate } from '@angular/common';
 import { W4MDriverService } from '../../../shared/services/w4m-service-driver';
-import { MonitoringInterface } from '../../monitoring-interface/monitoring-interface';
+import { DelayImpactAnalysis } from '../../delay-impact-analysis/delay-impact-analysis';
 
 @Component({
   selector: 'w4m-edit-bar',
@@ -14,6 +14,7 @@ import { MonitoringInterface } from '../../monitoring-interface/monitoring-inter
 export class Wait4MeEditBar {
   public w4mService = inject(W4MDriverService);
   private dialog = inject(MatDialog);
+  @Input() currentLineCode: string | null = null;
 
   public number_of_requests(): String {
     const delay_in_edit =
@@ -35,7 +36,7 @@ export class Wait4MeEditBar {
     const delay = this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!];
 
 
-    this.dialog.open(MonitoringInterface, {
+    this.dialog.open(DelayImpactAnalysis, {
       width: '90vw',     
       height: 'calc(100dvh - 70px)', 
       maxWidth: '100vw', 
@@ -43,7 +44,10 @@ export class Wait4MeEditBar {
       data: {            
         stopName: this.w4mService.activeStopName(),
         depTime: time_string,
-        delay: delay
+        delay: delay,
+        currentLineCode: this.currentLineCode,
+        autoSelectFirstDeparture: true,
+        showCloseButton: true,
       },
       panelClass: 'custom-modal-container'
     });
