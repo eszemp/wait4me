@@ -22,12 +22,12 @@ Wait4Me/
 - `angular.json`: Angular workspace configuration.
 - `package.json`: Frontend dependencies and npm scripts.
 - `public/`: Static SVG assets used across the UI.
-- `src/app/`: Application code, routed feature areas, and shared utilities.
+- `src/app/`: Application code, routed feature areas, and shared utilities. For more details see below.
 - `src/environments/`: Environment configuration for local and deployed builds.
 
 ## Subpages of the WebApp
 
-The main routes are defined in `src/app/app.routes.ts`:
+The routes to the subpages of the application are defined in `src/app/app.routes.ts`:
 
 - `/`: Home screen
 - `/passenger`: Passenger interface
@@ -89,3 +89,44 @@ The build output is written to `Wait4Me/dist/`. Navigate to it and copy it to th
 cd Wait4Me/dist/Wait4Me
 scp -r ./browser/* w3_wait4meprd@wait4me.ethz.ch:~/htdocs/
 ```
+
+## Structure of the Application Code
+
+Here is an overview of the contents of `src/app/`:
+
+```text
+src/app/
+├── components/
+│   ├── home/
+│   ├── passenger-interface/
+│   │   ├── route-form/
+│   │   ├── destination-autocomplete/
+│   │   ├── wait4me-button/
+│   │   ├── passenger-connection-details/
+│   │   └── passenger-walking-route/
+│   ├── driver-interface/
+│   │   ├── driver-status/
+│   │   ├── driver-departures/
+│   │   ├── driver-connection-details/
+│   │   ├── w4m-display/
+│   │   └── w4m-edit-bar/
+│   └── delay-impact-analysis/
+│       ├── delay-effects/
+│       ├── line-search/
+│       └── station-statistics/
+└── shared/
+    ├── config/
+    ├── models/
+    ├── services/
+    └── types/
+```
+
+- `components/`: Contains the main feature views for the landing page, passenger flow, driver flow, and delay-impact analysis.
+- `components/home/`: Landing page and informational content.
+- `components/passenger-interface/`: Passenger trip search, connection selection, and walking-route views.
+- `components/driver-interface/`: Driver-side station search, departures, and connection details.
+- `components/delay-impact-analysis/`: Monitoring views for line delays and station vulnerability.
+- `shared/`: Holds reusable configuration, models, services, and types used across multiple UI areas.
+- `shared/config/`: Shared settings for backend endpoints and request restrictions.
+- `shared/services/`: Reusable services for API access, trip handling, geofencing, and request state.
+- `shared/types/`: Shared TypeScript types for trips, departures, OJP data, and request payloads.
