@@ -31,6 +31,14 @@ npm install
 
 If you want the exact lockfile state, use `npm ci` instead.
 
+## Environment file
+
+The frontend reads API settings from `src/environments/environments.ts`.
+
+Use `src/environments/environments.example.ts` as a template:
+
+Then update the `apiKey` value in `environments.ts` with your valid key before starting the app.
+
 ## Development server
 
 Start the app locally with:
