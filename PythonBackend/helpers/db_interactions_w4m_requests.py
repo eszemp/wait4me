@@ -1,3 +1,5 @@
+"""Database helpers for creating and managing Wait4Me ride connection requests."""
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
@@ -15,6 +17,7 @@ DB_CONFIG = {
 }
 
 def post_to_db(command, params):
+    """Execute a write statement and return success or the error string."""
 
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
@@ -29,6 +32,7 @@ def post_to_db(command, params):
         conn.close()
 
 def get_from_db(command, params, multiple=False):
+    """Execute a read statement and return one value or a list of rows."""
 
     conn = psycopg2.connect(**DB_CONFIG)
     
@@ -49,6 +53,7 @@ def get_from_db(command, params, multiple=False):
     return "Not found"      
 
 def create_new_request(data):
+    """Create a new wait request record and return status plus request ID."""
     request_id = str(uuid.uuid4())
     
     command = """ INSERT INTO wait4me_requests (
@@ -80,6 +85,7 @@ def create_new_request(data):
         return db_transaction, 0
 
 def change_request_status(request_id, data):
+    """Update the status field of a request and return operation status."""
 
     command = """
         UPDATE wait4me_requests 
@@ -96,6 +102,7 @@ def change_request_status(request_id, data):
         return db_transaction, 0  
     
 def get_request_status(request_id):
+    """Return the current status for one request ID."""
 
     command = """
         SELECT status 
@@ -107,6 +114,7 @@ def get_request_status(request_id):
     return result
 
 def get_incoming_requests(stop_ref, service):
+    """Return pending requests for a given transfer stop and outgoing service."""
 
     command = """
         SELECT * 
@@ -120,6 +128,7 @@ def get_incoming_requests(stop_ref, service):
     return results
 
 def get_cancelled_requests(stop_ref, service):
+    """Return cancelled requests for a given transfer stop and outgoing service."""
 
     command = """
         SELECT * 

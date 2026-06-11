@@ -5,12 +5,13 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "rootDir": "./src",
-    "types": []
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@maplibre/geojson-vt": ["src/shims/maplibre-geojson-vt.d.ts"],
+      "@maplibre/vt-pbf": ["src/shims/maplibre-vt-pbf.d.ts"]
+    }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["src/**/*.spec.ts"]
 }

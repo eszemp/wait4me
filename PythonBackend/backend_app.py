@@ -1,3 +1,5 @@
+"""Flask API for Wait4Me passenger requests and stop statistics endpoints."""
+
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -13,6 +15,7 @@ scheduler = APScheduler()
 # POST a passenger request
 @backend_app.route('/create-request', methods=['POST'])
 def create_request():
+    """Create a new passenger request and return its generated request ID."""
     data = request.json
     status, id = create_new_request(data)
     if status=="created":
@@ -23,6 +26,7 @@ def create_request():
 # POST a status change to a passenger request (cancel, accept or decline)
 @backend_app.route('/update-request/<request_id>', methods=['POST'])
 def update_request(request_id):
+    """Update the status of an existing request by request ID."""
     data = request.json
     status, id = change_request_status(request_id, data)
     if status=="changed":
@@ -33,6 +37,7 @@ def update_request(request_id):
 # GET the status of a request
 @backend_app.route('/get-status/<request_id>', methods=['GET'])
 def get_status(request_id):
+    """Return the current status for one request ID."""
     result = get_request_status(request_id)
     if result == 'Not found':
         return jsonify({"api_status": "Not found"}), 404
@@ -44,6 +49,7 @@ def get_status(request_id):
 # example usage: /driver/request?transfer_stop_ref=xxx&outgoing_service=xxx
 @backend_app.route('/driver/get-requests', methods=['GET'])
 def get_requests():
+    """Return pending and cancelled requests for a stop/service pair."""
     stop_ref = request.args.get('transfer_stop_ref')
     service = request.args.get('outgoing_service')
     incoming_requests = get_incoming_requests(stop_ref, service)
@@ -65,6 +71,7 @@ def get_requests():
         
 @backend_app.route('/get-stops', methods=['GET'])
 def get_all_stops():
+    """Return all stops with transfer data as a GeoJSON FeatureCollection."""
     db_response = get_all_stops_with_transfers()
     if db_response == "Not found" or not db_response:
         return jsonify({
@@ -94,6 +101,7 @@ def get_all_stops():
 
 @backend_app.route('/get-stop', methods=['GET'])
 def get_stop():
+    """Return one stop by name as a GeoJSON Feature."""
     #stop_ref = request.args.get('ref', '')
     stop_name = request.args.get('name', '')
     
@@ -120,6 +128,7 @@ def get_stop():
 # GET health check (see if API is running)
 @backend_app.route("/health", methods=["GET"])
 def health():
+    """Return a simple health response to confirm API availability."""
     return jsonify({"api_status": "Health check okay"}), 200
 
 def expire_old_requests():

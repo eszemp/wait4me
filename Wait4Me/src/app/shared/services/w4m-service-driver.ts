@@ -19,7 +19,8 @@ export class W4MDriverService {
   public additionalDelaysAnySource: WritableSignal<{ [stopRef: string]: number }> = signal({});
   public declinedDelays: WritableSignal<{ [stopRef: string]: number }> = signal({});
   public stopSequence: WritableSignal<string[]> = signal([]);
-  public delayImpactRating: WritableSignal<{ [stopRef: string]: { [delay: number]: string } }> = signal({}); 
+  public delayImpactRating: WritableSignal<{ [stopRef: string]: { [delay: number]: string } }> =
+    signal({});
 
   public activeRequestIds = computed(() => {
     const stopRef = this.activeStopRef();
@@ -63,13 +64,12 @@ export class W4MDriverService {
           if (!requestsByDelay[minutes]) {
             requestsByDelay[minutes] = [];
             // Store the impact rating for this specific delay bucket
-            impactsByDelay[minutes] = data.delay_impact; 
+            impactsByDelay[minutes] = data.delay_impact;
           }
           requestsByDelay[minutes].push(data.request_id);
         });
 
         await this.handle_pending_requests(requestsByDelay, impactsByDelay, stop_ref);
-
       }
     } catch (error) {
       console.error('DB Query of all requests failed:', error);
@@ -137,11 +137,10 @@ export class W4MDriverService {
   }
 
   private async handle_pending_requests(
-    requestsByDelay: { [key: number]: string[] }, 
-    impactsByDelay: { [key: number]: string }, 
-    stop_ref: string
+    requestsByDelay: { [key: number]: string[] },
+    impactsByDelay: { [key: number]: string },
+    stop_ref: string,
   ) {
-
     // handle pending requests by comparing to already handled delays
     for (const delayStr of Object.keys(requestsByDelay)) {
       const delay = Number(delayStr);
@@ -150,7 +149,11 @@ export class W4MDriverService {
       // accept requests for delays smaller / equal to already accepted delays
       if (this.additionalDelaysAnySource()[stop_ref]) {
         const biggest_accepted_delay = this.additionalDelaysAnySource()[stop_ref];
-        console.log("Accept incoming requests for delays smaller/equal to already accepted", biggest_accepted_delay, "minutes");
+        console.log(
+          'Accept incoming requests for delays smaller/equal to already accepted',
+          biggest_accepted_delay,
+          'minutes',
+        );
         if (delay <= biggest_accepted_delay) {
           await this.post_changes_to_db(requestsByDelay[delay], 'accepted');
           delete requestsByDelay[delay];
@@ -198,7 +201,7 @@ export class W4MDriverService {
       return newState;
     });
 
-    this.delayImpactRating.update(state => {
+    this.delayImpactRating.update((state) => {
       const newState = { ...state };
       newState[stop_ref] = { ...(newState[stop_ref] ?? {}), ...impactsByDelay };
       return newState;
@@ -225,7 +228,14 @@ export class W4MDriverService {
     this.activeStopName.set(stopName);
     this.currentDepTime.set(depTime);
     this.editMode.set(true);
-    console.log('enabled edit mode for requests at stop', this.activeStopName(), "with ref", this.activeStopRef(), "departing at", this.currentDepTime());
+    console.log(
+      'enabled edit mode for requests at stop',
+      this.activeStopName(),
+      'with ref',
+      this.activeStopRef(),
+      'departing at',
+      this.currentDepTime(),
+    );
   }
 
   public async closeEditMode(): Promise<void> {
@@ -268,7 +278,6 @@ export class W4MDriverService {
       newState[stopRef] = newStopMap;
       return newState;
     });
-    //console.log("updated signal requestIDs", this.requestIds());
 
     this.smallestRequestedDelays.update((state) => {
       let newState = { ...state };
@@ -282,7 +291,6 @@ export class W4MDriverService {
       }
       return newState;
     });
-    //console.log("updated signal smallestRequestedDelays", this.smallestRequestedDelays());
 
     if (new_status === 'accepted') {
       this.acceptedDelays.update((state) => {
@@ -290,30 +298,32 @@ export class W4MDriverService {
         newState[stopRef] = delay;
         return newState;
       });
-      console.log("updated signal acceptedDelays", this.acceptedDelays());
+      console.log('updated signal acceptedDelays', this.acceptedDelays());
 
-      this.additionalDelaysAnySource.update(state => {
-          let newState = { ...state };
-          newState[stopRef] = delay;
-          
-          // Find current stop in sequence and apply delay to all subsequent stops
-          const sequence = this.stopSequence();
-          const currentIndex = sequence.indexOf(stopRef);
-          
-          if (currentIndex !== -1) {
-            for (let i = currentIndex + 1; i < sequence.length; i++) {
-              const downstreamStopRef = sequence[i];
-              // Only update if the new delay is larger than what was previously accepted for that stop
-              const existingDelay = newState[downstreamStopRef] || 0;
-              if (delay > existingDelay) {
-                newState[downstreamStopRef] = delay;
-                console.log(`Propagated accepted delay of ${delay}m to downstream stop: ${downstreamStopRef}`);
-              }
+      this.additionalDelaysAnySource.update((state) => {
+        let newState = { ...state };
+        newState[stopRef] = delay;
+
+        // Find current stop in sequence and apply delay to all subsequent stops
+        const sequence = this.stopSequence();
+        const currentIndex = sequence.indexOf(stopRef);
+
+        if (currentIndex !== -1) {
+          for (let i = currentIndex + 1; i < sequence.length; i++) {
+            const downstreamStopRef = sequence[i];
+            // Only update if the new delay is larger than what was previously accepted for that stop
+            const existingDelay = newState[downstreamStopRef] || 0;
+            if (delay > existingDelay) {
+              newState[downstreamStopRef] = delay;
+              console.log(
+                `Propagated accepted delay of ${delay}m to downstream stop: ${downstreamStopRef}`,
+              );
             }
           }
-          return newState;
+        }
+        return newState;
       });
-      console.log("updated signal additionalDelaysAnySource", this.additionalDelaysAnySource());
+      console.log('updated signal additionalDelaysAnySource', this.additionalDelaysAnySource());
     }
 
     if (new_status === 'declined') {
@@ -352,18 +362,18 @@ export class W4MDriverService {
 
   private cleanupStopData(stop_ref: string, delay: number) {
     // Remove impact rating if no IDs remain for that delay
-    this.delayImpactRating.update(state => {
+    this.delayImpactRating.update((state) => {
       if (!state[stop_ref] || state[stop_ref][delay] === undefined) return state;
-      
+
       const newState = { ...state };
       const updatedStopImpacts = { ...newState[stop_ref] };
-      
+
       // Check if there are still active requests for this delay
       const remainingRequests = this.requestIds()[stop_ref]?.[delay] || [];
       if (remainingRequests.length === 0) {
         delete updatedStopImpacts[delay];
       }
-      
+
       if (Object.keys(updatedStopImpacts).length === 0) {
         delete newState[stop_ref];
       } else {
@@ -373,8 +383,7 @@ export class W4MDriverService {
     });
   }
 
-  get_delay_impact_rating(stopRef: string, delay: number) : string {
+  get_delay_impact_rating(stopRef: string, delay: number): string {
     return this.delayImpactRating()[stopRef][delay];
   }
-  
 }

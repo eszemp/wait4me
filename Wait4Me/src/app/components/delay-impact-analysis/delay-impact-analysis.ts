@@ -36,9 +36,9 @@ export class DelayImpactAnalysis implements OnInit, OnDestroy {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     @Optional() private dialogRef: MatDialogRef<DelayImpactAnalysis>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    // If data exists (Modal mode), assign values. 
+    // If data exists (Modal mode), assign values.
     // If not (Router mode), vars remain null.
     if (this.data) {
       this.stopName = this.data.stopName ?? null;
@@ -70,5 +70,4 @@ export class DelayImpactAnalysis implements OnInit, OnDestroy {
       this.document.body.style.overflow = this.bodyOverflowBeforeLock;
     }
   }
-  
 }

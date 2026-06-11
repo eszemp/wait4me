@@ -31,7 +31,14 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
 
   private readonly histogramBuckets = ['<1m', '1-3m', '3-5m', '5-10m', '10-20m', '20m+'] as const;
-  private readonly displayLabels = ['<1 min', '1-3 min', '3-5 min', '5-10 min', '10-20 min', '20+ min'] as const;
+  private readonly displayLabels = [
+    '<1 min',
+    '1-3 min',
+    '3-5 min',
+    '5-10 min',
+    '10-20 min',
+    '20+ min',
+  ] as const;
   private readonly binColors = ['#b2182b', '#ef8a62', '#fddbc7', '#d1e5f0', '#67a9cf', '#2166ac'];
   private readonly sourceId = 'station-statistics-source';
   private readonly pointsLayerId = 'station-statistics-points';
@@ -87,7 +94,7 @@ export class StationStatisticsLayerComponent implements AfterViewInit, OnDestroy
 
     try {
       response = await firstValueFrom(
-        this.http.get<HistogramFeatureCollection>(`${BACKEND_URL}/get-stops`)
+        this.http.get<HistogramFeatureCollection>(`${BACKEND_URL}/get-stops`),
       );
     } catch (error) {
       console.error('Failed to load station histogram data from backend:', error);

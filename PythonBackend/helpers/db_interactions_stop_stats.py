@@ -1,3 +1,5 @@
+"""Database helpers for stop-level transfer buffer statistics."""
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
@@ -14,6 +16,7 @@ DB_CONFIG = {
 }
 
 def post_to_db(command, params):
+    """Execute a write statement and return success or the error string."""
 
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
@@ -28,6 +31,7 @@ def post_to_db(command, params):
         conn.close()
 
 def get_from_db(command, params, multiple=False):
+    """Execute a read statement and return one value or multiple rows."""
 
     conn = psycopg2.connect(**DB_CONFIG)
     cur = None
@@ -53,6 +57,7 @@ def get_from_db(command, params, multiple=False):
 
     
 def get_stop_by_coord(lon, lat, ref, name, buffer_m=500):
+    """Return one nearby stop matching coordinates and name within a search radius."""
 
     command = """
         SELECT "Nummer", "Name", "<1m", "1-3m", "3-5m", "5-10m", "10-20m", "20m+", buffer_timeseries, ST_AsGeoJSON(geom) as geom
@@ -75,6 +80,7 @@ def get_stop_by_coord(lon, lat, ref, name, buffer_m=500):
     return stop_info
 
 def get_all_stops_with_transfers():
+    """Return all stops that contain transfer time series data."""
 
     command = """
         SELECT "Nummer", "Name", "<1m", "1-3m", "3-5m", "5-10m", "10-20m", "20m+", buffer_timeseries, ST_AsGeoJSON(geom) as geom        
@@ -85,6 +91,7 @@ def get_all_stops_with_transfers():
     return response
 
 def get_stop_by_name(stop_name):
+    """Return one stop record by exact stop name."""
     command = """
         SELECT "Nummer", "Name", buffer_timeseries, ST_AsGeoJSON(geom) as geom
         FROM station_buffers

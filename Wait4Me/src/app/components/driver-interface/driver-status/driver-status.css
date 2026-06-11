@@ -69,7 +69,7 @@
 
 /* Decorative green line below the search field */
 .field-group.search-field::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;

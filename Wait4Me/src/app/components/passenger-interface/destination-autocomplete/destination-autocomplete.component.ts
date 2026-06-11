@@ -23,6 +23,7 @@ export class DestinationAutocompleteComponent {
   destinations: LocationSuggestion[] = [];
   showSuggestions = false;
 
+  /** Restores saved origin and destination IDs from the stored names, if available. */
   constructor(private ojpService: OJPLocation) {
     //if tripService.originName and destinationName are set, but Ids not -> determine and set ids
     (async () => {
@@ -54,6 +55,7 @@ export class DestinationAutocompleteComponent {
     })();
   }
 
+  /** Searches the OJP location service for matching stop suggestions. */
   async searchForLocation(loc_name: string): Promise<LocationSuggestion[]> {
     try {
       // firstValueFrom converts the Observable to a Promise and takes the first emission
@@ -65,6 +67,7 @@ export class DestinationAutocompleteComponent {
     }
   }
 
+  /** Updates the suggestion list for the current query string. */
   async onQueryChange(query: string): Promise<void> {
     if (query.length < 1) {
       //only start searching from min. 2 letters
@@ -75,6 +78,7 @@ export class DestinationAutocompleteComponent {
     this.showSuggestions = true;
   }
 
+  /** Applies the selected destination to the form control and trip state. */
   selectDestination(destination: LocationSuggestion): void {
     this.control().setValue(destination.stopPlaceName);
     this.showSuggestions = false;
@@ -88,12 +92,14 @@ export class DestinationAutocompleteComponent {
     }
   }
 
+  /** Hides the suggestion list after a short delay. */
   closeSuggestions(): void {
     setTimeout(() => {
       this.showSuggestions = false;
     }, 120);
   }
 
+  /** Clears the input and resets the selected trip endpoints and results. */
   clearInput(): void {
     this.control().setValue('');
     this.destinations = [];

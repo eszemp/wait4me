@@ -30,6 +30,7 @@ export class DriverConnectionDetails {
   departure: DepartureLine | null;
   originName: string;
 
+  /** Loads the selected departure, prepares stop order, and starts refresh timers. */
   constructor() {
     const navigation = this.router.currentNavigation();
     const state = (navigation?.extras.state ?? history.state) as {
@@ -42,9 +43,9 @@ export class DriverConnectionDetails {
     this.originName = state.originName?.trim() || 'Current stop';
 
     if (this.departure) {
-      const sequence = this.stops.map(stop => stop.id);
+      const sequence = this.stops.map((stop) => stop.id);
       this.w4mService.stopSequence.set(sequence);
-      console.log("Initialized stop sequence:", sequence);
+      console.log('Initialized stop sequence:', sequence);
     }
 
     const clockTimer = window.setInterval(() => {
@@ -54,7 +55,7 @@ export class DriverConnectionDetails {
     const refreshTimer = window.setInterval(async () => {
       if (this.departure) {
         this.departure = await this.stopEventService.refreshDepartureLine(this.departure);
-        console.log("real-time traffic data updated.")
+        console.log('real-time traffic data updated.');
       }
     }, 60000);
 
@@ -62,26 +63,30 @@ export class DriverConnectionDetails {
       window.clearInterval(clockTimer);
       window.clearInterval(refreshTimer);
     });
-
   }
 
+  /** Closes edit mode before leaving the details view. */
   ngOnDestroy() {
     this.w4mService.closeEditMode();
   }
 
+  /** Returns the formatted line label for display. */
   get lineLabel(): string {
     const value = this.departure?.line?.trim() || 'n/a';
     return value.toLowerCase().startsWith('line') ? value : `Line ${value}`;
   }
 
+  /** Returns the formatted course label for display. */
   get courseLabel(): string {
     return `Course ${this.departure?.course?.trim() || 'n/a'}`;
   }
 
+  /** Returns the destination label for display. */
   get destinationLabel(): string {
     return this.departure?.direction?.trim() || 'Destination n/a';
   }
 
+  /** Builds the list of stop rows shown in the detail view. */
   get stops(): DriverStopRow[] {
     if (!this.departure) {
       return [];
@@ -129,16 +134,19 @@ export class DriverConnectionDetails {
     ];
   }
 
+  /** Returns the subset of stops visible in the main summary. */
   get visibleStops(): DriverStopRow[] {
     return this.stops.slice(0, 4);
   }
 
+  /** Navigates back to the driver overview while preserving the selection. */
   backToDriver(): void {
     this.router.navigate(['/driver'], {
       state: { preserveSelection: true },
     });
   }
 
+  /** Closes edit mode when the click happens outside the display widget. */
   disable_edit_mode_when_active(event: Event): void {
     const target = event.target as HTMLElement;
 
@@ -153,15 +161,22 @@ export class DriverConnectionDetails {
     return;
   }
 
-  calculate_new_delay(stop : DepartureStop): string {
+  /** Calculates the updated delay for a stop after applying local adjustments. */
+  calculate_new_delay(stop: DepartureStop): string {
     if (stop.delay.totalMinutes) {
-      return stop.delay.plus(Duration.initFromTotalSeconds(this.w4mService.additionalDelaysAnySource()[stop.id]*60)).format();
-    }
-    else {
-      return Duration.initFromTotalSeconds(this.w4mService.additionalDelaysAnySource()[stop.id]*60).format();
+      return stop.delay
+        .plus(
+          Duration.initFromTotalSeconds(this.w4mService.additionalDelaysAnySource()[stop.id] * 60),
+        )
+        .format();
+    } else {
+      return Duration.initFromTotalSeconds(
+        this.w4mService.additionalDelaysAnySource()[stop.id] * 60,
+      ).format();
     }
   }
 
+  /** Returns whether the provided delay is greater than zero. */
   has_delay(stop_delay: Duration): Boolean {
     return stop_delay.isBiggerThanZero();
   }

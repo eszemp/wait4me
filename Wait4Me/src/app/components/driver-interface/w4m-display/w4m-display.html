@@ -1,69 +1,68 @@
 <div class="w4m-display-shell">
-    @if (this.hasOpenRequestForStop()) {
-        @if (this.hasMultipleRequestsForStop()) {
-            <div class="request-stack">
-                <div class="request open stacked-back" aria-hidden="true"></div>
-                <div
-                    class="request open stacked-front"
-                    [class.selected]="this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef"
-                    (click)="this.process_requests_for_this_stop()"
-                >
-                    <span class="request-delay">+ {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min</span>
-                  <span
-                    class="request-dots"
-                    aria-hidden="true"
-                    [class]="'rating-' + getImpactRating()"
-                  >
-                        <span class="request-dot"></span>
-                        <span class="request-dot"></span>
-                        <span class="request-dot"></span>
-                    </span>
-                    <span class="request-question">?</span>
-                </div>
-            </div>
-        }
-        @else {
-            <div
-                class="request open"
-                [class.selected]="this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef"
-                (click)="this.process_requests_for_this_stop()"
-            >
-                <span class="request-delay">
-                    + {{this.w4mService.smallestRequestedDelays()[this.stopRef]}} min
-                </span>
-                <span class="request-dots" 
-                    aria-hidden="true"
-                    [class]="'rating-' + getImpactRating()"
-                >
-                    <span class="request-dot"></span>
-                    <span class="request-dot"></span>
-                    <span class="request-dot"></span>
-                </span>
-                <span class="request-question">?</span>
-            </div>
-        }
+  @if (this.hasOpenRequestForStop()) {
+    @if (this.hasMultipleRequestsForStop()) {
+      <div class="request-stack">
+        <div class="request open stacked-back" aria-hidden="true"></div>
+        <div
+          class="request open stacked-front"
+          [class.selected]="
+            this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef
+          "
+          (click)="this.process_requests_for_this_stop()"
+        >
+          <span class="request-delay"
+            >+ {{ this.w4mService.smallestRequestedDelays()[this.stopRef] }} min</span
+          >
+          <span class="request-dots" aria-hidden="true" [class]="'rating-' + getImpactRating()">
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+          </span>
+          <span class="request-question">?</span>
+        </div>
+      </div>
+    } @else {
+      <div
+        class="request open"
+        [class.selected]="
+          this.w4mService.editMode() && this.w4mService.activeStopRef() === this.stopRef
+        "
+        (click)="this.process_requests_for_this_stop()"
+      >
+        <span class="request-delay">
+          + {{ this.w4mService.smallestRequestedDelays()[this.stopRef] }} min
+        </span>
+        <span class="request-dots" aria-hidden="true" [class]="'rating-' + getImpactRating()">
+          <span class="request-dot"></span>
+          <span class="request-dot"></span>
+          <span class="request-dot"></span>
+        </span>
+        <span class="request-question">?</span>
+      </div>
     }
-    @else if (this.hasAcceptedRequestForStop()) {
-        @if (this.hasMultipleRequestsForStop()) {
-            <div class="request-stack">
-                <div class="request open accepted stacked-back" aria-hidden="true"></div>
-                <div class="request open accepted stacked-front">
-                    <span class="request-delay">+ {{this.w4mService.acceptedDelays()[this.stopRef]}} min</span>
-                    <span class="request-dots" aria-hidden="true">
-                        <span class="request-dot"></span>
-                        <span class="request-dot"></span>
-                        <span class="request-dot"></span>
-                    </span>
-                </div>
-            </div>
-        }
-        @else {
-            <div class="request open accepted">
-                <span class="request-delay">+ {{this.w4mService.acceptedDelays()[this.stopRef]}} min</span>
-            </div>
-        }
+  } @else if (this.hasAcceptedRequestForStop()) {
+    @if (this.hasMultipleRequestsForStop()) {
+      <div class="request-stack">
+        <div class="request open accepted stacked-back" aria-hidden="true"></div>
+        <div class="request open accepted stacked-front">
+          <span class="request-delay"
+            >+ {{ this.w4mService.acceptedDelays()[this.stopRef] }} min</span
+          >
+          <span class="request-dots" aria-hidden="true">
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+            <span class="request-dot"></span>
+          </span>
+        </div>
+      </div>
+    } @else {
+      <div class="request open accepted">
+        <span class="request-delay"
+          >+ {{ this.w4mService.acceptedDelays()[this.stopRef] }} min</span
+        >
+      </div>
     }
-    @else if (this.hasAcceptedRequestForStop()) {
+  } @else if (this.hasAcceptedRequestForStop()) {
     @if (this.hasMultipleRequestsForStop()) {
       <div class="request-stack">
         <div class="request open accepted stacked-back" aria-hidden="true"></div>

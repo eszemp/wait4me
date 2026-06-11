@@ -34,7 +34,13 @@
 
   @if (departure) {
     <section class="stops-card" (click)="disable_edit_mode_when_active($event)">
-      @for (stop of visibleStops; track stop.id; let isLast = $last; let isFirst = $first; let idx = $index) {
+      @for (
+        stop of visibleStops;
+        track stop.id;
+        let isLast = $last;
+        let isFirst = $first;
+        let idx = $index
+      ) {
         <div class="stop-row" [class.last]="isLast" [class.first]="isFirst">
           <div class="timeline-column">
             <span class="dot"></span>
@@ -53,17 +59,12 @@
             }
             @if (idx === stops.length - 1) {
               @if (has_delay(departure.arrivalDelay)) {
-                <span class="time-delay">
-                  +{{ departure.arrivalDelay.format()}}
-                </span>
+                <span class="time-delay"> +{{ departure.arrivalDelay.format() }} </span>
               }
             } @else {
               @if (this.w4mService.additionalDelaysAnySource()[stop.id]) {
-                <span class="time-delay">
-                  +{{ this.calculate_new_delay(stop)}}
-                </span>
-              }
-              @else {
+                <span class="time-delay"> +{{ this.calculate_new_delay(stop) }} </span>
+              } @else {
                 <span *ngIf="has_delay(stop.delay)" class="time-delay">
                   +{{ stop.delay.format() }}
                 </span>

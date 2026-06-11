@@ -131,7 +131,6 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
    * map source. If `selection` is `null` the map source is cleared.
    */
   onLineSelected(selection: SelectedConnectionPayload | null): void {
-
     this.trackSubscription?.unsubscribe();
 
     if (!selection) {
@@ -325,12 +324,15 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
    * Updates the track source data and re-frames the map to the drawn geometry.
    * Enriches received GeoJSON features with transfer data; then adjusts the viewport to fit the geometry.
    */
-  private async updateTrackSource(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing=false): Promise<void> {
+  private async updateTrackSource(
+    geojson: { type: 'FeatureCollection'; features: unknown[] },
+    clearing = false,
+  ): Promise<void> {
     const map = this.map;
     if (!map || !map.isStyleLoaded()) {
       return;
     }
-    
+
     this.ensureTrackLayer();
     this.latestTrackGeojson = geojson;
 
@@ -344,10 +346,13 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
   }
 
   /**
-   * Scans the incoming connection track for stations, checks the local cache, 
+   * Scans the incoming connection track for stations, checks the local cache,
    * and queries the backend for any stations it hasn't seen yet.
    */
-  private async ensureStationDataCached(geojson: { type: 'FeatureCollection'; features: unknown[] }): Promise<void> {
+  private async ensureStationDataCached(geojson: {
+    type: 'FeatureCollection';
+    features: unknown[];
+  }): Promise<void> {
     const fetchPromises: Promise<void>[] = [];
 
     for (const feature of geojson.features) {
@@ -363,8 +368,10 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
       if (!stopRef && !stopNameKey) continue;
 
       // Skip if already successfully cached
-      if ((stopRef && this.stationTransferByRef.has(stopRef)) || 
-          (stopNameKey && this.stationTransferByName.has(stopNameKey))) {
+      if (
+        (stopRef && this.stationTransferByRef.has(stopRef)) ||
+        (stopNameKey && this.stationTransferByName.has(stopNameKey))
+      ) {
         continue;
       }
 
@@ -376,19 +383,21 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
 
       // Add API call to queue
       const params = new HttpParams().set('ref', stopRef).set('name', stopName);
-      
+
       const requestPromise = firstValueFrom(
-        this.http.get<any>(`${BACKEND_URL}/get-stop`, { params })
-      ).then((response) => {
-        if (response && response.properties) {
-          const dataset = this.buildDatasetFromFeature(response);
-          if (dataset.stopRef) this.stationTransferByRef.set(dataset.stopRef, dataset);
-          if (dataset.stopNameKey) this.stationTransferByName.set(dataset.stopNameKey, dataset);
-        }
-      }).catch(() => {
-        // Suppress 404s and cache the miss so we don't spam the backend
-        this.missingStationsCache.add(cacheKey);
-      });
+        this.http.get<any>(`${BACKEND_URL}/get-stop`, { params }),
+      )
+        .then((response) => {
+          if (response && response.properties) {
+            const dataset = this.buildDatasetFromFeature(response);
+            if (dataset.stopRef) this.stationTransferByRef.set(dataset.stopRef, dataset);
+            if (dataset.stopNameKey) this.stationTransferByName.set(dataset.stopNameKey, dataset);
+          }
+        })
+        .catch(() => {
+          // Suppress 404s and cache the miss so we don't spam the backend
+          this.missingStationsCache.add(cacheKey);
+        });
 
       fetchPromises.push(requestPromise);
     }
@@ -412,7 +421,11 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     const transferTimes = Array.isArray(properties['buffer_timeseries'])
       ? properties['buffer_timeseries']
           .map((entry: any) => {
-            const rawEntry = entry as { time?: unknown; buffer?: unknown; outgoing_line_id?: unknown };
+            const rawEntry = entry as {
+              time?: unknown;
+              buffer?: unknown;
+              outgoing_line_id?: unknown;
+            };
             const time = this.toSafeString(rawEntry.time);
             const timestampMs = this.parseTimestampMs(time);
             const bufferSeconds = this.toSafeNumber(rawEntry.buffer);
@@ -427,7 +440,10 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
               outgoingLineId,
             } satisfies StationTransferSeriesEntry;
           })
-          .filter((entry: StationTransferSeriesEntry | null): entry is StationTransferSeriesEntry => entry !== null)
+          .filter(
+            (entry: StationTransferSeriesEntry | null): entry is StationTransferSeriesEntry =>
+              entry !== null,
+          )
       : [];
 
     return {
@@ -488,7 +504,8 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
         const remainingBufferMinutes = selectedTransfer
           ? selectedTransfer.minutes - this.selectedDelayMinutes
           : null;
-        const hasTransferData = Array.isArray(dataset.transferSeries) && dataset.transferSeries.length > 0;
+        const hasTransferData =
+          Array.isArray(dataset.transferSeries) && dataset.transferSeries.length > 0;
 
         return {
           ...typedFeature,
@@ -574,22 +591,24 @@ export class DelayEffectsOnLinesLayerComponent implements AfterViewInit, OnDestr
     this.no_route = true;
     this.cdr.detectChanges();
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     this.no_route = false;
     this.cdr.detectChanges();
   }
-
 
   /**
    * Fits the map viewport to all valid coordinates of the currently rendered track.
    *
    * Ignores invalid geometries and ensures padding is applied for UI elements.
    */
-  private fitToTrack(geojson: { type: 'FeatureCollection'; features: unknown[] }, clearing: Boolean): void {
+  private fitToTrack(
+    geojson: { type: 'FeatureCollection'; features: unknown[] },
+    clearing: Boolean,
+  ): void {
     const map = this.map;
     if (!map || geojson.features.length === 0) {
-      if (!clearing){
+      if (!clearing) {
         this.showMessageNoGeometry();
       }
       return;

@@ -48,8 +48,7 @@
         <div class="meta-column">
           @if (trip.departurePlatform) {
             <span class="platform"> {{ trip.departurePlatform }}</span>
-          }
-          @else {
+          } @else {
             <span class="platform">n/a</span>
           }
           @if (trip.criticalTransferId === null) {

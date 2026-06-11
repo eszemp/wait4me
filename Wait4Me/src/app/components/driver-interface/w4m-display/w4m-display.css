@@ -89,13 +89,11 @@
   box-sizing: border-box;
 }
 
-
 /* SMALL: First dot Green */
 .rating-small .request-dot:nth-child(1) {
   background-color: #28a745;
 }
-.rating-small .request-dot:nth-child(2) 
-.rating-small .request-dot:nth-child(3) {
+.rating-small .request-dot:nth-child(2) .rating-small .request-dot:nth-child(3) {
   background-color: transparent;
 }
 
@@ -103,7 +101,7 @@
 .rating-medium .request-dot:nth-child(1),
 .rating-medium .request-dot:nth-child(2) {
   background-color: #fd7e14;
-} 
+}
 .rating-medium .request-dot:nth-child(3) {
   background-color: transparent;
 }

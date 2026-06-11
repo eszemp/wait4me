@@ -155,8 +155,6 @@ export class OJPTrip extends OJPBase {
     try {
       const request = TripRefineRequest.initWithTrip(selected.rawTrip);
       const response = await request.fetchResponse(this.sdk);
-      console.log("DEBUG Trip for Refinement:", request.payload.tripResult.trip);
-      console.log("DEBUG Request for Refinement:", request);
       if (response.ok && response.value.tripResult?.[0]) {
         const refinedTrip = await this.toPassengerTrip(response.value.tripResult[0]);
         if (refinedTrip) {
@@ -635,7 +633,7 @@ export class OJPTrip extends OJPBase {
       legs,
       criticalTransferId: criticalTransferId,
       criticalTransfer: criticalTransfer,
-      rawTrip: trip
+      rawTrip: trip,
     };
   }
 
@@ -682,17 +680,23 @@ export class OJPTrip extends OJPBase {
       boardTimeTimetable: new Date(this.asString(board?.serviceDeparture?.timetabledTime)),
       boardTimeEstimated: new Date(
         this.asString(
-          board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime
-        )
+          board?.serviceDeparture?.estimatedTime ?? board?.serviceDeparture?.timetabledTime,
+        ),
       ),
-      boardDelay: this.calculateDelay(board?.serviceDeparture?.timetabledTime, board?.serviceDeparture?.estimatedTime),
+      boardDelay: this.calculateDelay(
+        board?.serviceDeparture?.timetabledTime,
+        board?.serviceDeparture?.estimatedTime,
+      ),
       alightTimeTimetable: new Date(this.asString(alight?.serviceArrival?.timetabledTime)),
       alightTimeEstimated: new Date(
         this.asString(
-          alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime
-        )
+          alight?.serviceArrival?.estimatedTime ?? alight?.serviceArrival?.timetabledTime,
+        ),
       ),
-      alightDelay: this.calculateDelay(alight?.serviceArrival?.timetabledTime, alight?.serviceArrival?.estimatedTime),
+      alightDelay: this.calculateDelay(
+        alight?.serviceArrival?.timetabledTime,
+        alight?.serviceArrival?.estimatedTime,
+      ),
       boardStopName: this.readTextValue(board?.stopPointName) ?? '',
       alightStopName: this.readTextValue(alight?.stopPointName) ?? '',
       boardPlatform: this.getQuayText(board?.estimatedQuay) ?? this.getQuayText(board?.plannedQuay),
@@ -732,23 +736,22 @@ export class OJPTrip extends OJPBase {
     const departure_timetable = next_leg.boardTimeTimetable;
     // TODO: maybe adjust so its rounded up to the nearest half minute (later)
     const exact_delay_sec = (actual_arrival.getTime() - departure.getTime()) / 1000;
-    console.log("actual arrival", transfer_leg.duration.addToDate(arrival));
-    console.log("departure", next_leg.boardTimeEstimated)
-    console.log("required delay", exact_delay_sec);
-    let req_delay_sec : number;
+    console.log('actual arrival', transfer_leg.duration.addToDate(arrival));
+    console.log('departure', next_leg.boardTimeEstimated);
+    console.log('required delay', exact_delay_sec);
+    let req_delay_sec: number;
     if (exact_delay_sec % 60 < 30) {
-      req_delay_sec = exact_delay_sec - exact_delay_sec % 60;
+      req_delay_sec = exact_delay_sec - (exact_delay_sec % 60);
+    } else {
+      req_delay_sec = exact_delay_sec + (60 - (exact_delay_sec % 60));
     }
-    else {
-      req_delay_sec = exact_delay_sec + (60 - exact_delay_sec % 60);
-    }
-    console.log("requested (rounded)", req_delay_sec);
+    console.log('requested (rounded)', req_delay_sec);
     const transferStopName = next_leg.boardStopName;
     const suggestions = await firstValueFrom(
       this.locationService.getLocationInformation(transferStopName, 1),
     );
     const transferStopRef = suggestions[0]?.stopPlaceRef ?? '';
-    console.log("DEBUG TRANSFER STOPREF:", transferStopName, transferStopRef);
+    console.log('DEBUG TRANSFER STOPREF:', transferStopName, transferStopRef);
     const incomingServiceRef = prev_leg.journeyRef;
     const outgoingServiceRef = next_leg.journeyRef;
     return {
@@ -776,7 +779,7 @@ export class OJPTrip extends OJPBase {
     if (diffInMs <= 0) {
       return Duration.initFromTotalSeconds(0);
     }
-    const delayInSeconds = (diffInMs / 1000);
+    const delayInSeconds = diffInMs / 1000;
     return Duration.initFromTotalSeconds(delayInSeconds);
   }
 
@@ -815,13 +818,23 @@ export class OJPTrip extends OJPBase {
     if (!(transferLeg.id === 1 || transferLeg.id === totalLegs)) {
       const previous_leg = timedLegs.find((leg) => leg.id === transferLeg.id - 1);
       const following_leg = timedLegs.find((leg) => leg.id === transferLeg.id + 1);
-      const incoming_delay = this.calculateDelay(previous_leg?.alightTimeTimetable, previous_leg?.alightTimeEstimated);
-      if (incoming_delay.totalSeconds<30) {
+      const incoming_delay = this.calculateDelay(
+        previous_leg?.alightTimeTimetable,
+        previous_leg?.alightTimeEstimated,
+      );
+      if (incoming_delay.totalSeconds < 30) {
         return false; // TODO: justify this assumption
       }
-      const arrival = previous_leg?.alightTimeEstimated ? previous_leg.alightTimeEstimated : previous_leg?.alightTimeTimetable;
-      const outgoing_delay = this.calculateDelay(following_leg?.boardTimeTimetable, following_leg?.boardTimeEstimated);
-      let departure = following_leg?.boardTimeEstimated ? following_leg.boardTimeEstimated : following_leg?.boardTimeTimetable;
+      const arrival = previous_leg?.alightTimeEstimated
+        ? previous_leg.alightTimeEstimated
+        : previous_leg?.alightTimeTimetable;
+      const outgoing_delay = this.calculateDelay(
+        following_leg?.boardTimeTimetable,
+        following_leg?.boardTimeEstimated,
+      );
+      let departure = following_leg?.boardTimeEstimated
+        ? following_leg.boardTimeEstimated
+        : following_leg?.boardTimeTimetable;
       if (outgoing_delay.totalSeconds === 0) {
         // In case of earlier estimated departure -> treat as if departure like in timetable (TODO: justify decision)
         departure = following_leg?.boardTimeTimetable;
@@ -833,9 +846,9 @@ export class OJPTrip extends OJPBase {
       const IS_SIGNIFICANTLY_LATE = latenessMs >= 30000; // delay of at least 30 seconds
 
       if (latenessMs > 0) {
-        console.log("CRITICAL TRANSFER DETECTED:", IS_SIGNIFICANTLY_LATE);
-        console.log("Passenger Arrival at Platform:", passengerArrivalTimeAtPlatform);
-        console.log("Vehicle Departure:", departure);
+        console.log('CRITICAL TRANSFER DETECTED:', IS_SIGNIFICANTLY_LATE);
+        console.log('Passenger Arrival at Platform:', passengerArrivalTimeAtPlatform);
+        console.log('Vehicle Departure:', departure);
         console.log(`Lateness: ${latenessMs / 1000} seconds`);
       }
 
@@ -875,8 +888,7 @@ export class OJPTrip extends OJPBase {
     if (value && typeof value === 'object') {
       if (typeof value.text === 'string') {
         return value.text;
-      }
-      else if (typeof value.text === 'number') {
+      } else if (typeof value.text === 'number') {
         return String(value.text);
       }
     }

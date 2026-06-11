@@ -55,18 +55,19 @@ export class PassengerInterface implements OnDestroy {
     }
 
     timer(60000, 60000)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe(() => {
-      this.refreshTrips();
-    });
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.refreshTrips();
+      });
 
-    this.router.events.pipe(
-      filter((event: RouterEvent): event is NavigationStart => event instanceof NavigationStart),
-      takeUntilDestroyed()
-    ).subscribe((event: NavigationStart) => {
-      this.isNavigatingToDetails = event.url.includes('connection-details');
-    });
-
+    this.router.events
+      .pipe(
+        filter((event: RouterEvent): event is NavigationStart => event instanceof NavigationStart),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event: NavigationStart) => {
+        this.isNavigatingToDetails = event.url.includes('connection-details');
+      });
   }
 
   ngOnDestroy() {
@@ -78,16 +79,18 @@ export class PassengerInterface implements OnDestroy {
     }
   }
 
-  private refreshTrips() : void {
+  private refreshTrips(): void {
     // Only refresh if start / stop is defined for routing
-      if (this.tripService.originId() && this.tripService.destinationId()) {
-        this.tripService.isLoadingTrips.set(true);
-        this.tripService.getTripInformation(
+    if (this.tripService.originId() && this.tripService.destinationId()) {
+      this.tripService.isLoadingTrips.set(true);
+      this.tripService
+        .getTripInformation(
           this.tripService.originId()!,
           this.tripService.destinationId()!,
           this.tripService.departureDay() || '',
           this.tripService.departureTimeOfDay() || '',
-        ).subscribe({
+        )
+        .subscribe({
           next: (results) => {
             this.tripService.tripResults.set(results);
             this.tripService.isLoadingTrips.set(false);
@@ -97,8 +100,8 @@ export class PassengerInterface implements OnDestroy {
             this.tripService.isLoadingTrips.set(false);
           },
         });
-        console.log("real-time traffic data updated.")
-      } 
+      console.log('real-time traffic data updated.');
+    }
     return;
   }
 
@@ -121,7 +124,6 @@ export class PassengerInterface implements OnDestroy {
   }
 
   selectConnection(trip: PassengerTrip): void {
-    console.log('clicked on a connection');
     this.router.navigate(['/passenger/connection-details'], {
       state: { selectedTrip: trip },
     });

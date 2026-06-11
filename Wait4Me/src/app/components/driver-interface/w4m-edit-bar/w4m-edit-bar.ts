@@ -16,6 +16,7 @@ export class Wait4MeEditBar {
   private dialog = inject(MatDialog);
   @Input() currentLineCode: string | null = null;
 
+  /** Returns the number of open requests for the active stop. */
   public number_of_requests(): String {
     const delay_in_edit =
       this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!];
@@ -28,20 +29,20 @@ export class Wait4MeEditBar {
     return String(this.w4mService.activeRequestIds()[delay_in_edit].length);
   }
 
+  /** Opens the delay impact analysis dialog for the current stop. */
   open_delay_impact_analysis(): void {
-    console.log("Opening delay impact analysis in overlay");
+    console.log('Opening delay impact analysis in overlay');
 
     const date = this.w4mService.currentDepTime()!;
     const time_string = formatDate(date!, 'HH:mm', 'en-US');
     const delay = this.w4mService.smallestRequestedDelays()[this.w4mService.activeStopRef()!];
 
-
     this.dialog.open(DelayImpactAnalysis, {
-      width: '90vw',     
-      height: 'calc(100dvh - 70px)', 
-      maxWidth: '100vw', 
-      maxHeight: '100vh', 
-      data: {            
+      width: '90vw',
+      height: 'calc(100dvh - 70px)',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      data: {
         stopName: this.w4mService.activeStopName(),
         depTime: time_string,
         delay: delay,
@@ -49,7 +50,7 @@ export class Wait4MeEditBar {
         autoSelectFirstDeparture: true,
         showCloseButton: true,
       },
-      panelClass: 'custom-modal-container'
+      panelClass: 'custom-modal-container',
     });
   }
 }
