@@ -29,8 +29,6 @@ The main routes are defined in `src/app/app.routes.ts`:
 npm install
 ```
 
-If you want the exact lockfile state, use `npm ci` instead.
-
 ## Environment file
 
 The frontend reads API settings from `src/environments/environments.ts`.
