@@ -52,9 +52,9 @@ To prepare the environment for the scripts and notebook in `scripts/`:
 
 After that, you can select the "Buffer Analysis" kernel in Jupyter.
 
-## Create Environment File for OJP API Token
+## Create Environment File
 
-Use `scripts/.env.example` as a template for the environment file to store OJP access tokens used by the helpers. Create a file named `.env` in `scripts/` with the same structure:
+Use `scripts/.env.example` as a template for the environment file to store OJP API and DB access credentials used by the helpers. Create a file named `.env` in `scripts/` with the same structure:
 
 ```bash
 OJP_ACCESS_TOKEN=your_access_token_here
