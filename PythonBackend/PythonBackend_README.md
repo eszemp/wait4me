@@ -63,6 +63,14 @@ DB_PORT=5432
 API_KEY=your_access_token_here
 ```
 
+## Delay Impact Rating Configuration
+
+In the file `helpers/delay_impact_analysis.py` the way the application rates delay impacts can be configured through the following parameters:
+
+- `NO_OF_CONSIDERED_STOPS`: Number of onward stops from the station where the additional departure delay is requested that are considered for the delay impact rating. Default: 20 stops.
+- `MAX_THRESHOLD_SMALL_DELAY_IMPACT`: Percentage threshold of onward stops with a broken connection. If a requested delay is under this threshold, its delay impact is rated as small. Default: 10.
+- `MAX_THRESHOLD_MEDIUM_DELAY_IMPACT`: Percentage threshold of onward stops with a broken connection. If a requested delay is under this threshold, its delay impact is rated as medium. Anything above will be rated as a large delay impact. Default: 40.
+
 ## Run the Backend Locally (Dev)
 
 After completing setup, you can run the backend locally on your machine by running:
