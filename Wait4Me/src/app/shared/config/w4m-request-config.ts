@@ -22,7 +22,7 @@ export const W4M_REQUEST_CONFIG = {
   geofencingEnabled: false,
 
   // Buffer width (meters) used for geofence checks around the connection track.
-  bufferWidthMeters: 1000,
+  bufferWidthMeters: 500,
 
   // Allow only requests for buses. For testing purposes, this can be set to false to allow requests for every connection.
   allowOnlyBusRequests: false,
