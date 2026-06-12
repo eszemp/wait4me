@@ -66,6 +66,7 @@ Flask API for passenger requests and stop statistics.
 
 Angular frontend for the public prototype.
 
+- `Wait4Me_README.md`: Setup notes angular application.
 - `package.json`: Frontend scripts and dependencies.
 - `angular.json`: Angular workspace configuration.
 - `src/`: Application code, routes, styles, and supporting shims.
